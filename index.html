@@ -529,7 +529,10 @@ select.inp option{background:white;color:var(--text);}
       <div class="setup-title">Seni Tanıyalım 👋</div>
       <div class="setup-sub">MOTO'ya hoş geldin! Harika sürüşler seni bekliyor.</div>
       <div class="inp-label">Adın Soyadın</div><input class="inp" placeholder="Adın Soyadın" id="s1-name"/>
-      <div class="inp-label">Kullanıcı Adı</div><input class="inp" placeholder="@kullanici_adi" id="s1-user"/>
+      <div class="inp-label">Kullanıcı Adı</div>
+      <input class="inp" placeholder="ornek_kullanici_adi" id="s1-user" oninput="validateUsername(this)" autocapitalize="none" autocorrect="off" spellcheck="false"/>
+      <div id="username-status" style="font-size:12px;margin-top:-10px;margin-bottom:14px;padding:0 2px;display:none"></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:-10px;margin-bottom:14px;padding:0 2px">Küçük harf, rakam ve alt çizgi (_) kullanabilirsin. 3-30 karakter.</div>
       <div class="inp-label">Şehir</div>
       <select class="inp" id="s1-city">
         <option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option><option>Adana</option><option>Konya</option><option>Diğer</option>
@@ -665,85 +668,18 @@ select.inp option{background:white;color:var(--text);}
       <div class="scrl">
         <!-- STORIES -->
         <div class="stories" id="story-row">
-          <div class="story" onclick="toast('Story ekle yakında! 📸')">
+          <div class="story" onclick="toast('Story özelliği çok yakında! 📸')">
             <div class="sring empty"><div class="savatar">🏍️<div class="add-icon">+</div></div></div>
             <span id="my-sname">Sen</span>
           </div>
-        </div>
-        <!-- LIVE -->
-        <div class="stitle">Canlı Turlar</div>
-        <div class="live-card">
-          <div class="livebadge"><div class="ldot"></div> CANLI</div>
-          <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text)">Boğaz Sahil Turu 🌉</div>
-          <div style="display:flex;gap:14px;margin-bottom:10px">
-            <span style="font-size:12px;color:var(--text3)">📍 Beşiktaş → Sarıyer</span>
-            <span style="font-size:12px;color:var(--text3)">⏱ 38 dk</span>
-            <span style="font-size:12px;color:var(--text3)">🏍️ 8 sürücü</span>
+        </div></div>
+            <span id="my-sname">Sen</span>
           </div>
-          <div style="display:flex;margin-bottom:12px">
-            <div style="width:30px;height:30px;border-radius:50%;background:var(--bg2);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:14px;margin-right:-8px">🔥</div>
-            <div style="width:30px;height:30px;border-radius:50%;background:var(--bg2);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:14px;margin-right:-8px">🌲</div>
-            <div style="width:30px;height:30px;border-radius:50%;background:var(--orange);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;margin-right:16px">+6</div>
-            <span style="font-size:12px;color:var(--text3);align-self:center">8 aktif sürücü</span>
-          </div>
-          <button style="width:100%;background:var(--orange);color:white;border:none;border-radius:12px;padding:11px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer" onclick="joinTour('Boğaz Sahil Turu')">Tura Katıl</button>
         </div>
         <!-- POSTS -->
         <div class="stitle">Akış</div>
-        <!-- Gerçek postlar Firebase'den -->
+        <!-- Postlar Firebase'den yüklenir -->
         <div id="feed-posts"></div>
-        <!-- Demo postlar (feed boşken görünür) -->
-        <div id="demo-posts">
-          <div class="ph">
-            <div class="pavatar">🔥</div>
-            <div><div class="pname">Kerem Yıldız</div><div class="pbike">Supersport · 2022</div></div>
-            <div class="pvbadge">✓ Doğrulandı</div>
-          </div>
-          <div class="pmap">
-            <svg viewBox="0 0 393 200" xmlns="http://www.w3.org/2000/svg">
-              <defs><pattern id="g1" width="26" height="26" patternUnits="userSpaceOnUse"><path d="M26 0L0 0 0 26" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width=".5"/></pattern></defs>
-              <rect width="393" height="200" fill="#E8E4DE"/><rect width="393" height="200" fill="url(#g1)"/>
-              <rect x="0" y="110" width="393" height="90" fill="rgba(180,210,240,0.3)"/>
-              <path d="M36 178 Q80 155 122 144 Q162 133 188 120 Q218 107 248 101 Q278 95 308 87 Q332 81 360 70" fill="none" stroke="rgba(255,85,0,.2)" stroke-width="10" stroke-linecap="round"/>
-              <path d="M36 178 Q80 155 122 144 Q162 133 188 120 Q218 107 248 101 Q278 95 308 87 Q332 81 360 70" fill="none" stroke="#FF5500" stroke-width="3" stroke-linecap="round"/>
-              <circle cx="36" cy="178" r="7" fill="#16A34A"/><circle cx="36" cy="178" r="3.5" fill="white"/>
-              <circle cx="360" cy="70" r="7" fill="#FF5500"/><circle cx="360" cy="70" r="3.5" fill="white"/>
-              <rect x="46" y="170" width="84" height="16" rx="8" fill="rgba(0,0,0,.55)"/>
-              <text x="88" y="181" text-anchor="middle" fill="white" font-size="10" font-family="DM Sans,sans-serif" font-weight="600">Sultanahmet</text>
-              <rect x="276" y="54" width="58" height="16" rx="8" fill="rgba(0,0,0,.55)"/>
-              <text x="305" y="65" text-anchor="middle" fill="white" font-size="10" font-family="DM Sans,sans-serif" font-weight="600">Sarıyer</text>
-              <circle cx="188" cy="120" r="4" fill="rgba(255,85,0,.7)"/>
-              <circle cx="248" cy="101" r="4" fill="rgba(255,85,0,.7)"/>
-            </svg>
-            <div class="pmap-stats"><div class="chip">📍 47 km</div><div class="chip">⚡ 124 km/s</div><div class="chip">⏱ 58 dk</div></div>
-          </div>
-          <div class="pactions">
-            <button class="abtn liked" onclick="toggleLike(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>312</span></button>
-            <button class="abtn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>48</span></button>
-            <button class="abtn" onclick="toast('Bağlantı kopyalandı!')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span>Paylaş</span></button>
-          </div>
-          <div class="pcaption"><strong>Kerem Yıldız</strong> Sultanahmet'ten Sarıyer'e rıhtım boyunca. R1 ile eşsiz bir his 🔥</div>
-          <div class="use-route" onclick="toast('Rota navigasyona eklendi! 🗺️')">
-            <svg width="15" height="15" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-            <span>Bu Rotayı Kullan</span>
-            <svg width="14" height="14" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-        </div>
-        <div class="post">
-          <div class="ph">
-            <div class="pavatar">🌲</div>
-            <div><div class="pname">Ayşe Demir</div><div class="pbike">Adventure · Touring</div></div>
-            <div class="pvbadge">✓ Doğrulandı</div>
-          </div>
-          <div class="pimg" style="background:linear-gradient(135deg,#d4e8d4,#c0d8c0)">🌲<div style="position:absolute;bottom:10px;left:12px;display:flex;gap:6px"><div class="chip">📸 4 fotoğraf</div><div class="chip">🏕️ Kamp</div></div></div>
-          <div class="pactions">
-            <button class="abtn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>189</span></button>
-            <button class="abtn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>27</span></button>
-            <button class="abtn" onclick="toast('Paylaşıldı!')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span>Paylaş</span></button>
-          </div>
-          <div class="pcaption"><strong>Ayşe Demir</strong> Belgrad Ormanı → Kilyos. GS ile toprak yol kamp 🌿</div>
-        </div>
-        </div><!-- /demo-posts -->
         <div class="sp"></div>
       </div>
     </div>
@@ -780,22 +716,12 @@ select.inp option{background:white;color:var(--text);}
     <div id="tab-tur" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
       <div class="hdr"><div class="logo">TURLAR</div><button style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer" onclick="openCreateTour()">+ Tur Oluştur</button></div>
       <div class="scrl">
-        <div class="stitle">Aktif Turlar</div>
-        <div class="tour-card live-t">
-          <div class="tc-head"><div class="tc-name">Boğaz Sahil Turu 🌉</div><div class="tc-badge live">● CANLI</div></div>
-          <div class="tc-stats"><span class="tc-stat">📍 Beşiktaş → Sarıyer</span><span class="tc-stat">🏍️ 8 sürücü</span><span class="tc-stat">⏱ 38 dk</span></div>
-          <div class="tc-bottom"><div class="tc-avatars"><div class="tc-av">🔥</div><div class="tc-av">🌲</div><div class="tc-av">⚡</div><div class="tc-av" style="background:var(--orange);font-size:10px;font-weight:700;color:white">+5</div></div><button class="tc-join" onclick="joinTour('Boğaz Sahil Turu')">Katıl</button></div>
-        </div>
-        <div class="stitle">Yaklaşan Turlar</div>
-        <div class="tour-card">
-          <div class="tc-head"><div class="tc-name">Belgrad Ormanı Sabah Turu 🌲</div><div class="tc-badge upcoming">Yarın 07:00</div></div>
-          <div class="tc-stats"><span class="tc-stat">📍 Bahçeköy → Kilyos</span><span class="tc-stat">🏍️ 12 katılımcı</span><span class="tc-stat">📏 85 km</span></div>
-          <div class="tc-bottom"><div class="tc-avatars"><div class="tc-av">🌲</div><div class="tc-av">☕</div><div class="tc-av">🏔️</div></div><button class="tc-join" id="tj-belgrad" onclick="joinTour('Belgrad Ormanı Turu')">Katıl</button></div>
-        </div>
-        <div class="tour-card">
-          <div class="tc-head"><div class="tc-name">Karadeniz Kıyı Turu 🌊</div><div class="tc-badge upcoming">Pazar 08:30</div></div>
-          <div class="tc-stats"><span class="tc-stat">📍 Üsküdar → Şile</span><span class="tc-stat">🏍️ 6 katılımcı</span><span class="tc-stat">📏 130 km</span></div>
-          <div class="tc-bottom"><div class="tc-avatars"><div class="tc-av">🔥</div><div class="tc-av">⚡</div></div><button class="tc-join" onclick="joinTour('Karadeniz Kıyı Turu')">Katıl</button></div>
+        <div id="tours-feed">
+          <div style="text-align:center;padding:48px 24px;color:var(--text3);">
+            <div style="font-size:48px;margin-bottom:12px">🏍️</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">Henüz aktif tur yok</div>
+            <div style="font-size:13px">İlk turu sen oluştur!</div>
+          </div>
         </div>
         <div class="sp"></div>
       </div>
@@ -869,8 +795,9 @@ select.inp option{background:white;color:var(--text);}
             </div>
           </div>
           <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
-          <div class="prof-name" id="prof-name">Kerem Yıldız</div>
-          <div class="prof-bike" id="prof-bike">Supersport 1000 · 2022</div>
+          <div class="prof-name" id="prof-name">Sürücü</div>
+          <div style="font-size:13px;color:var(--text3);margin-bottom:4px" id="prof-username"></div>
+          <div class="prof-bike" id="prof-bike">—</div>
           <div class="prof-tags">
             <div class="ptag" id="prof-cat">Supersport</div>
             <div class="ptag" id="prof-city">İstanbul</div>
@@ -878,23 +805,16 @@ select.inp option{background:white;color:var(--text);}
             <div class="ptag">48 Tur 🏆</div>
           </div>
           <div class="prof-stats">
-            <div class="pst"><div class="pstv">48</div><div class="pstl">Tur</div></div>
-            <div class="pst"><div class="pstv">14.2K</div><div class="pstl">km</div></div>
-            <div class="pst"><div class="pstv">312</div><div class="pstl">Takipçi</div></div>
-            <div class="pst"><div class="pstv">87</div><div class="pstl">Takip</div></div>
+            <div class="pst"><div class="pstv" id="stat-tur">0</div><div class="pstl">Tur</div></div>
+            <div class="pst"><div class="pstv" id="stat-km">0</div><div class="pstl">km</div></div>
+            <div class="pst"><div class="pstv" id="stat-takipci">0</div><div class="pstl">Takipçi</div></div>
+            <div class="pst"><div class="pstv" id="stat-takip">0</div><div class="pstl">Takip</div></div>
           </div>
           <button class="prof-edit" onclick="toast('Profil düzenleme yakında!')">Profili Düzenle</button>
         </div>
         <div class="conn-section">
           <div class="conn-title">MOTO'daki Kullanıcılar <span id="user-count"></span></div>
           <div id="user-list"><div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Yükleniyor...</div></div>
-        </div>
-        <div class="conn-section">
-          <div class="conn-title">Bağlantılar <span>· Rehberinden bulunanlar</span></div>
-          <div class="conn-item"><div class="conn-av">🔥</div><div class="conn-info"><div class="conn-name">Murat Kaya</div><div class="conn-bike">Naked · 900cc</div></div><button class="conn-btn connect" onclick="toggleConnect(this)">Bağlantı Kur</button></div>
-          <div class="conn-item"><div class="conn-av">⚡</div><div class="conn-info"><div class="conn-name">Buse Çelik</div><div class="conn-bike">Supersport · 1000cc</div></div><button class="conn-btn connect" onclick="toggleConnect(this)">Bağlantı Kur</button></div>
-          <div class="conn-item"><div class="conn-av">🌲</div><div class="conn-info"><div class="conn-name">Tolga Arslan — Pro 🏅</div><div class="conn-bike">Adventure · Touring</div></div><button class="conn-btn follow" onclick="toggleFollow(this)">Takip Et</button></div>
-          <div class="conn-item"><div class="conn-av">☕</div><div class="conn-info"><div class="conn-name">Selin Yıldırım</div><div class="conn-bike">Naked · 500cc</div></div><button class="conn-btn connect" onclick="toggleConnect(this)">Bağlantı Kur</button></div>
         </div>
         <div style="height:14px"></div>
         <div class="stitle">Son Rotalar</div>
@@ -1256,12 +1176,85 @@ async function doAuth() {
 }
 
 // ── SETUP ──
-let uName='', uBike='', uCat='Supersport', uCity='İstanbul';
-function goS2() {
-  uName = document.getElementById('s1-name').value || 'Sürücü';
+let uName='', uBike='', uCat='Supersport', uCity='İstanbul', uUsername='';
+let _usernameValid = false;
+
+function validateUsername(input) {
+  const val = input.value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
+  input.value = val; // sadece geçerli karakterlere zorla
+  const status = document.getElementById('username-status');
+  status.style.display = 'block';
+
+  if (val.length < 3) {
+    status.textContent = 'En az 3 karakter olmalı';
+    status.style.color = 'var(--red)';
+    _usernameValid = false;
+    return;
+  }
+  if (val.length > 30) {
+    status.textContent = 'En fazla 30 karakter olabilir';
+    status.style.color = 'var(--red)';
+    _usernameValid = false;
+    return;
+  }
+  if (/^[._]|[._]$/.test(val)) {
+    status.textContent = 'Nokta veya alt çizgi ile başlayıp bitemez';
+    status.style.color = 'var(--red)';
+    _usernameValid = false;
+    return;
+  }
+  if (/[_.]{2}/.test(val)) {
+    status.textContent = 'Ardarda nokta veya alt çizgi olamaz';
+    status.style.color = 'var(--red)';
+    _usernameValid = false;
+    return;
+  }
+  status.textContent = 'Kontrol ediliyor...';
+  status.style.color = 'var(--text3)';
+  _usernameValid = false;
+  checkUsernameAvailability(val, status);
+}
+
+let _usernameCheckTimer;
+async function checkUsernameAvailability(username, statusEl) {
+  clearTimeout(_usernameCheckTimer);
+  _usernameCheckTimer = setTimeout(async () => {
+    if (!window._db) return;
+    try {
+      const { collection, query, where, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const q = query(collection(window._db, 'users'), where('username', '==', username));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        statusEl.textContent = '✓ @' + username + ' kullanılabilir';
+        statusEl.style.color = 'var(--green)';
+        _usernameValid = true;
+      } else {
+        statusEl.textContent = '✗ @' + username + ' zaten alınmış';
+        statusEl.style.color = 'var(--red)';
+        _usernameValid = false;
+      }
+    } catch(e) {
+      statusEl.textContent = 'Kontrol edilemedi';
+      statusEl.style.color = 'var(--text3)';
+      _usernameValid = true; // hata varsa geçmesine izin ver
+    }
+  }, 600);
+}
+
+async function goS2() {
+  const name = document.getElementById('s1-name').value.trim();
+  const username = document.getElementById('s1-user').value.trim().toLowerCase();
+
+  if (!name) { toast('Adını gir'); return; }
+  if (username.length < 3) { toast('Kullanıcı adı en az 3 karakter olmalı'); return; }
+  if (!_usernameValid) { toast('Kullanıcı adı müsait değil'); return; }
+
+  uName = name;
+  uUsername = username;
   uCity = document.getElementById('s1-city').value;
   showPage('pg-s2');
 }
+
 function goS3() {
   const brand = document.getElementById('s2-brand').value;
   const model = document.getElementById('s2-model').value;
@@ -1274,6 +1267,7 @@ function connectContacts() { toast('Rehber izni isteniyor...'); setTimeout(()=>t
 function finishSetup() {
   const data = {
     name: uName || 'Sürücü',
+    username: uUsername || '',
     bike: uBike || '',
     cat: uCat || 'Supersport',
     city: uCity || 'İstanbul',
@@ -1284,7 +1278,13 @@ function finishSetup() {
   if (window.firebaseSaveProfile) window.firebaseSaveProfile(data);
   showPage('pg-app');
   populateStories();
-  setTimeout(() => { loadFeedPosts(); if(window.loadUsers) window.loadUsers(); watchNotifBadge(); }, 500);
+  setTimeout(() => {
+    loadFeedPosts();
+    loadRealTours();
+    loadMyRoutes();
+    if(window.loadUsers) window.loadUsers();
+    watchNotifBadge();
+  }, 500);
 }
 
 // ── TABS ──
@@ -1541,40 +1541,17 @@ function joinTour(name) {
 function closePending() { document.getElementById('pending-modal').classList.remove('open'); }
 
 // ── STORIES ──
-const storyData = [
-  { emoji:'🔥', name:'Kerem Yıldız', time:'2 dk önce', bike:'Supersport 1000', caption:'Boğaz sabah sürüşü 🌅 Gün doğumunu motorda görmek bambaşka', hasRoute:true, route:'Beşiktaş → Arnavutköy · 28 km', bg:'linear-gradient(135deg,#1a0800,#2a1200)' },
-  { emoji:'🌲', name:'Ayşe Demir', time:'15 dk önce', bike:'Adventure Tourer', caption:'Belgrad Ormanı sis içinde 🌫️ Bu yollarda motor evinde hisseder', hasRoute:true, route:'Bahçeköy → Kilyos · 34 km', bg:'linear-gradient(135deg,#0a1a0a,#152815)' },
-  { emoji:'⚡', name:'Buse Çelik', time:'1 sa önce', bike:'Supersport 1000', caption:'Yeni lastiklerle ilk tur. Fark inanılmaz! ⚡', hasRoute:false, bg:'linear-gradient(135deg,#0a001a,#1a0a2a)' },
-  { emoji:'☕', name:'Selin Yıldırım', time:'3 sa önce', bike:'Naked 500', caption:'Moda rıhtımında kahve molası ☕', hasRoute:false, bg:'linear-gradient(135deg,#1a1000,#2a1a00)' }
-];
-let svIdx=0, svTimer;
+const storyData = [];
 function populateStories() {
-  const row = document.getElementById('story-row');
-  storyData.forEach((s,i) => {
-    const el = document.createElement('div'); el.className='story';
-    el.innerHTML=`<div class="sring"><div class="savatar">${s.emoji}</div></div><span>${s.name.split(' ')[0]}</span>`;
-    el.onclick=()=>openSv(i); row.appendChild(el);
-  });
+  // Stories özelliği yakında — şimdilik sadece "ekle" butonu göster
+  const name = window._currentUser?.name;
+  if (name) document.getElementById('my-sname').textContent = name.split(' ')[0];
 }
-function openSv(i) { svIdx=i; renderSv(); document.getElementById('sv').classList.add('open'); }
-function closeSv() { document.getElementById('sv').classList.remove('open'); clearTimeout(svTimer); }
-function renderSv() {
-  clearTimeout(svTimer);
-  const s = storyData[svIdx];
-  document.getElementById('sv-av').textContent=s.emoji;
-  document.getElementById('sv-name').textContent=s.name;
-  document.getElementById('sv-time').textContent=s.time;
-  const c = document.getElementById('sv-content');
-  c.style.background=s.bg;
-  let em = c.querySelector('.sv-em');
-  if (!em) { em=document.createElement('div'); em.className='sv-em'; em.style.cssText='font-size:90px;position:relative;z-index:1;'; c.appendChild(em); }
-  em.textContent=s.emoji;
-  document.getElementById('sv-footer').innerHTML=(s.hasRoute?`<div style="background:rgba(255,85,0,.15);border:1px solid rgba(255,85,0,.4);border-radius:12px;padding:10px 14px;margin-bottom:10px;cursor:pointer" onclick="toast('Rota eklendi! 🗺️')"><div style="font-size:10px;color:rgba(255,85,0,.9);font-weight:600;margin-bottom:3px">📍 ROTA</div><div style="font-size:14px;font-weight:600;color:white">${s.route}</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">Rotayı kullanmak için dokun →</div></div>`:'')+`<div style="color:white;font-size:13px;line-height:1.5"><strong>${s.name}</strong> · ${s.bike}<br>${s.caption}</div>`;
-  document.getElementById('sv-bars').innerHTML=storyData.map((_,i)=>`<div class="sv-bar"><div class="sv-fill ${i<svIdx?'done':i===svIdx?'active':''}"></div></div>`).join('');
-  svTimer=setTimeout(()=>svNext(),4000);
-}
-function svNext() { if(svIdx<storyData.length-1){svIdx++;renderSv();}else closeSv(); }
-function svPrev() { if(svIdx>0){svIdx--;renderSv();} }
+function openSv(i) {}
+function closeSv() { document.getElementById('sv').classList.remove('open'); }
+function svNext() {}
+function svPrev() {}
+
 
 function openNotifs() {
   document.getElementById('notif-ov').classList.add('open');
@@ -1813,7 +1790,30 @@ async function sendPhotoMsg(input) {
 
 // ── TOUR ──
 function openCreateTour() { document.getElementById('ct-ov').classList.add('open'); }
-function saveTour() { const n=document.getElementById('ct-name').value||'Yeni Tur'; document.getElementById('ct-ov').classList.remove('open'); toast(`"${n}" yayınlandı! 🏍️`); }
+async function saveTour() {
+  const name = document.getElementById('ct-name').value.trim();
+  const from = document.getElementById('ct-from').value.trim();
+  const to = document.getElementById('ct-to').value.trim();
+  const date = document.getElementById('ct-date').value;
+  if (!name) { toast('Tur adı gir'); return; }
+  document.getElementById('ct-ov').classList.remove('open');
+  const user = window._currentUser || {};
+  const tour = {
+    name, from, to, date,
+    uid: user.uid || '',
+    userName: user.name || 'Sürücü',
+    participants: [user.uid || ''],
+    createdAt: new Date().toISOString()
+  };
+  try {
+    if (window._db) {
+      const { collection, addDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      await addDoc(collection(window._db, 'tours'), tour);
+    }
+    toast(`"${name}" yayınlandı! 🏍️`);
+    loadRealTours();
+  } catch(e) { toast('Yayınlanamadı, tekrar dene'); }
+}
 
 // ── MISC ──
 let toastT;
@@ -2054,6 +2054,77 @@ async function submitComment(postOwnerUid, postId) {
   } catch(e) { toast('Yorum gönderilemedi'); }
 }
 
+// ── TURLAR ──
+async function loadRealTours() {
+  if (!window._db) return;
+  const feed = document.getElementById('tours-feed');
+  if (!feed) return;
+  try {
+    const { collection, query, orderBy, getDocs, limit } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const q = query(collection(window._db, 'tours'), orderBy('createdAt','desc'), limit(20));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      feed.innerHTML = `<div style="text-align:center;padding:48px 24px;color:var(--text3);">
+        <div style="font-size:48px;margin-bottom:12px">🏍️</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">Henüz aktif tur yok</div>
+        <div style="font-size:13px">İlk turu sen oluştur!</div>
+      </div>`;
+      return;
+    }
+    const tours = [];
+    snap.forEach(d => tours.push({ id: d.id, ...d.data() }));
+    feed.innerHTML = tours.map(t => `
+      <div class="tour-card">
+        <div class="tc-head">
+          <div class="tc-name">${t.name || 'Tur'}</div>
+          <div class="tc-badge upcoming">${t.date ? new Date(t.date).toLocaleDateString('tr-TR') : 'Tarih yok'}</div>
+        </div>
+        <div class="tc-stats">
+          <span class="tc-stat">📍 ${t.from || '—'} → ${t.to || '—'}</span>
+          <span class="tc-stat">🏍️ ${(t.participants||[]).length} katılımcı</span>
+        </div>
+        <div class="tc-bottom">
+          <div style="font-size:12px;color:var(--text3)">${t.userName || 'Sürücü'} tarafından</div>
+          <button class="tc-join" onclick="joinTour('${t.name}')">Katıl</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+
+// ── PROFİLDEKİ KENDİ ROTALARI ──
+async function loadMyRoutes() {
+  if (!window._db || !window._currentUser) return;
+  try {
+    const { collection, query, where, orderBy, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const q = query(collection(window._db,'routes'), where('uid','==',window._currentUser.uid), orderBy('createdAt','desc'));
+    const snap = await getDocs(q);
+    const grid = document.getElementById('my-routes-grid');
+    const empty = document.getElementById('my-routes-empty');
+    if (!grid) return;
+    if (snap.empty) { if(empty) empty.style.display='block'; return; }
+    if(empty) empty.style.display='none';
+    const routes = [];
+    snap.forEach(d => routes.push(d.data()));
+    // İstatistikleri güncelle
+    const totalKm = routes.reduce((s,r) => s + (r.distKm||0), 0);
+    const turEl = document.getElementById('stat-tur');
+    const kmEl = document.getElementById('stat-km');
+    if(turEl) turEl.textContent = routes.length;
+    if(kmEl) kmEl.textContent = totalKm >= 1000 ? (totalKm/1000).toFixed(1)+'K' : Math.round(totalKm);
+    // Grid render
+    grid.innerHTML = routes.slice(0,4).map(r => `
+      <div class="rcard">
+        <div class="rthumb" style="background:linear-gradient(135deg,#1a3a5c,#2a5a8c)">🗺️<div class="rkm">${r.distKm} km</div></div>
+        <div class="rinfo">
+          <div class="rname">${r.name || 'Rota'}</div>
+          <div class="rdate">${timeAgo(r.createdAt)}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+
 function sharePost(postId) {
   const url = `${window.location.href}`;
   if (navigator.share) {
@@ -2068,9 +2139,10 @@ function sharePost(postId) {
 // ── profil yükle ──
 window.loadUserProfile = function(d) {
   if (d.name) { document.getElementById('prof-name').textContent = d.name; document.getElementById('my-sname').textContent = d.name.split(' ')[0]; }
+  if (d.username) { const el = document.getElementById('prof-username'); if(el) el.textContent = '@' + d.username; }
   if (d.bike) document.getElementById('prof-bike').textContent = d.bike;
-  if (d.cat)  document.getElementById('prof-cat').textContent = d.cat;
-  if (d.city) document.getElementById('prof-city').textContent = d.city;
+  if (d.cat) { const el = document.getElementById('prof-cat'); if(el) el.textContent = d.cat; }
+  if (d.city) { const el = document.getElementById('prof-city'); if(el) el.textContent = d.city; }
 };
 
 function applyProfile(d) { window.loadUserProfile(d); }
