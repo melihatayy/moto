@@ -2,7 +2,10 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F5F2EE">
 <title>MOTO</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -20,9 +23,10 @@
   --shadow2:0 2px 8px rgba(0,0,0,0.1),0 8px 24px rgba(0,0,0,0.08);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:#F5F2EE;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:0;font-family:'DM Sans',sans-serif;color:var(--text);}
-.phone{width:100%;max-width:430px;min-height:100vh;height:auto;background:var(--bg);border-radius:0;overflow:hidden;position:relative;display:flex;flex-direction:column;margin:0 auto;}
-.sbar{padding:14px 28px 0;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--text);flex-shrink:0;z-index:5;background:var(--bg);}
+html,body{height:100%;height:100dvh;margin:0;padding:0;}
+body{background:#F5F2EE;display:flex;justify-content:center;align-items:stretch;height:100dvh;overflow:hidden;font-family:'DM Sans',sans-serif;color:var(--text);}
+.phone{width:100%;max-width:430px;height:100dvh;background:var(--bg);border-radius:0;overflow:hidden;position:relative;display:flex;flex-direction:column;margin:0 auto;}
+
 
 /* PAGES */
 .page{display:none;flex-direction:column;flex:1;overflow:hidden;position:absolute;inset:0;background:var(--bg);}
@@ -33,7 +37,7 @@ body{background:#F5F2EE;display:flex;justify-content:center;align-items:flex-sta
 .scrl::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 
 /* NAV */
-.nav{display:flex;background:var(--card);border-top:1px solid var(--border);padding:8px 0 24px;flex-shrink:0;z-index:10;}
+.nav{display:flex;background:var(--card);border-top:1px solid var(--border);padding:8px 0 calc(16px + env(safe-area-inset-bottom));flex-shrink:0;z-index:10;}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;opacity:.35;transition:opacity .2s,color .2s;color:var(--text2);}
 .ni.active{opacity:1;color:var(--orange);}
 .ni svg{width:21px;height:21px;}
@@ -281,6 +285,14 @@ select.inp option{background:white;color:var(--text);}
 .dm-info{flex:1;}
 .dm-name{font-size:14px;font-weight:600;color:var(--text);}
 .dm-status{font-size:11px;color:var(--green);}
+.dm-person-card{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.dm-person-card:active{opacity:.7;}
+.dm-pav{width:46px;height:46px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;border:1.5px solid var(--border);flex-shrink:0;}
+.dm-pinfo{flex:1;}
+.dm-pname{font-size:14px;font-weight:600;color:var(--text);}
+.dm-pbike{font-size:11px;color:var(--orange);margin-top:2px;}
+.dm-verif{color:var(--green);font-size:11px;}
+.dm-ponline{width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0;}
 .dm-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--bg);}
 .dm-msgs::-webkit-scrollbar{display:none;}
 .dmsg{max-width:72%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.5;}
@@ -288,7 +300,7 @@ select.inp option{background:white;color:var(--text);}
 .dmsg.me{background:var(--orange);color:white;border-bottom-right-radius:4px;align-self:flex-end;}
 .dmsg .t{font-size:10px;opacity:.6;margin-top:3px;}
 .dmsg.me .t{text-align:right;}
-.dm-input-wrap{padding:10px 14px 26px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;background:var(--card);}
+.dm-input-wrap{padding:10px 14px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;background:var(--card);}
 .dm-input{flex:1;background:var(--bg2);border:1.5px solid var(--border);border-radius:22px;padding:10px 16px;font-size:13px;color:var(--text);font-family:inherit;outline:none;}
 .dm-input::placeholder{color:var(--text3);}
 .dm-send{width:40px;height:40px;background:var(--orange);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
@@ -315,12 +327,21 @@ select.inp option{background:white;color:var(--text);}
 .pending-desc{font-size:14px;color:var(--text3);line-height:1.6;margin-bottom:24px;}
 .pending-close{width:100%;background:var(--bg2);color:var(--text);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;}
 
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.notif-item:active{opacity:.7;}
+.notif-unread{position:relative;}
+.notif-unread::after{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:6px;height:6px;background:var(--orange);border-radius:50%;}
+.notif-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.notif-info{flex:1;}
+.notif-text{font-size:13px;color:var(--text2);line-height:1.5;}
+.notif-time{font-size:11px;color:var(--text3);margin-top:3px;}
+
 .sp{height:16px;}
 </style>
 </head>
 <body style="margin:0;padding:0;">
 <div class="phone" id="phone">
-  <div class="sbar" id="sbar" style="background:var(--bg)"><span>9:41</span><span style="letter-spacing:2px;font-size:10px">●●●</span></div>
+
 
   <!-- ══════ LANG ══════ -->
   <div class="page active" id="pg-lang">
@@ -484,7 +505,7 @@ select.inp option{background:white;color:var(--text);}
         <div class="logo">MOTO</div>
         <div style="display:flex;gap:8px">
           <div class="hbtn" onclick="openDM()"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="nbadge"></div></div>
-          <div class="hbtn"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <div class="hbtn" onclick="openNotifs()"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div class="nbadge"></div></div>
         </div>
       </div>
       <div class="scrl">
@@ -828,14 +849,156 @@ select.inp option{background:white;color:var(--text);}
     <div class="sv-footer" id="sv-footer"></div>
   </div>
 
-  <!-- ══ DM ══ -->
+  <!-- ══ SOHBET LİSTESİ ══ -->
   <div class="dm-overlay" id="dm-ov">
     <div class="dm-hdr">
       <div class="dm-back" onclick="document.getElementById('dm-ov').classList.remove('open')"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div class="dm-av">🔥</div>
-      <div class="dm-info"><div class="dm-name">Kerem Yıldız</div><div class="dm-status">Çevrimiçi</div></div>
+      <div class="dm-info" style="flex:1"><div class="dm-name">Sohbetler</div></div>
     </div>
-    <div id="dm-body" style="flex:1;display:flex;flex-direction:column;overflow:hidden;"></div>
+    <!-- Doğrulama banner -->
+    <div style="margin:12px 14px 0;padding:12px 14px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:22px">🔒</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:#92400E">Mesajlaşmak için e-Devlet gerekli</div>
+        <div style="font-size:11px;color:#B45309;margin-top:2px">Her iki taraf da doğrulanmış olmalı</div>
+      </div>
+      <button onclick="verifyNow()" style="background:#FF5500;color:white;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap">Doğrula →</button>
+    </div>
+    <!-- Kişi önerileri -->
+    <div style="padding:14px 14px 6px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500">Konuşma Başlat</div>
+    <div class="scrl" style="flex:1;padding:0 14px;">
+      <div class="dm-person-card" onclick="openChat({emoji:'🔥',name:'Kerem Yıldız',bike:'Yamaha R1 · Supersport',status:'Çevrimiçi',verified:true})">
+        <div class="dm-pav">🔥</div>
+        <div class="dm-pinfo">
+          <div class="dm-pname">Kerem Yıldız <span class="dm-verif">✓</span></div>
+          <div class="dm-pbike">Yamaha R1 · Supersport</div>
+        </div>
+        <div class="dm-ponline"></div>
+      </div>
+      <div class="dm-person-card" onclick="openChat({emoji:'🌲',name:'Ayşe Demir',bike:'BMW R 1300 GS · Adventure',status:'1 sa önce',verified:true})">
+        <div class="dm-pav">🌲</div>
+        <div class="dm-pinfo">
+          <div class="dm-pname">Ayşe Demir <span class="dm-verif">✓</span></div>
+          <div class="dm-pbike">BMW R 1300 GS · Adventure</div>
+        </div>
+        <div style="font-size:10px;color:var(--text3)">1 sa önce</div>
+      </div>
+      <div class="dm-person-card" onclick="openChat({emoji:'⚡',name:'Buse Çelik',bike:'Honda CBR1000RR · Supersport',status:'Çevrimiçi',verified:false})">
+        <div class="dm-pav">⚡</div>
+        <div class="dm-pinfo">
+          <div class="dm-pname">Buse Çelik</div>
+          <div class="dm-pbike">Honda CBR1000RR · Supersport</div>
+        </div>
+        <div class="dm-ponline"></div>
+      </div>
+      <div class="dm-person-card" onclick="openChat({emoji:'🏔️',name:'Murat Kaya',bike:'Yamaha MT-09 · Naked',status:'3 sa önce',verified:false})">
+        <div class="dm-pav">🏔️</div>
+        <div class="dm-pinfo">
+          <div class="dm-pname">Murat Kaya</div>
+          <div class="dm-pbike">Yamaha MT-09 · Naked</div>
+        </div>
+        <div style="font-size:10px;color:var(--text3)">3 sa önce</div>
+      </div>
+      <div class="dm-person-card" onclick="openChat({emoji:'☕',name:'Selin Yıldırım',bike:'Honda CB500F · Naked',status:'Çevrimiçi',verified:true})">
+        <div class="dm-pav">☕</div>
+        <div class="dm-pinfo">
+          <div class="dm-pname">Selin Yıldırım <span class="dm-verif">✓</span></div>
+          <div class="dm-pbike">Honda CB500F · Naked</div>
+        </div>
+        <div class="dm-ponline"></div>
+      </div>
+      <div class="dm-person-card" onclick="openChat({emoji:'🌲',name:'Tolga Arslan',bike:'BMW R 1300 GS · Adventure',status:'Çevrimiçi',verified:true})">
+        <div class="dm-pav">🌲</div>
+        <div class="dm-pinfo">
+          <div class="dm-pname">Tolga Arslan 🏅 <span class="dm-verif">✓</span></div>
+          <div class="dm-pbike">BMW R 1300 GS · Pro Sürücü</div>
+        </div>
+        <div class="dm-ponline"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SOHBET EKRANI ══ -->
+  <div class="dm-overlay" id="chat-ov">
+    <div class="dm-hdr">
+      <div class="dm-back" onclick="document.getElementById('chat-ov').classList.remove('open')"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="dm-av" id="chat-av">🔥</div>
+      <div class="dm-info"><div class="dm-name" id="chat-name">—</div><div class="dm-status" id="chat-status">—</div></div>
+    </div>
+    <div id="chat-body" style="flex:1;display:flex;flex-direction:column;overflow:hidden;"></div>
+  </div>
+
+  <!-- ══ e-DEVLET MODAL ══ -->
+  <!-- ══ BİLDİRİMLER ══ -->
+  <div class="dm-overlay" id="notif-ov">
+    <div class="dm-hdr">
+      <div class="dm-back" onclick="document.getElementById('notif-ov').classList.remove('open')"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="dm-info" style="flex:1"><div class="dm-name">Bildirimler</div></div>
+      <div onclick="clearNotifs()" style="font-size:12px;color:var(--orange);cursor:pointer;font-weight:500">Tümünü Gör</div>
+    </div>
+    <div class="scrl" style="flex:1;">
+      <div id="notif-list" style="padding:8px 14px;">
+        <div class="notif-item notif-unread">
+          <div class="notif-icon" style="background:#FEF2F2">❤️</div>
+          <div class="notif-info">
+            <div class="notif-text"><strong>Kerem Yıldız</strong> gönderini beğendi</div>
+            <div class="notif-time">2 dk önce</div>
+          </div>
+        </div>
+        <div class="notif-item notif-unread">
+          <div class="notif-icon" style="background:#F0FDF4">🏍️</div>
+          <div class="notif-info">
+            <div class="notif-text"><strong>Boğaz Sahil Turu</strong> başladı! 8 sürücü katıldı</div>
+            <div class="notif-time">15 dk önce</div>
+          </div>
+        </div>
+        <div class="notif-item notif-unread">
+          <div class="notif-icon" style="background:#EFF6FF">👤</div>
+          <div class="notif-info">
+            <div class="notif-text"><strong>Ayşe Demir</strong> seni takip etmeye başladı</div>
+            <div class="notif-time">1 sa önce</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:#FFF7ED">💬</div>
+          <div class="notif-info">
+            <div class="notif-text"><strong>Buse Çelik</strong> gönderine yorum yaptı: "Harika rota! 🔥"</div>
+            <div class="notif-time">3 sa önce</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:#F0FDF4">✅</div>
+          <div class="notif-info">
+            <div class="notif-text">Profilin <strong>e-Devlet</strong> ile doğrulandı</div>
+            <div class="notif-time">1 gün önce</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:#FEF2F2">❤️</div>
+          <div class="notif-info">
+            <div class="notif-text"><strong>Murat Kaya</strong> ve 12 kişi daha gönderini beğendi</div>
+            <div class="notif-time">2 gün önce</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon" style="background:#EFF6FF">🗺️</div>
+          <div class="notif-info">
+            <div class="notif-text"><strong>Sultanahmet → Sarıyer</strong> rotanı 5 kişi kullandı</div>
+            <div class="notif-time">3 gün önce</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pending-modal" id="edevlet-modal" onclick="document.getElementById('edevlet-modal').classList.remove('open')">
+    <div class="pending-sheet" onclick="event.stopPropagation()">
+      <div class="pending-icon">🔒</div>
+      <div class="pending-title">Mesajlaşmak için Doğrulama Gerekli</div>
+      <div class="pending-desc"><strong id="edevlet-target-name"></strong> ile mesajlaşmak için her iki tarafın da e-Devlet ile kimliğini doğrulaması gerekiyor.<br><br>Bu sayede MOTO topluluğu güvenli kalır, sahte profil olmaz.</div>
+      <button class="pending-close" style="background:var(--orange);color:white;margin-bottom:10px" onclick="verifyNow()">e-Devlet ile Doğrula →</button>
+      <button class="pending-close" onclick="document.getElementById('edevlet-modal').classList.remove('open')">Şimdi Değil</button>
+    </div>
   </div>
 
   <!-- ══ CREATE TOUR ══ -->
@@ -1079,24 +1242,60 @@ function renderSv() {
 function svNext() { if(svIdx<storyData.length-1){svIdx++;renderSv();}else closeSv(); }
 function svPrev() { if(svIdx>0){svIdx--;renderSv();} }
 
-// ── DM ──
+function openNotifs() {
+  document.getElementById('notif-ov').classList.add('open');
+  // Bildirim badge'ini kaldır
+  document.querySelectorAll('.hbtn .nbadge').forEach((b,i) => { if(i===1) b.style.display='none'; });
+}
+function clearNotifs() {
+  document.querySelectorAll('.notif-unread').forEach(n => n.classList.remove('notif-unread'));
+  toast('Tüm bildirimler okundu ✓');
+}
+
+// ── SOHBET ──
 let isVerified = false;
 function openDM() {
   document.getElementById('dm-ov').classList.add('open');
-  const body = document.getElementById('dm-body');
-  if (isVerified) {
-    body.innerHTML=`<div class="dm-msgs" id="dm-msgs"><div class="dmsg them">Merhaba! Yarınki tura geliyor musun? 🏍️<div class="t">14:32</div></div><div class="dmsg me">Kesinlikle! Saat kaçta?<div class="t">14:35</div></div><div class="dmsg them">Sabah 07:00 Beşiktaş Meydan<div class="t">14:36</div></div></div><div class="dm-input-wrap"><input class="dm-input" placeholder="Mesaj yaz..." id="dm-inp" onkeydown="if(event.key==='Enter')sendMsg()"/><button class="dm-send" onclick="sendMsg()"><svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg></button></div>`;
-  } else {
-    body.innerHTML=`<div class="dm-locked"><div class="dm-locked-icon">🔒</div><div class="dm-locked-title">Mesajlaşmak için doğrula</div><div class="dm-locked-desc">Sohbet özelliği yalnızca e-Devlet ile doğrulanmış hesaplara açık. Topluluk güvenli kalsın.</div><button class="dm-verify-btn" onclick="verifyNow()">e-Devlet ile Doğrula →</button></div>`;
-  }
 }
-function verifyNow() { toast('e-Devlet doğrulama...'); setTimeout(()=>{ isVerified=true; toast('✓ Doğrulandı! Artık mesajlaşabilirsin 🎉'); openDM(); },1500); }
+function openChat(person) {
+  // Her iki taraf da doğrulanmamışsa eDevlet modal
+  if (!isVerified || !person.verified) {
+    document.getElementById('edevlet-target-name').textContent = person.name;
+    document.getElementById('edevlet-modal').classList.add('open');
+    return;
+  }
+  // Doğrulanmışsa sohbet aç
+  document.getElementById('chat-av').textContent = person.emoji;
+  document.getElementById('chat-name').textContent = person.name;
+  document.getElementById('chat-status').textContent = person.status;
+  const body = document.getElementById('chat-body');
+  body.innerHTML = `<div class="dm-msgs" id="dm-msgs">
+    <div class="dmsg them">Merhaba! Yarınki tura geliyor musun? 🏍️<div class="t">14:32</div></div>
+    <div class="dmsg me">Kesinlikle! Saat kaçta?<div class="t">14:35</div></div>
+    <div class="dmsg them">Sabah 07:00 Beşiktaş Meydan 🤙<div class="t">14:36</div></div>
+  </div>
+  <div class="dm-input-wrap">
+    <input class="dm-input" placeholder="Mesaj yaz..." id="dm-inp" onkeydown="if(event.key==='Enter')sendMsg()"/>
+    <button class="dm-send" onclick="sendMsg()"><svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg></button>
+  </div>`;
+  document.getElementById('chat-ov').classList.add('open');
+}
+function verifyNow() {
+  document.getElementById('edevlet-modal').classList.remove('open');
+  toast('e-Devlet doğrulama başlatılıyor...');
+  setTimeout(() => {
+    isVerified = true;
+    toast('✓ Doğrulandı! Artık mesajlaşabilirsin 🎉');
+  }, 1500);
+}
 function sendMsg() {
-  const inp=document.getElementById('dm-inp'); if(!inp.value.trim())return;
-  const msgs=document.getElementById('dm-msgs');
-  const el=document.createElement('div'); el.className='dmsg me';
-  const now=new Date(); el.innerHTML=inp.value+`<div class="t">${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>`;
-  msgs.appendChild(el); inp.value=''; msgs.scrollTop=msgs.scrollHeight;
+  const inp = document.getElementById('dm-inp');
+  if (!inp.value.trim()) return;
+  const msgs = document.getElementById('dm-msgs');
+  const el = document.createElement('div'); el.className = 'dmsg me';
+  const now = new Date();
+  el.innerHTML = inp.value + `<div class="t">${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>`;
+  msgs.appendChild(el); inp.value = ''; msgs.scrollTop = msgs.scrollHeight;
 }
 
 // ── TOUR ──
