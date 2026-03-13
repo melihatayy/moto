@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOTO</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#F5F2EE;--bg2:#EDEBE6;--bg3:#E4E1DB;
+  --card:#FFFFFF;--card2:#F9F7F4;
+  --border:#E0DDD8;--border2:#D0CDC7;
+  --orange:#FF5500;--orange2:#FF7733;--odim:rgba(255,85,0,0.09);--oglow:rgba(255,85,0,0.15);
+  --text:#1A1814;--text2:#4A4740;--text3:#8A8680;
+  --green:#16A34A;--gdim:rgba(22,163,74,0.1);
+  --red:#DC2626;--rdim:rgba(220,38,38,0.1);
+  --blue:#2563EB;--bdim:rgba(37,99,235,0.1);
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.06);
+  --shadow2:0 2px 8px rgba(0,0,0,0.1),0 8px 24px rgba(0,0,0,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:#F5F2EE;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:0;font-family:'DM Sans',sans-serif;color:var(--text);}
+.phone{width:100%;max-width:430px;min-height:100vh;height:auto;background:var(--bg);border-radius:0;overflow:hidden;position:relative;display:flex;flex-direction:column;margin:0 auto;}
+.sbar{padding:14px 28px 0;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--text);flex-shrink:0;z-index:5;background:var(--bg);}
+
+/* PAGES */
+.page{display:none;flex-direction:column;flex:1;overflow:hidden;position:absolute;inset:0;background:var(--bg);}
+.page.active{display:flex;position:relative;}
+.scrl{flex:1;overflow-y:auto;overflow-x:hidden;}
+.scrl::-webkit-scrollbar{width:3px;}
+.scrl::-webkit-scrollbar-track{background:transparent;}
+.scrl::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* NAV */
+.nav{display:flex;background:var(--card);border-top:1px solid var(--border);padding:8px 0 24px;flex-shrink:0;z-index:10;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;opacity:.35;transition:opacity .2s,color .2s;color:var(--text2);}
+.ni.active{opacity:1;color:var(--orange);}
+.ni svg{width:21px;height:21px;}
+.ni span{font-size:9px;font-weight:500;letter-spacing:.2px;}
+
+/* BTN */
+.btn{width:100%;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;}
+.btn:active{transform:scale(.98);}
+.btn-orange{background:var(--orange);color:white;}
+.btn-outline{background:transparent;color:var(--text);border:1.5px solid var(--border2);}
+.btn-ghost{background:var(--bg2);color:var(--text2);border:none;}
+
+/* TOAST */
+.toast{position:absolute;bottom:110px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--text);color:white;border-radius:12px;padding:10px 18px;font-size:13px;white-space:nowrap;opacity:0;transition:all .25s;z-index:999;pointer-events:none;box-shadow:var(--shadow2);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* OVERLAY */
+.overlay{position:absolute;inset:0;background:var(--bg);z-index:80;display:none;flex-direction:column;}
+.overlay.open{display:flex;}
+
+/* ── LANG ── */
+#pg-lang{background:var(--card);justify-content:center;align-items:center;}
+.lang-wrap{width:100%;padding:40px 32px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+.lang-logo{font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:6px;color:var(--orange);line-height:1;}
+.lang-sub{font-size:14px;color:var(--text3);margin-bottom:4px;text-align:center;}
+.lang-btns{display:flex;gap:12px;width:100%;}
+.lang-btn{flex:1;padding:16px;border-radius:14px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.lang-btn span:first-child{font-size:28px;}
+.lang-btn.sel{border-color:var(--orange);background:var(--odim);color:var(--orange);}
+
+/* ── WELCOME ── */
+#pg-welcome{justify-content:flex-end;background:var(--text);}
+.welcome-bg{position:absolute;inset:0;background:linear-gradient(180deg,#1a0800 0%,#0a0a0a 100%);}
+.welcome-logo{position:absolute;top:100px;left:50%;transform:translateX(-50%);font-family:'Bebas Neue',sans-serif;font-size:80px;letter-spacing:8px;color:var(--orange);}
+.welcome-emoji{position:absolute;top:90px;left:50%;transform:translateX(-50%);font-size:100px;opacity:.1;}
+.welcome-body{position:relative;z-index:2;padding:32px 28px 40px;background:linear-gradient(transparent,rgba(0,0,0,.95) 20%);}
+.welcome-tagline{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;line-height:1.1;margin-bottom:10px;color:white;}
+.welcome-sub{font-size:14px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:28px;}
+.welcome-dots{display:flex;gap:8px;margin-bottom:28px;}
+.wdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);}
+.wdot.active{background:var(--orange);width:24px;border-radius:4px;}
+
+/* ── AUTH ── */
+.auth-body{padding:28px 24px;}
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:3px;color:var(--orange);margin-bottom:4px;}
+.auth-title{font-size:22px;font-weight:700;margin-bottom:4px;}
+.auth-sub{font-size:13px;color:var(--text3);margin-bottom:28px;line-height:1.6;}
+.social-btn{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:13px;font-size:14px;font-weight:500;font-family:inherit;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;transition:border-color .2s;box-shadow:var(--shadow);}
+.social-btn:hover{border-color:var(--border2);}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--text3);font-size:12px;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.auth-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:13px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;margin-bottom:10px;transition:border-color .2s;box-shadow:var(--shadow);}
+.auth-input:focus{border-color:var(--orange);}
+.auth-input::placeholder{color:var(--text3);}
+.auth-switch{text-align:center;margin-top:18px;font-size:13px;color:var(--text3);}
+.auth-switch span{color:var(--orange);cursor:pointer;font-weight:600;}
+
+/* ── SETUP ── */
+.setup-hdr{padding:18px 20px 0;display:flex;align-items:center;gap:12px;background:var(--bg);}
+.setup-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);background:var(--bg2);border-radius:50%;}
+.setup-step{font-size:12px;color:var(--text3);margin-left:auto;}
+.setup-prog{height:3px;background:var(--border);margin:14px 20px 0;border-radius:2px;}
+.setup-prog-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .4s;}
+.setup-body{padding:22px 20px;}
+.setup-title{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1.5px;margin-bottom:4px;color:var(--text);}
+.setup-sub{font-size:13px;color:var(--text3);margin-bottom:22px;line-height:1.6;}
+.inp-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.inp{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;margin-bottom:14px;transition:border-color .2s;box-shadow:var(--shadow);}
+.inp:focus{border-color:var(--orange);}
+.inp::placeholder{color:var(--text3);}
+select.inp option{background:white;color:var(--text);}
+
+/* BIKE CAT GRID */
+.bike-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.bike-opt{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:all .2s;text-align:center;box-shadow:var(--shadow);}
+.bike-opt.sel{border-color:var(--orange);background:var(--odim);}
+.bike-opt-icon{font-size:26px;margin-bottom:4px;}
+.bike-opt-name{font-size:12px;font-weight:600;color:var(--text);}
+.bike-opt-desc{font-size:10px;color:var(--text3);margin-top:1px;}
+
+/* ── HEADER ── */
+.hdr{padding:14px 18px 10px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:var(--bg);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--orange);line-height:1;}
+.hbtn{width:38px;height:38px;background:var(--card);border:1.5px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;box-shadow:var(--shadow);}
+.nbadge{position:absolute;top:0;right:0;width:8px;height:8px;background:var(--orange);border-radius:50%;border:2px solid var(--bg);}
+
+/* ── STORIES ── */
+.stories{display:flex;gap:10px;padding:4px 18px 14px;overflow-x:auto;}
+.stories::-webkit-scrollbar{display:none;}
+.story{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
+.sring{width:62px;height:62px;border-radius:50%;padding:2.5px;background:linear-gradient(135deg,var(--orange),#FFAA00);}
+.sring.empty{background:var(--border2);}
+.savatar{width:100%;height:100%;border-radius:50%;background:var(--bg2);border:2.5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;}
+.story span{font-size:10px;color:var(--text3);max-width:64px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.add-icon{position:absolute;bottom:-1px;right:-1px;width:20px;height:20px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);font-size:12px;font-weight:700;color:white;}
+
+/* ── STORY VIEWER ── */
+.sv{position:absolute;inset:0;background:#000;z-index:200;display:none;flex-direction:column;}
+.sv.open{display:flex;}
+.sv-bars{display:flex;gap:4px;padding:14px 14px 8px;}
+.sv-bar{flex:1;height:2px;background:rgba(255,255,255,.25);border-radius:2px;overflow:hidden;}
+.sv-fill{height:100%;background:white;width:0;}
+.sv-fill.done{width:100%;}
+.sv-fill.active{animation:svprog 4s linear forwards;}
+@keyframes svprog{to{width:100%}}
+.sv-hdr{padding:8px 14px;display:flex;align-items:center;gap:10px;}
+.sv-av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(--orange);}
+.sv-name{font-size:13px;font-weight:600;color:white;flex:1;}
+.sv-time{font-size:11px;color:rgba(255,255,255,.5);}
+.sv-x{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:20px;}
+.sv-content{flex:1;display:flex;align-items:center;justify-content:center;position:relative;}
+.sv-tap{position:absolute;inset:0;display:flex;z-index:2;}
+.sv-prev{flex:2;cursor:pointer;}
+.sv-next{flex:3;cursor:pointer;}
+.sv-footer{position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(transparent,rgba(0,0,0,.8));z-index:1;}
+
+/* ── POSTS ── */
+.stitle{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;padding:4px 18px 10px;color:var(--text);}
+.live-card{margin:0 14px 10px;background:var(--card);border:1.5px solid var(--orange);border-radius:18px;padding:16px;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.live-card::before{content:'';position:absolute;top:0;right:0;width:140px;height:140px;background:radial-gradient(circle,var(--oglow),transparent 70%);pointer-events:none;}
+.livebadge{display:inline-flex;align-items:center;gap:5px;background:var(--red);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-bottom:10px;color:white;}
+.ldot{width:6px;height:6px;background:white;border-radius:50%;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.post{background:var(--card);margin:0 14px 10px;border-radius:18px;border:1.5px solid var(--border);overflow:hidden;box-shadow:var(--shadow);}
+.ph{padding:12px 14px 10px;display:flex;align-items:center;gap:10px;}
+.pavatar{width:42px;height:42px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1.5px solid var(--border);}
+.pname{font-size:13px;font-weight:600;color:var(--text);}
+.pbike{font-size:11px;color:var(--orange);font-weight:500;margin-top:1px;}
+.pvbadge{margin-left:auto;font-size:10px;background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.25);border-radius:20px;padding:3px 8px;white-space:nowrap;}
+.pmap{width:100%;height:200px;background:var(--bg2);position:relative;overflow:hidden;}
+.pmap svg{width:100%;height:100%;}
+.pmap-stats{position:absolute;bottom:0;left:0;right:0;padding:10px 12px;background:linear-gradient(transparent,rgba(0,0,0,.5));display:flex;gap:6px;}
+.chip{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:500;color:white;backdrop-filter:blur(4px);}
+.pimg{width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:70px;position:relative;background:var(--bg2);}
+.pactions{padding:10px 14px;display:flex;gap:10px;align-items:center;border-top:1px solid var(--border);}
+.abtn{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3);cursor:pointer;background:none;border:none;font-family:inherit;transition:color .15s;}
+.abtn:hover{color:var(--text2);}
+.abtn svg{width:19px;height:19px;}
+.abtn.liked{color:var(--red);}
+.abtn.liked svg{fill:var(--red);}
+.pcaption{padding:8px 14px 12px;font-size:13px;line-height:1.55;color:var(--text2);}
+.pcaption strong{color:var(--text);}
+.use-route{margin:0 14px 12px;background:var(--odim);border:1px solid rgba(255,85,0,.2);border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.use-route span{font-size:12px;font-weight:500;color:var(--orange);flex:1;}
+
+/* ── MAP ── */
+#map-container{flex:1;position:relative;}
+.map-search{position:absolute;top:12px;left:12px;right:12px;z-index:10;background:rgba(255,255,255,.92);border:1.5px solid var(--border);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:8px;color:var(--text3);font-size:13px;box-shadow:var(--shadow2);backdrop-filter:blur(4px);}
+
+
+/* ROUTE LIST */
+.route-list{padding:12px 14px;}
+.route-item{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s;box-shadow:var(--shadow);}
+.route-item:hover{border-color:var(--orange);}
+.route-item.active-route{border-color:var(--orange);background:var(--odim);}
+.ri-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.ri-name{font-size:14px;font-weight:600;color:var(--text);}
+.ri-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.ri-badge.popular{background:var(--odim);color:var(--orange);border:1px solid rgba(255,85,0,.2);}
+.ri-badge.new{background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2);}
+.ri-stats{display:flex;gap:12px;}
+.ri-stat{font-size:12px;color:var(--text3);}
+.ri-map-mini{height:80px;background:linear-gradient(135deg,#1a3a5c,#2a5a8c);border-radius:8px;margin-bottom:8px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(255,255,255,.6);}
+.ri-map-mini svg{width:100%;height:100%;position:absolute;}
+.ri-join-btn{width:100%;background:var(--orange);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:10px;}
+
+/* ── TUR ── */
+.tour-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;margin:0 14px 10px;padding:14px;cursor:pointer;transition:border-color .2s;box-shadow:var(--shadow);}
+.tour-card.live-t{border-color:var(--orange);}
+.tc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.tc-name{font-size:15px;font-weight:700;color:var(--text);}
+.tc-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.tc-badge.live{background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.25);}
+.tc-badge.upcoming{background:var(--odim);color:var(--orange);border:1px solid rgba(255,85,0,.2);}
+.tc-stats{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+.tc-stat{font-size:12px;color:var(--text3);}
+.tc-bottom{display:flex;justify-content:space-between;align-items:center;}
+.tc-avatars{display:flex;}
+.tc-av{width:28px;height:28px;border-radius:50%;background:var(--bg2);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:13px;margin-right:-8px;}
+.tc-join{background:var(--orange);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;}
+.tc-join.pending{background:var(--bg2);color:var(--text3);border:1px solid var(--border);}
+
+/* ── LİSTİNGS ── */
+.catscrl{display:flex;gap:8px;padding:0 14px 14px;overflow-x:auto;}
+.catscrl::-webkit-scrollbar{display:none;}
+.cat{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1.5px solid var(--border);background:var(--card);color:var(--text3);cursor:pointer;transition:all .2s;box-shadow:var(--shadow);}
+.cat.active{background:var(--orange);border-color:var(--orange);color:white;}
+.lcard{background:var(--card);border:1.5px solid var(--border);border-radius:16px;margin:0 14px 10px;overflow:hidden;cursor:pointer;box-shadow:var(--shadow);}
+.limg{height:160px;background:linear-gradient(135deg,#f0ede8,#e4e1db);display:flex;align-items:center;justify-content:center;font-size:70px;position:relative;}
+.lprice{position:absolute;bottom:10px;right:10px;background:var(--orange);color:white;font-weight:700;font-size:15px;padding:5px 12px;border-radius:10px;}
+.lfree{position:absolute;top:10px;left:10px;background:var(--green);color:white;font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;}
+.lbody{padding:12px 14px 10px;}
+.lname{font-size:15px;font-weight:600;color:var(--text);margin-bottom:5px;}
+.ldetail{font-size:12px;color:var(--text3);display:flex;gap:14px;}
+.lseller{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.lsav{width:28px;height:28px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.lsname{font-size:12px;color:var(--text3);}
+.lsverif{margin-left:auto;font-size:10px;color:var(--green);}
+
+/* ── PROFİL ── */
+.prof-cover{height:110px;background:linear-gradient(135deg,#FF5500,#FF8800);position:relative;overflow:hidden;flex-shrink:0;}
+.prof-cover::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(255,255,255,.05) 20px,rgba(255,255,255,.05) 40px);}
+.prof-body{padding:0 18px 16px;background:var(--bg);}
+.prof-av-wrap{display:inline-block;margin-top:-44px;margin-bottom:10px;position:relative;}
+.prof-av{width:88px;height:88px;border-radius:50%;background:var(--bg2);border:4px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:var(--shadow2);}
+.prof-vbadge{position:absolute;bottom:2px;right:2px;width:26px;height:26px;background:var(--green);border-radius:50%;border:2.5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.prof-name{font-size:21px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.prof-bike{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--orange);margin-bottom:8px;}
+.prof-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.ptag{font-size:11px;background:var(--card);border:1.5px solid var(--border);border-radius:20px;padding:3px 10px;color:var(--text3);}
+.prof-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;background:var(--card);box-shadow:var(--shadow);}
+.pst{padding:12px 6px;text-align:center;border-right:1px solid var(--border);}
+.pst:last-child{border-right:none;}
+.pstv{font-size:18px;font-weight:700;color:var(--text);}
+.pstl{font-size:9px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px;}
+.prof-edit{width:100%;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:12px;padding:10px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;box-shadow:var(--shadow);}
+
+/* CONN */
+.conn-section{padding:14px 18px 0;}
+.conn-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px;color:var(--text);}
+.conn-title span{font-size:11px;color:var(--text3);font-weight:400;}
+.conn-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.conn-av{width:44px;height:44px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:20px;border:1.5px solid var(--border);}
+.conn-info{flex:1;}
+.conn-name{font-size:13px;font-weight:600;color:var(--text);}
+.conn-bike{font-size:11px;color:var(--orange);}
+.conn-btn{font-size:11px;font-weight:600;padding:7px 12px;border-radius:8px;border:none;font-family:inherit;cursor:pointer;}
+.conn-btn.connect{background:var(--odim);color:var(--orange);border:1px solid rgba(255,85,0,.2);}
+.conn-btn.follow{background:var(--bdim);color:var(--blue);border:1px solid rgba(37,99,235,.2);}
+.conn-btn.connected{background:var(--bg2);color:var(--text3);border:1px solid var(--border);}
+.routes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px 14px;}
+.rcard{background:var(--card);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:var(--shadow);}
+.rthumb{height:80px;background:linear-gradient(135deg,#1a3a5c,#2a5a8c);display:flex;align-items:center;justify-content:center;font-size:28px;position:relative;}
+.rkm{position:absolute;bottom:6px;right:8px;font-size:11px;font-weight:700;color:white;background:rgba(0,0,0,.4);padding:2px 6px;border-radius:6px;}
+.rinfo{padding:8px 10px;}
+.rname{font-size:12px;font-weight:600;color:var(--text);}
+.rdate{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* DM */
+.dm-overlay{position:absolute;inset:0;background:var(--bg);z-index:150;display:none;flex-direction:column;}
+.dm-overlay.open{display:flex;}
+.dm-hdr{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card);}
+.dm-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);}
+.dm-av{width:40px;height:40px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:20px;border:1.5px solid var(--border);}
+.dm-info{flex:1;}
+.dm-name{font-size:14px;font-weight:600;color:var(--text);}
+.dm-status{font-size:11px;color:var(--green);}
+.dm-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--bg);}
+.dm-msgs::-webkit-scrollbar{display:none;}
+.dmsg{max-width:72%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.5;}
+.dmsg.them{background:var(--card);color:var(--text2);border-bottom-left-radius:4px;align-self:flex-start;border:1px solid var(--border);}
+.dmsg.me{background:var(--orange);color:white;border-bottom-right-radius:4px;align-self:flex-end;}
+.dmsg .t{font-size:10px;opacity:.6;margin-top:3px;}
+.dmsg.me .t{text-align:right;}
+.dm-input-wrap{padding:10px 14px 26px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;background:var(--card);}
+.dm-input{flex:1;background:var(--bg2);border:1.5px solid var(--border);border-radius:22px;padding:10px 16px;font-size:13px;color:var(--text);font-family:inherit;outline:none;}
+.dm-input::placeholder{color:var(--text3);}
+.dm-send{width:40px;height:40px;background:var(--orange);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.dm-locked{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;gap:12px;}
+.dm-locked-icon{font-size:40px;}
+.dm-locked-title{font-size:16px;font-weight:600;color:var(--text);}
+.dm-locked-desc{font-size:13px;color:var(--text3);line-height:1.6;}
+.dm-verify-btn{background:var(--orange);color:white;border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:8px;}
+
+/* CREATE TOUR */
+.ct-overlay{position:absolute;inset:0;background:var(--bg);z-index:150;display:none;flex-direction:column;}
+.ct-overlay.open{display:flex;}
+.ct-hdr{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card);}
+.ct-back{cursor:pointer;color:var(--text2);}
+.ct-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;flex:1;color:var(--text);}
+.ct-save{background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;}
+
+/* PENDING MODAL */
+.pending-modal{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:flex-end;justify-content:center;}
+.pending-modal.open{display:flex;}
+.pending-sheet{background:var(--card);border-radius:24px 24px 0 0;padding:28px 24px 40px;width:100%;text-align:center;}
+.pending-icon{font-size:48px;margin-bottom:14px;}
+.pending-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.pending-desc{font-size:14px;color:var(--text3);line-height:1.6;margin-bottom:24px;}
+.pending-close{width:100%;background:var(--bg2);color:var(--text);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;}
+
+.sp{height:16px;}
+</style>
+</head>
+<body style="margin:0;padding:0;">
+<div class="phone" id="phone">
+  <div class="sbar" id="sbar" style="background:var(--bg)"><span>9:41</span><span style="letter-spacing:2px;font-size:10px">●●●</span></div>
+
+  <!-- ══════ LANG ══════ -->
+  <div class="page active" id="pg-lang">
+    <div class="lang-wrap">
+      <div class="lang-logo">MOTO</div>
+      <div class="lang-sub">Dil seçin / Select language</div>
+      <div class="lang-btns">
+        <button class="lang-btn sel" id="btn-tr" onclick="selLang('tr')"><span>🇹🇷</span><span>Türkçe</span></button>
+        <button class="lang-btn" id="btn-en" onclick="selLang('en')"><span>🇬🇧</span><span>English</span></button>
+      </div>
+      <button class="btn btn-orange" onclick="goWelcome()">Devam Et →</button>
+    </div>
+  </div>
+
+  <!-- ══════ WELCOME ══════ -->
+  <div class="page" id="pg-welcome" style="background:var(--text);">
+    <div class="welcome-bg"></div>
+    <div class="welcome-emoji">🏍️</div>
+    <div class="welcome-logo">MOTO</div>
+    <div class="welcome-body">
+      <div class="welcome-dots"><div class="wdot active" id="wd0"></div><div class="wdot" id="wd1"></div><div class="wdot" id="wd2"></div></div>
+      <div class="welcome-tagline" id="wt">Motoru varsa<br>MOTO'yu hak ediyorsun.</div>
+      <div class="welcome-sub" id="ws">Türkiye'nin motorsiklet topluluğuna hoş geldin. Güvenli sürüşler, zevkli yollar! 🏍️</div>
+      <button class="btn btn-orange" onclick="goAuth()">Başlayalım →</button>
+      <div style="text-align:center;margin-top:14px;font-size:12px;color:rgba(255,255,255,.4)">Hesabın var mı? <span style="color:var(--orange);cursor:pointer" onclick="goAuth()">Giriş yap</span></div>
+    </div>
+  </div>
+
+  <!-- ══════ AUTH ══════ -->
+  <div class="page" id="pg-auth">
+    <div class="scrl"><div class="auth-body">
+      <div class="auth-logo">MOTO</div>
+      <div class="auth-title" id="auth-title">Hesap Oluştur</div>
+      <div class="auth-sub" id="auth-sub">Sürüş dünyasına katıl. Güvenli, doğrulanmış topluluk.</div>
+      <button class="social-btn" onclick="socialLogin('Google')">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Google ile devam et
+      </button>
+      <button class="social-btn" onclick="socialLogin('Apple')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--text)"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Apple ile devam et
+      </button>
+      <div class="auth-divider">veya e-posta ile</div>
+      <input class="auth-input" type="email" placeholder="E-posta adresin" id="inp-email"/>
+      <input class="auth-input" type="password" placeholder="Şifre (en az 8 karakter)" id="inp-pw"/>
+      <input class="auth-input" type="password" placeholder="Şifreyi tekrarla" id="inp-pw2" style="display:block"/>
+      <button class="btn btn-orange" onclick="doAuth()" id="auth-btn">Kayıt Ol</button>
+      <div class="auth-switch" id="auth-switch">Hesabın var mı? <span onclick="toggleAuth()">Giriş yap</span></div>
+    </div></div>
+  </div>
+
+  <!-- ══════ SETUP 1: KİŞİSEL ══════ -->
+  <div class="page" id="pg-s1">
+    <div class="setup-hdr"><div class="setup-back" onclick="showPage('pg-auth')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="setup-step">1 / 3</div></div>
+    <div class="setup-prog"><div class="setup-prog-fill" style="width:33%"></div></div>
+    <div class="scrl"><div class="setup-body">
+      <div class="setup-title">Seni Tanıyalım 👋</div>
+      <div class="setup-sub">MOTO'ya hoş geldin! Harika sürüşler seni bekliyor.</div>
+      <div class="inp-label">Adın Soyadın</div><input class="inp" placeholder="Adın Soyadın" id="s1-name"/>
+      <div class="inp-label">Kullanıcı Adı</div><input class="inp" placeholder="@kullanici_adi" id="s1-user"/>
+      <div class="inp-label">Şehir</div>
+      <select class="inp" id="s1-city">
+        <option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option><option>Adana</option><option>Konya</option><option>Diğer</option>
+      </select>
+      <button class="btn btn-orange" onclick="goS2()">Devam →</button>
+    </div></div>
+  </div>
+
+  <!-- ══════ SETUP 2: MOTOR ══════ -->
+  <div class="page" id="pg-s2">
+    <div class="setup-hdr"><div class="setup-back" onclick="showPage('pg-s1')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="setup-step">2 / 3</div></div>
+    <div class="setup-prog"><div class="setup-prog-fill" style="width:66%"></div></div>
+    <div class="scrl"><div class="setup-body">
+      <div class="setup-title">Motorun Hangisi? 🏍️</div>
+      <div class="setup-sub">Marka ve model seç. Doğru topluluğa seni yönlendirelim.</div>
+
+      <!-- MARKA SEÇİMİ -->
+      <div class="inp-label">Marka</div>
+      <select class="inp" id="s2-brand" onchange="populateModels()">
+        <option value="">— Marka seç —</option>
+        <option value="yamaha">Yamaha</option>
+        <option value="bmw">BMW Motorrad</option>
+        <option value="honda">Honda</option>
+        <option value="diger">Diğer</option>
+      </select>
+
+      <!-- MODEL SEÇİMİ -->
+      <div class="inp-label">Model</div>
+      <select class="inp" id="s2-model" disabled>
+        <option value="">— Önce marka seç —</option>
+      </select>
+
+      <!-- KATEGORİ (otomatik) -->
+      <div class="inp-label">Kategori</div>
+      <select class="inp" id="s2-cat">
+        <option>Supersport</option><option>Adventure / Touring</option><option>Naked / Streetfighter</option><option>Cafe Racer / Retro</option><option>Enduro / Off-Road</option><option>Scooter / Maxi Scooter</option><option>Cruiser</option>
+      </select>
+
+      <!-- MODEL YILI -->
+      <div class="inp-label">Model Yılı</div>
+      <select class="inp" id="s2-year">
+        <option value="">— Yıl seç —</option>
+        <option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014 ve öncesi</option>
+      </select>
+
+      <!-- MOTORUN KM -->
+      <div class="inp-label">Motorun Kilometre Sayacı</div>
+      <select class="inp" id="s2-bike-km">
+        <option value="">— Km seç —</option>
+        <option>0 – 5.000 km (sıfır / az kullanılmış)</option>
+        <option>5.000 – 15.000 km</option>
+        <option>15.000 – 30.000 km</option>
+        <option>30.000 – 50.000 km</option>
+        <option>50.000 km üzeri</option>
+      </select>
+
+      <!-- SÜRÜCÜ KM (opsiyonel) -->
+      <div class="inp-label">Toplam Sürüş Deneyimin <span style="font-size:10px;color:var(--orange)">(opsiyonel)</span></div>
+      <select class="inp" id="s2-rider-km">
+        <option value="">— Seç (opsiyonel) —</option>
+        <option>Yeni sürücü (0–5.000 km)</option>
+        <option>Orta (5.000–20.000 km)</option>
+        <option>Deneyimli (20.000–50.000 km)</option>
+        <option>Veteran (50.000–100.000 km)</option>
+        <option>Efsane (100.000 km üzeri) 🏆</option>
+      </select>
+
+      <button class="btn btn-orange" onclick="goS3()">Devam →</button>
+    </div></div>
+  </div>
+
+  <!-- ══════ SETUP 3: DOĞRULAMA ══════ -->
+  <div class="page" id="pg-s3">
+    <div class="setup-hdr"><div class="setup-back" onclick="showPage('pg-s2')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="setup-step">3 / 3</div></div>
+    <div class="setup-prog"><div class="setup-prog-fill" style="width:100%"></div></div>
+    <div class="scrl"><div class="setup-body">
+      <div class="setup-title">Son Adım 🎯</div>
+      <div class="setup-sub">Profilini güçlendir. Doğrulanmış hesaplar mesajlaşabilir ve ilanlarına öncelik tanınır.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+        <div style="background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;box-shadow:var(--shadow)" onclick="toast('e-Devlet doğrulama başlatılıyor... 🇹🇷')">
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">🇹🇷</span><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">e-Devlet ile Doğrula</div><div style="font-size:12px;color:var(--text3)">Kimliğini doğrula, ✓ rozeti kazan</div></div><svg width="16" height="16" fill="none" stroke="var(--text3)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div style="background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;box-shadow:var(--shadow)" onclick="toast('Ruhsat fotoğrafı yükleniyor...')">
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">Ruhsat Fotoğrafı</div><div style="font-size:12px;color:var(--text3)">Motor gerçekten senin mi? Doğrula.</div></div><svg width="16" height="16" fill="none" stroke="var(--text3)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div style="background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;box-shadow:var(--shadow)" onclick="connectContacts()">
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">📱</span><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">Telefon Rehberini Bağla</div><div style="font-size:12px;color:var(--text3)">MOTO'daki arkadaşlarını bul</div></div><svg width="16" height="16" fill="none" stroke="var(--text3)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </div>
+      <button class="btn btn-orange" onclick="finishSetup()">Profile Başla 🏍️</button>
+      <button class="btn btn-outline" style="margin-top:10px" onclick="finishSetup()">Şimdi Değil</button>
+    </div></div>
+  </div>
+
+  <!-- ══════ ANA UYGULAMA ══════ -->
+  <div class="page" id="pg-app" style="flex-direction:column;">
+
+    <!-- FEED -->
+    <div id="tab-feed" class="tab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="hdr">
+        <div class="logo">MOTO</div>
+        <div style="display:flex;gap:8px">
+          <div class="hbtn" onclick="openDM()"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="nbadge"></div></div>
+          <div class="hbtn"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        </div>
+      </div>
+      <div class="scrl">
+        <!-- STORIES -->
+        <div class="stories" id="story-row">
+          <div class="story" onclick="toast('Story ekle yakında! 📸')">
+            <div class="sring empty"><div class="savatar">🏍️<div class="add-icon">+</div></div></div>
+            <span id="my-sname">Sen</span>
+          </div>
+        </div>
+        <!-- LIVE -->
+        <div class="stitle">Canlı Turlar</div>
+        <div class="live-card">
+          <div class="livebadge"><div class="ldot"></div> CANLI</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text)">Boğaz Sahil Turu 🌉</div>
+          <div style="display:flex;gap:14px;margin-bottom:10px">
+            <span style="font-size:12px;color:var(--text3)">📍 Beşiktaş → Sarıyer</span>
+            <span style="font-size:12px;color:var(--text3)">⏱ 38 dk</span>
+            <span style="font-size:12px;color:var(--text3)">🏍️ 8 sürücü</span>
+          </div>
+          <div style="display:flex;margin-bottom:12px">
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--bg2);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:14px;margin-right:-8px">🔥</div>
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--bg2);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:14px;margin-right:-8px">🌲</div>
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--orange);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;margin-right:16px">+6</div>
+            <span style="font-size:12px;color:var(--text3);align-self:center">8 aktif sürücü</span>
+          </div>
+          <button style="width:100%;background:var(--orange);color:white;border:none;border-radius:12px;padding:11px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer" onclick="joinTour('Boğaz Sahil Turu')">Tura Katıl</button>
+        </div>
+        <!-- POSTS -->
+        <div class="stitle">Akış</div>
+        <div class="post">
+          <div class="ph">
+            <div class="pavatar">🔥</div>
+            <div><div class="pname">Kerem Yıldız</div><div class="pbike">Yamaha R1 2022 · Supersport</div></div>
+            <div class="pvbadge">✓ Doğrulandı</div>
+          </div>
+          <div class="pmap">
+            <svg viewBox="0 0 393 200" xmlns="http://www.w3.org/2000/svg">
+              <defs><pattern id="g1" width="26" height="26" patternUnits="userSpaceOnUse"><path d="M26 0L0 0 0 26" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width=".5"/></pattern></defs>
+              <rect width="393" height="200" fill="#E8E4DE"/><rect width="393" height="200" fill="url(#g1)"/>
+              <rect x="0" y="110" width="393" height="90" fill="rgba(180,210,240,0.3)"/>
+              <path d="M36 178 Q80 155 122 144 Q162 133 188 120 Q218 107 248 101 Q278 95 308 87 Q332 81 360 70" fill="none" stroke="rgba(255,85,0,.2)" stroke-width="10" stroke-linecap="round"/>
+              <path d="M36 178 Q80 155 122 144 Q162 133 188 120 Q218 107 248 101 Q278 95 308 87 Q332 81 360 70" fill="none" stroke="#FF5500" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="36" cy="178" r="7" fill="#16A34A"/><circle cx="36" cy="178" r="3.5" fill="white"/>
+              <circle cx="360" cy="70" r="7" fill="#FF5500"/><circle cx="360" cy="70" r="3.5" fill="white"/>
+              <rect x="46" y="170" width="84" height="16" rx="8" fill="rgba(0,0,0,.55)"/>
+              <text x="88" y="181" text-anchor="middle" fill="white" font-size="10" font-family="DM Sans,sans-serif" font-weight="600">Sultanahmet</text>
+              <rect x="276" y="54" width="58" height="16" rx="8" fill="rgba(0,0,0,.55)"/>
+              <text x="305" y="65" text-anchor="middle" fill="white" font-size="10" font-family="DM Sans,sans-serif" font-weight="600">Sarıyer</text>
+              <circle cx="188" cy="120" r="4" fill="rgba(255,85,0,.7)"/>
+              <circle cx="248" cy="101" r="4" fill="rgba(255,85,0,.7)"/>
+            </svg>
+            <div class="pmap-stats"><div class="chip">📍 47 km</div><div class="chip">⚡ 124 km/s</div><div class="chip">⏱ 58 dk</div></div>
+          </div>
+          <div class="pactions">
+            <button class="abtn liked" onclick="toggleLike(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>312</span></button>
+            <button class="abtn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>48</span></button>
+            <button class="abtn" onclick="toast('Bağlantı kopyalandı!')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span>Paylaş</span></button>
+          </div>
+          <div class="pcaption"><strong>Kerem Yıldız</strong> Sultanahmet'ten Sarıyer'e rıhtım boyunca. R1 ile eşsiz bir his 🔥</div>
+          <div class="use-route" onclick="toast('Rota navigasyona eklendi! 🗺️')">
+            <svg width="15" height="15" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            <span>Bu Rotayı Kullan</span>
+            <svg width="14" height="14" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+        <div class="post">
+          <div class="ph">
+            <div class="pavatar">🌲</div>
+            <div><div class="pname">Ayşe Demir</div><div class="pbike">BMW R 1300 GS · Adventure</div></div>
+            <div class="pvbadge">✓ Doğrulandı</div>
+          </div>
+          <div class="pimg" style="background:linear-gradient(135deg,#d4e8d4,#c0d8c0)">🌲<div style="position:absolute;bottom:10px;left:12px;display:flex;gap:6px"><div class="chip">📸 4 fotoğraf</div><div class="chip">🏕️ Kamp</div></div></div>
+          <div class="pactions">
+            <button class="abtn" onclick="toggleLike(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>189</span></button>
+            <button class="abtn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>27</span></button>
+            <button class="abtn" onclick="toast('Paylaşıldı!')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span>Paylaş</span></button>
+          </div>
+          <div class="pcaption"><strong>Ayşe Demir</strong> Belgrad Ormanı → Kilyos. GS ile toprak yol kamp 🌿</div>
+        </div>
+        <div class="sp"></div>
+      </div>
+    </div>
+
+    <!-- ROTA TAB -->
+    <div id="tab-rota" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="hdr"><div class="logo">ROTALAR</div><button style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer" onclick="toast('Rota kaydı başlatılıyor...')">+ Rota Kaydet</button></div>
+      <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+        <!-- MAP -->
+        <div style="height:320px;position:relative;flex-shrink:0;background:#E8E4DE;overflow:hidden;" id="map-wrap">
+          <div class="map-search"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>İstanbul'da rota ara...</div>
+          <!-- SVG Istanbul Map -->
+          <svg id="istanbul-map" viewBox="0 0 393 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+            <!-- BG -->
+            <rect width="393" height="320" fill="#D6D0C8"/>
+            <!-- Su - Boğaz -->
+            <path d="M192 0 Q196 20 194 40 Q192 70 190 100 Q188 130 186 160 Q184 190 182 220 Q180 250 178 280 Q176 300 175 320" fill="none" stroke="#A8C8E8" stroke-width="18" opacity=".7"/>
+            <!-- Haliç -->
+            <path d="M60 148 Q90 140 120 138 Q150 136 175 140" fill="none" stroke="#A8C8E8" stroke-width="10" opacity=".6"/>
+            <!-- Marmara Denizi -->
+            <rect x="0" y="220" width="190" height="100" fill="#B8D4EC" opacity=".5" rx="4"/>
+            <!-- Karadeniz hint -->
+            <rect x="200" y="0" width="193" height="60" fill="#B8D4EC" opacity=".3" rx="4"/>
+
+            <!-- SOKAKLAR - Avrupa yakası ana yollar -->
+            <path d="M0 160 Q40 158 80 155 Q120 152 160 150 Q175 150 192 152" fill="none" stroke="#C8C2BA" stroke-width="3"/>
+            <path d="M0 185 Q50 183 100 180 Q140 178 175 178" fill="none" stroke="#C8C2BA" stroke-width="2"/>
+            <path d="M80 100 Q82 120 84 140 Q86 158 86 175 Q86 200 88 220" fill="none" stroke="#C8C2BA" stroke-width="2.5"/>
+            <path d="M40 155 Q42 175 44 200 Q46 220 50 240" fill="none" stroke="#C8C2BA" stroke-width="2"/>
+            <path d="M120 138 Q122 155 124 175 Q126 200 128 220" fill="none" stroke="#C8C2BA" stroke-width="2"/>
+            <!-- Asya yakası -->
+            <path d="M200 150 Q240 148 280 145 Q320 142 393 140" fill="none" stroke="#C8C2BA" stroke-width="3"/>
+            <path d="M200 175 Q250 173 300 170 Q340 168 393 166" fill="none" stroke="#C8C2BA" stroke-width="2"/>
+            <path d="M220 140 Q222 160 224 185 Q226 210 228 240" fill="none" stroke="#C8C2BA" stroke-width="2"/>
+            <path d="M270 138 Q272 160 274 185 Q276 210 278 240" fill="none" stroke="#C8C2BA" stroke-width="2"/>
+            <!-- Köprüler -->
+            <line x1="188" y1="130" x2="205" y2="128" stroke="#888" stroke-width="4" stroke-linecap="round"/>
+            <line x1="185" y1="158" x2="202" y2="156" stroke="#888" stroke-width="4" stroke-linecap="round"/>
+
+            <!-- YEŞİL ALANLAR -->
+            <ellipse cx="155" cy="120" rx="22" ry="14" fill="#B8D4B0" opacity=".6"/>
+            <ellipse cx="80" cy="105" rx="18" ry="12" fill="#B8D4B0" opacity=".5"/>
+            <ellipse cx="300" cy="100" rx="30" ry="20" fill="#B8D4B0" opacity=".5"/>
+
+            <!-- ROTALAR -->
+            <!-- 0: Sultanahmet → Sarıyer (turuncu) -->
+            <path id="rpath-0" d="M130 190 Q140 175 155 165 Q165 158 180 153 Q192 150 200 148 Q215 145 230 140 Q250 134 270 128 Q290 122 310 116 Q330 110 355 104" fill="none" stroke="#FF5500" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+            <circle cx="130" cy="190" r="7" fill="#16A34A" stroke="white" stroke-width="2"/>
+            <circle cx="355" cy="104" r="7" fill="#FF5500" stroke="white" stroke-width="2"/>
+
+            <!-- 1: Belgrad Ormanı (yeşil) -->
+            <path id="rpath-1" d="M110 155 Q105 140 100 125 Q96 112 90 100 Q84 88 78 76 Q72 64 68 52 Q64 40 62 28" fill="none" stroke="#16A34A" stroke-width="4" stroke-linecap="round" opacity="0.35" stroke-dasharray="6,4"/>
+            <circle cx="110" cy="155" r="7" fill="#16A34A" stroke="white" stroke-width="2" opacity=".4"/>
+            <circle cx="62" cy="28" r="7" fill="#16A34A" stroke="white" stroke-width="2" opacity=".4"/>
+
+            <!-- 2: Üsküdar → Şile (mavi) -->
+            <path id="rpath-2" d="M220 168 Q235 163 250 158 Q270 152 290 148 Q310 144 330 138 Q350 132 370 126 Q382 122 390 118" fill="none" stroke="#2563EB" stroke-width="4" stroke-linecap="round" opacity="0.35" stroke-dasharray="6,4"/>
+            <circle cx="220" cy="168" r="7" fill="#16A34A" stroke="white" stroke-width="2" opacity=".4"/>
+            <circle cx="390" cy="118" r="7" fill="#2563EB" stroke="white" stroke-width="2" opacity=".4"/>
+
+            <!-- SEMTLER -->
+            <text x="118" y="195" font-size="9" fill="#555" font-family="DM Sans,sans-serif" font-weight="600">Sultanahmet</text>
+            <text x="340" y="101" font-size="9" fill="#555" font-family="DM Sans,sans-serif" font-weight="600">Sarıyer</text>
+            <text x="152" y="148" font-size="9" fill="#555" font-family="DM Sans,sans-serif" font-weight="500">Beşiktaş</text>
+            <text x="205" y="165" font-size="9" fill="#555" font-family="DM Sans,sans-serif" font-weight="500">Üsküdar</text>
+            <text x="60" y="148" font-size="9" fill="#555" font-family="DM Sans,sans-serif" font-weight="500">Bakırköy</text>
+            <text x="56" y="35" font-size="9" fill="#16A34A" font-family="DM Sans,sans-serif" font-weight="600">Kilyos</text>
+            <text x="375" y="115" font-size="9" fill="#2563EB" font-family="DM Sans,sans-serif" font-weight="600">Şile</text>
+
+            <!-- COMPASS -->
+            <circle cx="362" cy="290" r="18" fill="white" opacity=".8"/>
+            <text x="362" y="283" text-anchor="middle" font-size="8" fill="#888" font-family="sans-serif" font-weight="700">K</text>
+            <line x1="362" y1="276" x2="362" y2="284" stroke="#FF5500" stroke-width="2"/>
+            <line x1="362" y1="296" x2="362" y2="304" stroke="#888" stroke-width="1.5"/>
+            <text x="362" y="308" text-anchor="middle" font-size="7" fill="#888" font-family="sans-serif">G</text>
+
+            <!-- SCALE -->
+            <rect x="14" y="292" width="60" height="2" fill="#888"/>
+            <rect x="14" y="290" width="2" height="6" fill="#888"/>
+            <rect x="74" y="290" width="2" height="6" fill="#888"/>
+            <text x="44" y="306" text-anchor="middle" font-size="8" fill="#888" font-family="sans-serif">10 km</text>
+          </svg>
+          <!-- Legend -->
+          <div style="position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.9);border-radius:10px;padding:8px 10px;font-size:10px;display:flex;flex-direction:column;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,.1);">
+            <div id="leg-0" style="display:flex;align-items:center;gap:6px;cursor:pointer;opacity:1" onclick="selectRoute(0)"><div style="width:20px;height:3px;background:#FF5500;border-radius:2px"></div><span style="color:#333;font-weight:500">Sultanahmet → Sarıyer</span></div>
+            <div id="leg-1" style="display:flex;align-items:center;gap:6px;cursor:pointer;opacity:.4" onclick="selectRoute(1)"><div style="width:20px;height:3px;background:#16A34A;border-radius:2px;border-top:1px dashed #16A34A;border-bottom:none;height:0;border-width:2px"></div><span style="color:#333;font-weight:500">Belgrad Ormanı</span></div>
+            <div id="leg-2" style="display:flex;align-items:center;gap:6px;cursor:pointer;opacity:.4" onclick="selectRoute(2)"><div style="width:20px;height:0;border-top:2px dashed #2563EB;border-radius:2px"></div><span style="color:#333;font-weight:500">Üsküdar → Şile</span></div>
+          </div>
+        </div>
+        <!-- ROUTE LIST -->
+        <div class="scrl" style="flex:1;">
+          <div class="stitle">Popüler Rotalar</div>
+          <div class="route-list">
+
+            <div class="route-item active-route" id="ri-0" onclick="selectRoute(0)">
+              <div class="ri-head"><div class="ri-name">🌉 Sultanahmet → Sarıyer</div><div class="ri-badge popular">⭐ Popüler</div></div>
+              <div class="ri-map-mini">
+                <svg viewBox="0 0 300 80"><path d="M10 65 Q50 50 90 45 Q130 40 155 32 Q180 24 210 22 Q240 20 270 14" fill="none" stroke="#FF5500" stroke-width="2.5" stroke-linecap="round"/><circle cx="10" cy="65" r="5" fill="#16A34A"/><circle cx="270" cy="14" r="5" fill="#FF5500"/></svg>
+              </div>
+              <div class="ri-stats"><span class="ri-stat">📍 47.3 km</span><span class="ri-stat">⏱ ~58 dk</span><span class="ri-stat">👥 284 kez kullanıldı</span></div>
+              <button class="ri-join-btn" onclick="event.stopPropagation();joinTour('Sultanahmet → Sarıyer Rotası')">Bu Rotada Tur Oluştur</button>
+            </div>
+
+            <div class="route-item" id="ri-1" onclick="selectRoute(1)">
+              <div class="ri-head"><div class="ri-name">🌲 Belgrad Ormanı Turu</div><div class="ri-badge new">Yeni</div></div>
+              <div class="ri-map-mini">
+                <svg viewBox="0 0 300 80"><path d="M10 65 Q60 55 100 45 Q150 34 180 28 Q220 22 270 18" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"/><circle cx="10" cy="65" r="5" fill="#16A34A"/><circle cx="270" cy="18" r="5" fill="#FF5500"/></svg>
+              </div>
+              <div class="ri-stats"><span class="ri-stat">📍 89 km</span><span class="ri-stat">⏱ ~1.5 sa</span><span class="ri-stat">👥 142 kez kullanıldı</span></div>
+              <button class="ri-join-btn" onclick="event.stopPropagation();joinTour('Belgrad Ormanı Turu')">Bu Rotada Tur Oluştur</button>
+            </div>
+
+            <div class="route-item" id="ri-2" onclick="selectRoute(2)">
+              <div class="ri-head"><div class="ri-name">🌊 Üsküdar → Şile Kıyı Yolu</div><div class="ri-badge popular">⭐ Popüler</div></div>
+              <div class="ri-map-mini">
+                <svg viewBox="0 0 300 80"><path d="M10 65 Q50 58 90 52 Q130 46 170 38 Q210 30 250 22 Q265 18 270 16" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/><circle cx="10" cy="65" r="5" fill="#16A34A"/><circle cx="270" cy="16" r="5" fill="#FF5500"/></svg>
+              </div>
+              <div class="ri-stats"><span class="ri-stat">📍 130 km</span><span class="ri-stat">⏱ ~2 sa</span><span class="ri-stat">👥 198 kez kullanıldı</span></div>
+              <button class="ri-join-btn" onclick="event.stopPropagation();joinTour('Şile Kıyı Yolu Turu')">Bu Rotada Tur Oluştur</button>
+            </div>
+
+          </div>
+          <div class="sp"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TUR TAB -->
+    <div id="tab-tur" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="hdr"><div class="logo">TURLAR</div><button style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer" onclick="openCreateTour()">+ Tur Oluştur</button></div>
+      <div class="scrl">
+        <div class="stitle">Aktif Turlar</div>
+        <div class="tour-card live-t">
+          <div class="tc-head"><div class="tc-name">Boğaz Sahil Turu 🌉</div><div class="tc-badge live">● CANLI</div></div>
+          <div class="tc-stats"><span class="tc-stat">📍 Beşiktaş → Sarıyer</span><span class="tc-stat">🏍️ 8 sürücü</span><span class="tc-stat">⏱ 38 dk</span></div>
+          <div class="tc-bottom"><div class="tc-avatars"><div class="tc-av">🔥</div><div class="tc-av">🌲</div><div class="tc-av">⚡</div><div class="tc-av" style="background:var(--orange);font-size:10px;font-weight:700;color:white">+5</div></div><button class="tc-join" onclick="joinTour('Boğaz Sahil Turu')">Katıl</button></div>
+        </div>
+        <div class="stitle">Yaklaşan Turlar</div>
+        <div class="tour-card">
+          <div class="tc-head"><div class="tc-name">Belgrad Ormanı Sabah Turu 🌲</div><div class="tc-badge upcoming">Yarın 07:00</div></div>
+          <div class="tc-stats"><span class="tc-stat">📍 Bahçeköy → Kilyos</span><span class="tc-stat">🏍️ 12 katılımcı</span><span class="tc-stat">📏 85 km</span></div>
+          <div class="tc-bottom"><div class="tc-avatars"><div class="tc-av">🌲</div><div class="tc-av">☕</div><div class="tc-av">🏔️</div></div><button class="tc-join" id="tj-belgrad" onclick="joinTour('Belgrad Ormanı Turu')">Katıl</button></div>
+        </div>
+        <div class="tour-card">
+          <div class="tc-head"><div class="tc-name">Karadeniz Kıyı Turu 🌊</div><div class="tc-badge upcoming">Pazar 08:30</div></div>
+          <div class="tc-stats"><span class="tc-stat">📍 Üsküdar → Şile</span><span class="tc-stat">🏍️ 6 katılımcı</span><span class="tc-stat">📏 130 km</span></div>
+          <div class="tc-bottom"><div class="tc-avatars"><div class="tc-av">🔥</div><div class="tc-av">⚡</div></div><button class="tc-join" onclick="joinTour('Karadeniz Kıyı Turu')">Katıl</button></div>
+        </div>
+        <div class="sp"></div>
+      </div>
+    </div>
+
+    <!-- İLAN TAB -->
+    <div id="tab-ilan" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="hdr"><div class="logo">İLANLAR</div><button style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer" onclick="toast('İlan oluştur açılıyor...')">+ İlan Ver</button></div>
+      <div class="scrl">
+        <div style="margin:0 14px 12px;padding:10px 14px;background:#ECFDF5;border:1px solid #BBF7D0;border-radius:12px;font-size:12px;color:#166534">✅ <strong>Tüm ilanlar ücretsiz!</strong> Sahibinden'de öde, burada bedava.</div>
+        <div class="catscrl">
+          <div class="cat active">Tümü</div>
+          <div class="cat" onclick="filterCat(this)">Yamaha</div>
+          <div class="cat" onclick="filterCat(this)">BMW</div>
+          <div class="cat" onclick="filterCat(this)">Honda</div>
+          <div class="cat" onclick="filterCat(this)">Aksesuar</div>
+        </div>
+        <div class="lcard" onclick="toast('İlan detayı açılıyor...')">
+          <div class="limg" style="background:linear-gradient(135deg,#E8E4DE,#D8D4CE)">🏍️<div class="lfree">ÜCRETSİZ</div><div class="lprice">285.000 ₺</div></div>
+          <div class="lbody">
+            <div style="font-size:11px;color:var(--orange);font-weight:600;margin-bottom:4px">YAMAHA · SUPERSPORT</div>
+            <div class="lname">Yamaha R1 2022</div>
+            <div class="ldetail"><span>📅 2022</span><span>📍 12.400 km</span><span>🏙️ İstanbul</span></div>
+          </div>
+          <div class="lseller"><div class="lsav">🔥</div><div class="lsname">Kerem Yıldız</div><div class="lsverif">✓ e-Devlet</div></div>
+        </div>
+        <div class="lcard" onclick="toast('İlan detayı açılıyor...')">
+          <div class="limg" style="background:linear-gradient(135deg,#E8F0E8,#D8E4D8)">🌲<div class="lfree">ÜCRETSİZ</div><div class="lprice">420.000 ₺</div></div>
+          <div class="lbody">
+            <div style="font-size:11px;color:var(--orange);font-weight:600;margin-bottom:4px">BMW MOTORRAD · ADVENTURE</div>
+            <div class="lname">BMW R 1300 GS 2023</div>
+            <div class="ldetail"><span>📅 2023</span><span>📍 8.200 km</span><span>🏙️ Ankara</span></div>
+          </div>
+          <div class="lseller"><div class="lsav">🌲</div><div class="lsname">Ayşe Demir</div><div class="lsverif">✓ e-Devlet</div></div>
+        </div>
+        <div class="lcard" onclick="toast('İlan detayı açılıyor...')">
+          <div class="limg" style="background:linear-gradient(135deg,#FFF8E8,#EEE8D8)">🏍️<div class="lfree">ÜCRETSİZ</div><div class="lprice">175.000 ₺</div></div>
+          <div class="lbody">
+            <div style="font-size:11px;color:var(--orange);font-weight:600;margin-bottom:4px">HONDA · NAKED</div>
+            <div class="lname">Honda CB650R 2021</div>
+            <div class="ldetail"><span>📅 2021</span><span>📍 18.700 km</span><span>🏙️ İzmir</span></div>
+          </div>
+          <div class="lseller"><div class="lsav">⚡</div><div class="lsname">Can Öztürk</div><div class="lsverif">✓ e-Devlet</div></div>
+        </div>
+        <div class="lcard" onclick="toast('İlan detayı açılıyor...')">
+          <div class="limg" style="background:linear-gradient(135deg,#F0E8F8,#E0D8E8)">🏍️<div class="lfree">ÜCRETSİZ</div><div class="lprice">95.000 ₺</div></div>
+          <div class="lbody">
+            <div style="font-size:11px;color:var(--orange);font-weight:600;margin-bottom:4px">YAMAHA · NAKED</div>
+            <div class="lname">Yamaha MT-07 2020</div>
+            <div class="ldetail"><span>📅 2020</span><span>📍 24.100 km</span><span>🏙️ Bursa</span></div>
+          </div>
+          <div class="lseller"><div class="lsav">🏔️</div><div class="lsname">Murat Kaya</div><div class="lsverif">✓ e-Devlet</div></div>
+        </div>
+        <div class="sp"></div>
+      </div>
+    </div>
+
+    <!-- PROFİL TAB -->
+    <div id="tab-profil" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="scrl">
+        <div class="prof-cover"></div>
+        <div class="prof-body">
+          <div class="prof-av-wrap"><div class="prof-av">🏍️</div><div class="prof-vbadge">✓</div></div>
+          <div class="prof-name" id="prof-name">Kerem Yıldız</div>
+          <div class="prof-bike" id="prof-bike">Yamaha R1 · 2022</div>
+          <div class="prof-tags">
+            <div class="ptag" id="prof-cat">Supersport</div>
+            <div class="ptag" id="prof-city">İstanbul</div>
+            <div class="ptag">14.2K km</div>
+            <div class="ptag">48 Tur 🏆</div>
+          </div>
+          <div class="prof-stats">
+            <div class="pst"><div class="pstv">48</div><div class="pstl">Tur</div></div>
+            <div class="pst"><div class="pstv">14.2K</div><div class="pstl">km</div></div>
+            <div class="pst"><div class="pstv">312</div><div class="pstl">Takipçi</div></div>
+            <div class="pst"><div class="pstv">87</div><div class="pstl">Takip</div></div>
+          </div>
+          <button class="prof-edit">Profili Düzenle</button>
+        </div>
+        <div class="conn-section">
+          <div class="conn-title">Bağlantılar <span>· Rehberinden bulunanlar</span></div>
+          <div class="conn-item"><div class="conn-av">🔥</div><div class="conn-info"><div class="conn-name">Murat Kaya</div><div class="conn-bike">Yamaha MT-09 · Naked</div></div><button class="conn-btn connect" onclick="toggleConnect(this)">Bağlantı Kur</button></div>
+          <div class="conn-item"><div class="conn-av">⚡</div><div class="conn-info"><div class="conn-name">Buse Çelik</div><div class="conn-bike">Honda CBR1000RR · Supersport</div></div><button class="conn-btn connect" onclick="toggleConnect(this)">Bağlantı Kur</button></div>
+          <div class="conn-item"><div class="conn-av">🌲</div><div class="conn-info"><div class="conn-name">Tolga Arslan — Pro 🏅</div><div class="conn-bike">BMW R 1300 GS · Adventure</div></div><button class="conn-btn follow" onclick="toggleFollow(this)">Takip Et</button></div>
+          <div class="conn-item"><div class="conn-av">☕</div><div class="conn-info"><div class="conn-name">Selin Yıldırım</div><div class="conn-bike">Honda CB500F · Naked</div></div><button class="conn-btn connect" onclick="toggleConnect(this)">Bağlantı Kur</button></div>
+        </div>
+        <div style="height:14px"></div>
+        <div class="stitle">Son Rotalar</div>
+        <div class="routes-grid">
+          <div class="rcard" onclick="toast('Rota detayı...')"><div class="rthumb">🌉<div class="rkm">47 km</div></div><div class="rinfo"><div class="rname">Sultanahmet → Sarıyer</div><div class="rdate">2 gün önce</div></div></div>
+          <div class="rcard" onclick="toast('Rota detayı...')"><div class="rthumb">🌲<div class="rkm">89 km</div></div><div class="rinfo"><div class="rname">Belgrad Ormanı</div><div class="rdate">5 gün önce</div></div></div>
+          <div class="rcard" onclick="toast('Rota detayı...')"><div class="rthumb">🌊<div class="rkm">203 km</div></div><div class="rinfo"><div class="rname">Karadeniz Sahili</div><div class="rdate">2 hafta önce</div></div></div>
+          <div class="rcard" onclick="toast('Rota detayı...')"><div class="rthumb">🏔️<div class="rkm">318 km</div></div><div class="rinfo"><div class="rname">Bolu Dağı</div><div class="rdate">3 hafta önce</div></div></div>
+        </div>
+        <div class="sp"></div>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <div class="nav" id="main-nav">
+      <div class="ni active" onclick="switchTab('feed',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Anasayfa</span></div>
+      <div class="ni" onclick="switchTab('rota',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><span>Rotalar</span></div>
+      <div class="ni" onclick="switchTab('tur',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Turlar</span></div>
+      <div class="ni" onclick="switchTab('ilan',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>İlanlar</span></div>
+      <div class="ni" onclick="switchTab('profil',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profil</span></div>
+    </div>
+  </div>
+
+  <!-- ══ STORY VIEWER ══ -->
+  <div class="sv" id="sv">
+    <div class="sv-bars" id="sv-bars"></div>
+    <div class="sv-hdr"><div class="sv-av" id="sv-av"></div><div class="sv-name" id="sv-name"></div><div class="sv-time" id="sv-time"></div><div class="sv-x" onclick="closeSv()">✕</div></div>
+    <div class="sv-content" id="sv-content"><div class="sv-tap"><div class="sv-prev" onclick="svPrev()"></div><div class="sv-next" onclick="svNext()"></div></div></div>
+    <div class="sv-footer" id="sv-footer"></div>
+  </div>
+
+  <!-- ══ DM ══ -->
+  <div class="dm-overlay" id="dm-ov">
+    <div class="dm-hdr">
+      <div class="dm-back" onclick="document.getElementById('dm-ov').classList.remove('open')"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="dm-av">🔥</div>
+      <div class="dm-info"><div class="dm-name">Kerem Yıldız</div><div class="dm-status">Çevrimiçi</div></div>
+    </div>
+    <div id="dm-body" style="flex:1;display:flex;flex-direction:column;overflow:hidden;"></div>
+  </div>
+
+  <!-- ══ CREATE TOUR ══ -->
+  <div class="ct-overlay" id="ct-ov">
+    <div class="ct-hdr">
+      <div class="ct-back" onclick="document.getElementById('ct-ov').classList.remove('open')"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="ct-title">TUR OLUŞTUR</div>
+      <button class="ct-save" onclick="saveTour()">Yayınla</button>
+    </div>
+    <div class="scrl" style="padding:20px 18px">
+      <div class="inp-label">Tur Adı</div><input class="inp" placeholder="Örn: Boğaz Gün Batımı Turu" id="ct-name"/>
+      <div class="inp-label">Buluşma Noktası</div><input class="inp" placeholder="Örn: Beşiktaş Meydan" id="ct-from"/>
+      <div class="inp-label">Varış Noktası</div><input class="inp" placeholder="Örn: Sarıyer Balıkçı Koyu" id="ct-to"/>
+      <div class="inp-label">Tarih & Saat</div><input class="inp" type="datetime-local" id="ct-date"/>
+      <div class="inp-label">Motor Kategorisi</div>
+      <select class="inp"><option>Tüm Kategoriler</option><option>Supersport</option><option>Adventure</option><option>Naked</option><option>Cafe Racer</option></select>
+      <div class="inp-label">Açıklama</div>
+      <textarea class="inp" rows="3" placeholder="Tur hakkında birkaç kelime..."></textarea>
+      <div class="sp"></div>
+    </div>
+  </div>
+
+  <!-- ══ PENDING MODAL ══ -->
+  <div class="pending-modal" id="pending-modal" onclick="closePending()">
+    <div class="pending-sheet" onclick="event.stopPropagation()">
+      <div class="pending-icon">⏳</div>
+      <div class="pending-title">Onay Bekleniyor</div>
+      <div class="pending-desc" id="pending-desc">Tur liderinden onay bekleniyor. Kabul edildiğinde bildirim alacaksın. Harika sürüşler! 🏍️</div>
+      <button class="pending-close" onclick="closePending()">Tamam, Bekleyeceğim</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ── BIKE DATA ──
+const BIKES = {
+  yamaha: {
+    models: ['R1 (YZF-R1)','R3 (YZF-R3)','R6 (YZF-R6)','R7 (YZF-R7)','MT-03','MT-07','MT-09','MT-09 SP','MT-09 Tracer','MT-10','MT-10 SP','Tracer 7','Tracer 9','Tracer 9 GT','XSR700','XSR900','TMAX 560','NMAX 125','XMAX 300','Ténéré 700','FJR1300','VMAX','Bolt (XV950)'],
+    cats: { 'R1':'Supersport','R3':'Supersport','R6':'Supersport','R7':'Supersport','MT-03':'Naked','MT-07':'Naked','MT-09':'Naked','MT-09 SP':'Naked','MT-09 Tracer':'Touring','MT-10':'Naked','MT-10 SP':'Naked','Tracer 7':'Touring','Tracer 9':'Touring','Tracer 9 GT':'Touring','XSR700':'Cafe Racer / Retro','XSR900':'Cafe Racer / Retro','TMAX 560':'Scooter / Maxi Scooter','NMAX 125':'Scooter / Maxi Scooter','XMAX 300':'Scooter / Maxi Scooter','Ténéré 700':'Adventure / Touring','FJR1300':'Touring','VMAX':'Cruiser','Bolt (XV950)':'Cruiser' }
+  },
+  bmw: {
+    models: ['S 1000 RR','S 1000 R','S 1000 XR','M 1000 RR','M 1000 R','R 1300 GS','R 1300 GS Adventure','R 1250 GS','R 1250 GS Adventure','R 1250 RT','R 1250 RS','F 900 R','F 900 XR','F 800 GS','F 850 GS','F 850 GS Adventure','G 310 GS','G 310 R','R nineT','R nineT Scrambler','R nineT Urban G/S','R nineT Racer','R nineT Pure','K 1600 GTL','K 1600 GT','C 400 X','C 400 GT','CE 04'],
+    cats: { 'S 1000 RR':'Supersport','S 1000 R':'Naked','S 1000 XR':'Adventure / Touring','M 1000 RR':'Supersport','M 1000 R':'Naked','R 1300 GS':'Adventure / Touring','R 1300 GS Adventure':'Adventure / Touring','R 1250 GS':'Adventure / Touring','R 1250 GS Adventure':'Adventure / Touring','R 1250 RT':'Touring','R 1250 RS':'Touring','F 900 R':'Naked','F 900 XR':'Adventure / Touring','F 800 GS':'Adventure / Touring','F 850 GS':'Adventure / Touring','F 850 GS Adventure':'Adventure / Touring','G 310 GS':'Adventure / Touring','G 310 R':'Naked','R nineT':'Cafe Racer / Retro','R nineT Scrambler':'Cafe Racer / Retro','R nineT Urban G/S':'Cafe Racer / Retro','R nineT Racer':'Cafe Racer / Retro','R nineT Pure':'Cafe Racer / Retro','K 1600 GTL':'Touring','K 1600 GT':'Touring','C 400 X':'Scooter / Maxi Scooter','C 400 GT':'Scooter / Maxi Scooter','CE 04':'Scooter / Maxi Scooter' }
+  },
+  honda: {
+    models: ['CBR1000RR-R Fireblade','CBR1000RR-R SP','CBR600RR','CBR500R','CBR300R','CB1000R','CB650R','CB500F','CB500X','CB125R','Africa Twin (CRF1100L)','Africa Twin Adventure Sports','X-ADV 750','NC750X','NC750S','Forza 750','Forza 350','PCX 125','SH 350i','SH 150i','Monkey','Super Cub C125','NT1100','CB1000 Hornet','CB750 Hornet','CB300 Hornet','Transalp 750','VFR800F','Gold Wing'],
+    cats: { 'CBR1000RR-R Fireblade':'Supersport','CBR1000RR-R SP':'Supersport','CBR600RR':'Supersport','CBR500R':'Supersport','CBR300R':'Supersport','CB1000R':'Naked','CB650R':'Naked','CB500F':'Naked','CB500X':'Adventure / Touring','CB125R':'Naked','Africa Twin (CRF1100L)':'Adventure / Touring','Africa Twin Adventure Sports':'Adventure / Touring','X-ADV 750':'Adventure / Touring','NC750X':'Adventure / Touring','NC750S':'Naked','Forza 750':'Scooter / Maxi Scooter','Forza 350':'Scooter / Maxi Scooter','PCX 125':'Scooter / Maxi Scooter','SH 350i':'Scooter / Maxi Scooter','SH 150i':'Scooter / Maxi Scooter','Monkey':'Cafe Racer / Retro','Super Cub C125':'Cafe Racer / Retro','NT1100':'Touring','CB1000 Hornet':'Naked','CB750 Hornet':'Naked','CB300 Hornet':'Naked','Transalp 750':'Adventure / Touring','VFR800F':'Touring','Gold Wing':'Touring' }
+  }
+};
+
+function populateModels() {
+  const brand = document.getElementById('s2-brand').value;
+  const modelSel = document.getElementById('s2-model');
+  const catSel = document.getElementById('s2-cat');
+  modelSel.innerHTML = '<option value="">— Model seç —</option>';
+  if (!brand || brand === 'diger') { modelSel.disabled = true; return; }
+  modelSel.disabled = false;
+  BIKES[brand].models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m; opt.textContent = m;
+    modelSel.appendChild(opt);
+  });
+  modelSel.onchange = () => {
+    const cat = BIKES[brand].cats[modelSel.value];
+    if (cat) {
+      const opts = catSel.querySelectorAll('option');
+      opts.forEach(o => { o.selected = o.textContent.startsWith(cat.split(' ')[0]); });
+    }
+  };
+}
+
+// ── PAGE NAV ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.position = 'absolute'; });
+  const pg = document.getElementById(id);
+  pg.classList.add('active');
+  pg.style.position = 'relative';
+}
+
+// ── LANG ──
+let lang = 'tr';
+function selLang(l) {
+  lang = l;
+  document.getElementById('btn-tr').classList.toggle('sel', l==='tr');
+  document.getElementById('btn-en').classList.toggle('sel', l==='en');
+  document.getElementById('phone').querySelector('.btn-orange').textContent = l==='tr' ? 'Devam Et →' : 'Continue →';
+}
+
+const SLIDES = {
+  tr: [
+    { t:'Motoru varsa\nMOTO\'yu hak ediyorsun.', s:'Türkiye\'nin motorsiklet topluluğuna hoş geldin. Güvenli sürüşler, zevkli yollar! 🏍️' },
+    { t:'Rota kaydet,\nherkesle paylaş.', s:'Gittiğin her yolu haritaya dök. Başkaları da senin rotanı kullansın.' },
+    { t:'Güvenli al,\ngüvenli sat.', s:'e-Devlet doğrulamalı ilanlar. Sahibinden\'e para yok.' }
+  ],
+  en: [
+    { t:'If you ride,\nyou belong here.', s:'Welcome to Turkey\'s motorcycle community. Safe rides, great roads! 🏍️' },
+    { t:'Record routes,\nshare with all.', s:'Map every road. Let others follow your route.' },
+    { t:'Buy safe,\nsell safe.', s:'Listings verified with official ID. Zero listing fees.' }
+  ]
+};
+let slideIdx = 0, slideTimer;
+function goWelcome() {
+  slideIdx = 0;
+  showSlide();
+  clearInterval(slideTimer);
+  slideTimer = setInterval(() => { slideIdx = (slideIdx+1)%3; showSlide(); }, 3000);
+  showPage('pg-welcome');
+}
+function showSlide() {
+  const s = SLIDES[lang][slideIdx];
+  document.getElementById('wt').innerHTML = s.t.replace('\n','<br>');
+  document.getElementById('ws').textContent = s.s;
+  ['wd0','wd1','wd2'].forEach((id,i) => document.getElementById(id).classList.toggle('active', i===slideIdx));
+}
+function goAuth() { clearInterval(slideTimer); showPage('pg-auth'); }
+
+// ── AUTH ──
+let isLogin = false;
+function toggleAuth() {
+  isLogin = !isLogin;
+  document.getElementById('auth-title').textContent = isLogin ? (lang==='tr'?'Giriş Yap':'Log In') : (lang==='tr'?'Hesap Oluştur':'Create Account');
+  document.getElementById('auth-sub').textContent = isLogin ? (lang==='tr'?'Hoş geldin! Harika sürüşler seni bekliyor 🏍️':'Welcome back! Great rides await 🏍️') : (lang==='tr'?'Sürüş dünyasına katıl.':'Join the riding world.');
+  document.getElementById('auth-btn').textContent = isLogin ? (lang==='tr'?'Giriş Yap':'Log In') : (lang==='tr'?'Kayıt Ol':'Sign Up');
+  document.getElementById('inp-pw2').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('auth-switch').innerHTML = isLogin ? (lang==='tr'?'Hesabın yok mu? <span onclick="toggleAuth()">Kayıt ol</span>':'No account? <span onclick="toggleAuth()">Sign up</span>') : (lang==='tr'?'Hesabın var mı? <span onclick="toggleAuth()">Giriş yap</span>':'Have an account? <span onclick="toggleAuth()">Log in</span>');
+}
+function socialLogin(p) { toast(`${p} ile giriş yapılıyor...`); setTimeout(()=>showPage('pg-s1'),700); }
+function doAuth() {
+  const e = document.getElementById('inp-email').value;
+  if (!e||!e.includes('@')) { toast('Geçerli e-posta gir'); return; }
+  toast('Giriş yapılıyor...');
+  setTimeout(()=>showPage('pg-s1'),700);
+}
+
+// ── SETUP ──
+let uName='', uBike='', uCat='Supersport', uCity='İstanbul';
+function goS2() {
+  uName = document.getElementById('s1-name').value || 'Sürücü';
+  uCity = document.getElementById('s1-city').value;
+  showPage('pg-s2');
+}
+function goS3() {
+  const brand = document.getElementById('s2-brand').value;
+  const model = document.getElementById('s2-model').value;
+  const year = document.getElementById('s2-year').value;
+  if (brand && model) { uBike = model + (year ? ' · ' + year : ''); }
+  uCat = document.getElementById('s2-cat').value.split(' ')[0];
+  showPage('pg-s3');
+}
+function connectContacts() { toast('Rehber izni isteniyor...'); setTimeout(()=>toast('3 arkadaş MOTO\'da bulundu! 🏍️'),1200); }
+function finishSetup() {
+  if (uName) document.getElementById('prof-name').textContent = uName;
+  if (uBike) document.getElementById('prof-bike').textContent = uBike;
+  if (uCat) document.getElementById('prof-cat').textContent = uCat;
+  document.getElementById('prof-city').textContent = uCity;
+  if (uName) document.getElementById('my-sname').textContent = uName.split(' ')[0];
+  showPage('pg-app');
+  populateStories();
+  setTimeout(initMap, 300);
+}
+
+// ── TABS ──
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.style.display='none');
+  document.getElementById('tab-'+name).style.display='flex';
+  document.querySelectorAll('#main-nav .ni').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  if (name==='rota') initMap();
+}
+
+// ── MAP ──
+// ── MAP (SVG tabanlı, CDN yok) ──
+const routeColors = ['#FF5500','#16A34A','#2563EB'];
+function selectRoute(idx) {
+  // route items listede vurgula
+  document.querySelectorAll('.route-item').forEach((el,i)=>el.classList.toggle('active-route',i===idx));
+  // SVG rotaları: seçili olanı tam görünür, diğerleri soluk + kesikli
+  [0,1,2].forEach(i => {
+    const path = document.getElementById('rpath-'+i);
+    if (!path) return;
+    if (i === idx) {
+      path.setAttribute('opacity','1');
+      path.removeAttribute('stroke-dasharray');
+      path.setAttribute('stroke-width','5');
+    } else {
+      path.setAttribute('opacity','0.25');
+      path.setAttribute('stroke-dasharray','6,4');
+      path.setAttribute('stroke-width','3');
+    }
+  });
+  // Legend opaklığı
+  [0,1,2].forEach(i => {
+    const leg = document.getElementById('leg-'+i);
+    if (leg) leg.style.opacity = i===idx ? '1' : '0.4';
+  });
+}
+function initMap() {} // artık gerek yok
+
+// ── JOIN TOUR ──
+function joinTour(name) {
+  document.getElementById('pending-desc').textContent = `"${name}" için tur liderinden onay bekleniyor. Kabul edildiğinde bildirim alacaksın. Harika sürüşler! 🏍️`;
+  document.getElementById('pending-modal').classList.add('open');
+}
+function closePending() { document.getElementById('pending-modal').classList.remove('open'); }
+
+// ── STORIES ──
+const storyData = [
+  { emoji:'🔥', name:'Kerem Yıldız', time:'2 dk önce', bike:'Yamaha R1', caption:'Boğaz sabah sürüşü 🌅 R1 ile gün doğumunu görmek bambaşka', hasRoute:true, route:'Beşiktaş → Arnavutköy · 28 km', bg:'linear-gradient(135deg,#1a0800,#2a1200)' },
+  { emoji:'🌲', name:'Ayşe Demir', time:'15 dk önce', bike:'BMW R 1300 GS', caption:'Belgrad Ormanı sis içinde 🌫️ GS bu yollarda evinde hisseder', hasRoute:true, route:'Bahçeköy → Kilyos · 34 km', bg:'linear-gradient(135deg,#0a1a0a,#152815)' },
+  { emoji:'⚡', name:'Buse Çelik', time:'1 sa önce', bike:'Honda CBR1000RR', caption:'Yeni lastiklerle ilk tur. Fark inanılmaz! ⚡', hasRoute:false, bg:'linear-gradient(135deg,#0a001a,#1a0a2a)' },
+  { emoji:'☕', name:'Selin Yıldırım', time:'3 sa önce', bike:'Honda CB500F', caption:'Moda rıhtımında kahve molası ☕', hasRoute:false, bg:'linear-gradient(135deg,#1a1000,#2a1a00)' }
+];
+let svIdx=0, svTimer;
+function populateStories() {
+  const row = document.getElementById('story-row');
+  storyData.forEach((s,i) => {
+    const el = document.createElement('div'); el.className='story';
+    el.innerHTML=`<div class="sring"><div class="savatar">${s.emoji}</div></div><span>${s.name.split(' ')[0]}</span>`;
+    el.onclick=()=>openSv(i); row.appendChild(el);
+  });
+}
+function openSv(i) { svIdx=i; renderSv(); document.getElementById('sv').classList.add('open'); }
+function closeSv() { document.getElementById('sv').classList.remove('open'); clearTimeout(svTimer); }
+function renderSv() {
+  clearTimeout(svTimer);
+  const s = storyData[svIdx];
+  document.getElementById('sv-av').textContent=s.emoji;
+  document.getElementById('sv-name').textContent=s.name;
+  document.getElementById('sv-time').textContent=s.time;
+  const c = document.getElementById('sv-content');
+  c.style.background=s.bg;
+  let em = c.querySelector('.sv-em');
+  if (!em) { em=document.createElement('div'); em.className='sv-em'; em.style.cssText='font-size:90px;position:relative;z-index:1;'; c.appendChild(em); }
+  em.textContent=s.emoji;
+  document.getElementById('sv-footer').innerHTML=(s.hasRoute?`<div style="background:rgba(255,85,0,.15);border:1px solid rgba(255,85,0,.4);border-radius:12px;padding:10px 14px;margin-bottom:10px;cursor:pointer" onclick="toast('Rota eklendi! 🗺️')"><div style="font-size:10px;color:rgba(255,85,0,.9);font-weight:600;margin-bottom:3px">📍 ROTA</div><div style="font-size:14px;font-weight:600;color:white">${s.route}</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">Rotayı kullanmak için dokun →</div></div>`:'')+`<div style="color:white;font-size:13px;line-height:1.5"><strong>${s.name}</strong> · ${s.bike}<br>${s.caption}</div>`;
+  document.getElementById('sv-bars').innerHTML=storyData.map((_,i)=>`<div class="sv-bar"><div class="sv-fill ${i<svIdx?'done':i===svIdx?'active':''}"></div></div>`).join('');
+  svTimer=setTimeout(()=>svNext(),4000);
+}
+function svNext() { if(svIdx<storyData.length-1){svIdx++;renderSv();}else closeSv(); }
+function svPrev() { if(svIdx>0){svIdx--;renderSv();} }
+
+// ── DM ──
+let isVerified = false;
+function openDM() {
+  document.getElementById('dm-ov').classList.add('open');
+  const body = document.getElementById('dm-body');
+  if (isVerified) {
+    body.innerHTML=`<div class="dm-msgs" id="dm-msgs"><div class="dmsg them">Merhaba! Yarınki tura geliyor musun? 🏍️<div class="t">14:32</div></div><div class="dmsg me">Kesinlikle! Saat kaçta?<div class="t">14:35</div></div><div class="dmsg them">Sabah 07:00 Beşiktaş Meydan<div class="t">14:36</div></div></div><div class="dm-input-wrap"><input class="dm-input" placeholder="Mesaj yaz..." id="dm-inp" onkeydown="if(event.key==='Enter')sendMsg()"/><button class="dm-send" onclick="sendMsg()"><svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg></button></div>`;
+  } else {
+    body.innerHTML=`<div class="dm-locked"><div class="dm-locked-icon">🔒</div><div class="dm-locked-title">Mesajlaşmak için doğrula</div><div class="dm-locked-desc">Sohbet özelliği yalnızca e-Devlet ile doğrulanmış hesaplara açık. Topluluk güvenli kalsın.</div><button class="dm-verify-btn" onclick="verifyNow()">e-Devlet ile Doğrula →</button></div>`;
+  }
+}
+function verifyNow() { toast('e-Devlet doğrulama...'); setTimeout(()=>{ isVerified=true; toast('✓ Doğrulandı! Artık mesajlaşabilirsin 🎉'); openDM(); },1500); }
+function sendMsg() {
+  const inp=document.getElementById('dm-inp'); if(!inp.value.trim())return;
+  const msgs=document.getElementById('dm-msgs');
+  const el=document.createElement('div'); el.className='dmsg me';
+  const now=new Date(); el.innerHTML=inp.value+`<div class="t">${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</div>`;
+  msgs.appendChild(el); inp.value=''; msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ── TOUR ──
+function openCreateTour() { document.getElementById('ct-ov').classList.add('open'); }
+function saveTour() { const n=document.getElementById('ct-name').value||'Yeni Tur'; document.getElementById('ct-ov').classList.remove('open'); toast(`"${n}" yayınlandı! 🏍️`); }
+
+// ── MISC ──
+let toastT;
+function toast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600);
+}
+function toggleLike(btn) {
+  btn.classList.toggle('liked');
+  const sp=btn.querySelector('span'); sp.textContent=btn.classList.contains('liked')?parseInt(sp.textContent)+1:parseInt(sp.textContent)-1;
+}
+function toggleConnect(btn) {
+  const c=btn.classList.toggle('connected'); btn.classList.remove('connect');
+  btn.textContent=c?'Bağlandı ✓':'Bağlantı Kur';
+  if(c)toast('Bağlantı kuruldu! 🤝'); else btn.classList.add('connect');
+}
+function toggleFollow(btn) {
+  const f=btn.textContent==='Takip Ediliyor';
+  btn.textContent=f?'Takip Et':'Takip Ediliyor';
+  btn.classList.toggle('follow',f); btn.classList.toggle('connected',!f);
+  if(!f)toast('Takip edildi! ✓');
+}
+function filterCat(chip) { chip.closest('.catscrl').querySelectorAll('.cat').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
+</script>
+</body>
+</html>
