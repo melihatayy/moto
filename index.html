@@ -349,7 +349,7 @@ select.inp option{background:white;color:var(--text);}
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -364,13 +364,10 @@ select.inp option{background:white;color:var(--text);}
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const googleProvider = new GoogleAuthProvider();
 
-  // Global erişim için window'a bağla
   window._auth = auth;
   window._db = db;
-  window._createUser = createUserWithEmailAndPassword;
-  window._signIn = signInWithEmailAndPassword;
-  window._signOut = signOut;
   window._doc = doc;
   window._setDoc = setDoc;
   window._getDoc = getDoc;
@@ -380,12 +377,10 @@ select.inp option{background:white;color:var(--text);}
   // Oturum kontrolü
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // Kullanıcı giriş yapmış, profili yükle
       const snap = await getDoc(doc(db, "users", user.uid));
       if (snap.exists()) {
         const data = snap.data();
         window._currentUser = { uid: user.uid, ...data };
-        // Setup tamamlanmışsa direkt uygulamaya gönder
         if (data.setupDone) {
           applyProfile(data);
           showPage('pg-app');
@@ -393,32 +388,56 @@ select.inp option{background:white;color:var(--text);}
           loadUsers();
           setTimeout(() => { loadFeedPosts(); watchNotifBadge(); }, 500);
         } else {
+          if (user.displayName) document.getElementById('s1-name').value = user.displayName;
           showPage('pg-s1');
         }
       } else {
+        window._currentUser = { uid: user.uid };
+        if (user.displayName) document.getElementById('s1-name').value = user.displayName;
         showPage('pg-s1');
       }
     }
-    // Giriş yapılmamışsa lang ekranında kal
   });
 
-  // Kayıt ol
+  // E-posta kayıt
   window.firebaseRegister = async (email, password) => {
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      return { ok: true, uid: cred.user.uid };
+      await createUserWithEmailAndPassword(auth, email, password);
+      return { ok: true };
     } catch(e) {
-      return { ok: false, msg: e.code === 'auth/email-already-in-use' ? 'Bu e-posta zaten kayıtlı' : 'Kayıt hatası: ' + e.message };
+      const msgs = {
+        'auth/email-already-in-use': 'Bu e-posta zaten kayıtlı',
+        'auth/weak-password': 'Şifre en az 6 karakter olmalı',
+        'auth/invalid-email': 'Geçersiz e-posta adresi'
+      };
+      return { ok: false, msg: msgs[e.code] || 'Hata: ' + e.message };
     }
   };
 
-  // Giriş yap
+  // E-posta giriş
   window.firebaseLogin = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       return { ok: true };
     } catch(e) {
-      return { ok: false, msg: 'E-posta veya şifre hatalı' };
+      const msgs = {
+        'auth/invalid-credential': 'E-posta veya şifre hatalı',
+        'auth/user-not-found': 'Bu e-posta kayıtlı değil',
+        'auth/wrong-password': 'Şifre hatalı',
+        'auth/too-many-requests': 'Çok fazla deneme, lütfen bekle'
+      };
+      return { ok: false, msg: msgs[e.code] || 'Giriş hatası' };
+    }
+  };
+
+  // Google giriş
+  window.firebaseGoogleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      return { ok: true };
+    } catch(e) {
+      if (e.code === 'auth/popup-closed-by-user') return { ok: false, msg: '' };
+      return { ok: false, msg: 'Google girişi başarısız: ' + e.message };
     }
   };
 
@@ -429,7 +448,14 @@ select.inp option{background:white;color:var(--text);}
     await setDoc(doc(db, "users", user.uid), { ...data, uid: user.uid, setupDone: true });
   };
 
-  // Tüm kullanıcıları yükle
+  // Çıkış
+  window.firebaseSignOut = async () => {
+    await signOut(auth);
+    window._currentUser = null;
+    showPage('pg-lang');
+  };
+
+  // Kullanıcıları yükle
   window.loadUsers = async () => {
     try {
       const snap = await getDocs(collection(db, "users"));
@@ -524,9 +550,34 @@ select.inp option{background:white;color:var(--text);}
       <div class="inp-label">Marka</div>
       <select class="inp" id="s2-brand" onchange="populateModels()">
         <option value="">— Marka seç —</option>
-        <option value="yamaha">Yamaha</option>
+        <option value="aprilia">Aprilia</option>
+        <option value="bajaj">Bajaj</option>
+        <option value="barossa">Barossa</option>
+        <option value="benda">Benda Motor</option>
+        <option value="bisan">Bisan</option>
         <option value="bmw">BMW Motorrad</option>
+        <option value="cfmoto">CFmoto</option>
+        <option value="daelim">Daelim</option>
         <option value="honda">Honda</option>
+        <option value="hyosung">Hyosung</option>
+        <option value="jawa">Jawa</option>
+        <option value="kawasaki">Kawasaki</option>
+        <option value="kove">Kove</option>
+        <option value="kuba">Kuba</option>
+        <option value="moto_morini">Moto Morini</option>
+        <option value="mv_agusta">MV Agusta</option>
+        <option value="piaggio">Piaggio</option>
+        <option value="qj">QJ Motor</option>
+        <option value="revolt">Revolt</option>
+        <option value="rieju">Rieju</option>
+        <option value="rmg">RMG Moto Gusto</option>
+        <option value="suzuki">Suzuki</option>
+        <option value="togo">Togo</option>
+        <option value="um">UM Motorcycles</option>
+        <option value="vespa">Vespa</option>
+        <option value="voge">Voge</option>
+        <option value="yamaha">Yamaha</option>
+        <option value="zontes">Zontes</option>
         <option value="diger">Diğer</option>
       </select>
 
@@ -1066,18 +1117,34 @@ select.inp option{background:white;color:var(--text);}
 <script>
 // ── BIKE DATA ──
 const BIKES = {
-  yamaha: {
-    models: ['R1 (YZF-R1)','R3 (YZF-R3)','R6 (YZF-R6)','R7 (YZF-R7)','MT-03','MT-07','MT-09','MT-09 SP','MT-09 Tracer','MT-10','MT-10 SP','Tracer 7','Tracer 9','Tracer 9 GT','XSR700','XSR900','TMAX 560','NMAX 125','XMAX 300','Ténéré 700','FJR1300','VMAX','Bolt (XV950)'],
-    cats: { 'R1':'Supersport','R3':'Supersport','R6':'Supersport','R7':'Supersport','MT-03':'Naked','MT-07':'Naked','MT-09':'Naked','MT-09 SP':'Naked','MT-09 Tracer':'Touring','MT-10':'Naked','MT-10 SP':'Naked','Tracer 7':'Touring','Tracer 9':'Touring','Tracer 9 GT':'Touring','XSR700':'Cafe Racer / Retro','XSR900':'Cafe Racer / Retro','TMAX 560':'Scooter / Maxi Scooter','NMAX 125':'Scooter / Maxi Scooter','XMAX 300':'Scooter / Maxi Scooter','Ténéré 700':'Adventure / Touring','FJR1300':'Touring','VMAX':'Cruiser','Bolt (XV950)':'Cruiser' }
-  },
-  bmw: {
-    models: ['S 1000 RR','S 1000 R','S 1000 XR','M 1000 RR','M 1000 R','R 1300 GS','R 1300 GS Adventure','R 1250 GS','R 1250 GS Adventure','R 1250 RT','R 1250 RS','F 900 R','F 900 XR','F 800 GS','F 850 GS','F 850 GS Adventure','G 310 GS','G 310 R','R nineT','R nineT Scrambler','R nineT Urban G/S','R nineT Racer','R nineT Pure','K 1600 GTL','K 1600 GT','C 400 X','C 400 GT','CE 04'],
-    cats: { 'S 1000 RR':'Supersport','S 1000 R':'Naked','S 1000 XR':'Adventure / Touring','M 1000 RR':'Supersport','M 1000 R':'Naked','R 1300 GS':'Adventure / Touring','R 1300 GS Adventure':'Adventure / Touring','R 1250 GS':'Adventure / Touring','R 1250 GS Adventure':'Adventure / Touring','R 1250 RT':'Touring','R 1250 RS':'Touring','F 900 R':'Naked','F 900 XR':'Adventure / Touring','F 800 GS':'Adventure / Touring','F 850 GS':'Adventure / Touring','F 850 GS Adventure':'Adventure / Touring','G 310 GS':'Adventure / Touring','G 310 R':'Naked','R nineT':'Cafe Racer / Retro','R nineT Scrambler':'Cafe Racer / Retro','R nineT Urban G/S':'Cafe Racer / Retro','R nineT Racer':'Cafe Racer / Retro','R nineT Pure':'Cafe Racer / Retro','K 1600 GTL':'Touring','K 1600 GT':'Touring','C 400 X':'Scooter / Maxi Scooter','C 400 GT':'Scooter / Maxi Scooter','CE 04':'Scooter / Maxi Scooter' }
-  },
-  honda: {
-    models: ['CBR1000RR-R Fireblade','CBR1000RR-R SP','CBR600RR','CBR500R','CBR300R','CB1000R','CB650R','CB500F','CB500X','CB125R','Africa Twin (CRF1100L)','Africa Twin Adventure Sports','X-ADV 750','NC750X','NC750S','Forza 750','Forza 350','PCX 125','SH 350i','SH 150i','Monkey','Super Cub C125','NT1100','CB1000 Hornet','CB750 Hornet','CB300 Hornet','Transalp 750','VFR800F','Gold Wing'],
-    cats: { 'CBR1000RR-R Fireblade':'Supersport','CBR1000RR-R SP':'Supersport','CBR600RR':'Supersport','CBR500R':'Supersport','CBR300R':'Supersport','CB1000R':'Naked','CB650R':'Naked','CB500F':'Naked','CB500X':'Adventure / Touring','CB125R':'Naked','Africa Twin (CRF1100L)':'Adventure / Touring','Africa Twin Adventure Sports':'Adventure / Touring','X-ADV 750':'Adventure / Touring','NC750X':'Adventure / Touring','NC750S':'Naked','Forza 750':'Scooter / Maxi Scooter','Forza 350':'Scooter / Maxi Scooter','PCX 125':'Scooter / Maxi Scooter','SH 350i':'Scooter / Maxi Scooter','SH 150i':'Scooter / Maxi Scooter','Monkey':'Cafe Racer / Retro','Super Cub C125':'Cafe Racer / Retro','NT1100':'Touring','CB1000 Hornet':'Naked','CB750 Hornet':'Naked','CB300 Hornet':'Naked','Transalp 750':'Adventure / Touring','VFR800F':'Touring','Gold Wing':'Touring' }
-  }
+  yamaha:{models:['MT-03','MT-07','MT-09','MT-09 SP','MT-09 Tracer','MT-10','MT-10 SP','R1 (YZF-R1)','R3 (YZF-R3)','R6 (YZF-R6)','R7 (YZF-R7)','Tracer 7','Tracer 9','Tracer 9 GT','XSR700','XSR900','TMAX 560','NMAX 125','X-MAX 300','Ténéré 700','FJR 1300','VMAX','Bolt (XV950)',"BW's 100","BW's 125",'Aerox 100','Crypton','Cygnus L',"D'elight",'DT 125 R'],cats:{'R1 (YZF-R1)':'Supersport','R3 (YZF-R3)':'Supersport','R6 (YZF-R6)':'Supersport','R7 (YZF-R7)':'Supersport','MT-03':'Naked','MT-07':'Naked','MT-09':'Naked','MT-09 SP':'Naked','MT-09 Tracer':'Touring','MT-10':'Naked','MT-10 SP':'Naked','Tracer 7':'Touring','Tracer 9':'Touring','Tracer 9 GT':'Touring','XSR700':'Cafe Racer / Retro','XSR900':'Cafe Racer / Retro','TMAX 560':'Scooter / Maxi Scooter','NMAX 125':'Scooter / Maxi Scooter','X-MAX 300':'Scooter / Maxi Scooter','Ténéré 700':'Adventure / Touring','FJR 1300':'Touring','VMAX':'Cruiser','Bolt (XV950)':'Cruiser',"BW's 100":'Scooter / Maxi Scooter',"BW's 125":'Scooter / Maxi Scooter','Aerox 100':'Scooter / Maxi Scooter','Crypton':'Scooter / Maxi Scooter','Cygnus L':'Scooter / Maxi Scooter',"D'elight":'Scooter / Maxi Scooter','DT 125 R':'Enduro / Off-Road'}},
+  bmw:{models:['C 400 GT','C 400 X','CE 04','F 800 GS','F 850 GS','F 850 GS Adventure','F 900 R','F 900 XR','G 310 GS','G 310 R','K 1600 GT','K 1600 GTL','M 1000 R','M 1000 RR','R 1250 GS','R 1250 GS Adventure','R 1250 RS','R 1250 RT','R 1300 GS','R 1300 GS Adventure','R nineT','R nineT Pure','R nineT Racer','R nineT Scrambler','R nineT Urban G/S','S 1000 R','S 1000 RR','S 1000 XR'],cats:{'S 1000 RR':'Supersport','M 1000 RR':'Supersport','S 1000 R':'Naked','M 1000 R':'Naked','S 1000 XR':'Adventure / Touring','R 1300 GS':'Adventure / Touring','R 1300 GS Adventure':'Adventure / Touring','R 1250 GS':'Adventure / Touring','R 1250 GS Adventure':'Adventure / Touring','F 850 GS':'Adventure / Touring','F 850 GS Adventure':'Adventure / Touring','F 800 GS':'Adventure / Touring','F 900 XR':'Adventure / Touring','G 310 GS':'Adventure / Touring','R 1250 RT':'Touring','R 1250 RS':'Touring','K 1600 GT':'Touring','K 1600 GTL':'Touring','F 900 R':'Naked','G 310 R':'Naked','R nineT':'Cafe Racer / Retro','R nineT Pure':'Cafe Racer / Retro','R nineT Racer':'Cafe Racer / Retro','R nineT Scrambler':'Cafe Racer / Retro','R nineT Urban G/S':'Cafe Racer / Retro','C 400 X':'Scooter / Maxi Scooter','C 400 GT':'Scooter / Maxi Scooter','CE 04':'Scooter / Maxi Scooter'}},
+  honda:{models:['Africa Twin (CRF1100L)','Africa Twin Adventure Sports','CB 125 R','CB 300 Hornet','CB 500 F','CB 500 X','CB 650 R','CB 750 Hornet','CB 1000 Hornet','CB 1000 R','CBR 300 R','CBR 500 R','CBR 600 RR','CBR 1000 RR-R Fireblade','CBR 1000 RR-R SP','Forza 350','Forza 750','Gold Wing','Monkey','NC 750 S','NC 750 X','NT 1100','PCX 125','SH 150i','SH 350i','Super Cub C125','Transalp 750','VFR 800 F','X-ADV 750'],cats:{'CBR 1000 RR-R Fireblade':'Supersport','CBR 1000 RR-R SP':'Supersport','CBR 600 RR':'Supersport','CBR 500 R':'Supersport','CBR 300 R':'Supersport','CB 1000 R':'Naked','CB 650 R':'Naked','CB 500 F':'Naked','CB 300 Hornet':'Naked','CB 750 Hornet':'Naked','CB 1000 Hornet':'Naked','CB 125 R':'Naked','CB 500 X':'Adventure / Touring','Africa Twin (CRF1100L)':'Adventure / Touring','Africa Twin Adventure Sports':'Adventure / Touring','X-ADV 750':'Adventure / Touring','NC 750 X':'Adventure / Touring','Transalp 750':'Adventure / Touring','NC 750 S':'Naked','NT 1100':'Touring','VFR 800 F':'Touring','Gold Wing':'Touring','Forza 750':'Scooter / Maxi Scooter','Forza 350':'Scooter / Maxi Scooter','PCX 125':'Scooter / Maxi Scooter','SH 350i':'Scooter / Maxi Scooter','SH 150i':'Scooter / Maxi Scooter','Monkey':'Cafe Racer / Retro','Super Cub C125':'Cafe Racer / Retro'}},
+  kawasaki:{models:['Eliminator 500','Eliminator 500 SE','ER-5','ER-6 F','ER-6 N','GTR 1400','J 300','KLE 500','KLR 650','Ninja 125','Ninja 400','Ninja 650','Ninja 1000 SX','Ninja ZX-6R','Ninja ZX-10R','Ninja ZX-10RR','Ninja ZX-25R','Ninja H2','Ninja H2 SX','Versys 650','Versys 1000','Versys-X 300','W800','Z400','Z650','Z650 RS','Z900','Z900 RS','Z900 RS Cafe','Z1000'],cats:{'Ninja ZX-10R':'Supersport','Ninja ZX-10RR':'Supersport','Ninja ZX-6R':'Supersport','Ninja ZX-25R':'Supersport','Ninja H2':'Supersport','Ninja 400':'Naked','Ninja 650':'Naked','Ninja 125':'Naked','Ninja 1000 SX':'Touring','Ninja H2 SX':'Touring','Z400':'Naked','Z650':'Naked','Z650 RS':'Cafe Racer / Retro','Z900':'Naked','Z900 RS':'Cafe Racer / Retro','Z900 RS Cafe':'Cafe Racer / Retro','Z1000':'Naked','Versys 650':'Adventure / Touring','Versys 1000':'Adventure / Touring','Versys-X 300':'Adventure / Touring','KLE 500':'Adventure / Touring','KLR 650':'Adventure / Touring','W800':'Cafe Racer / Retro','Eliminator 500':'Cruiser','Eliminator 500 SE':'Cruiser','J 300':'Scooter / Maxi Scooter','GTR 1400':'Touring','ER-5':'Naked','ER-6 F':'Naked','ER-6 N':'Naked'}},
+  suzuki:{models:['Address','Address 110','AN 125 HK','Avenis 125','Burgman 200','Burgman 400','Burgman 650','Burgman Street 125EX','DR 650 SE','DRZ 400 S','GSX-R 125','GSX-R 600','GSX-R 750','GSX-R 1000','GSX-R 1000 R','GSX-S 125','GSX-S 750','GSX-S 1000','GSX-S 1000 GT','Hayabusa','Katana','SV 650','SV 650 X','V-Strom 650','V-Strom 650 XT','V-Strom 1050','V-Strom 1050 XT'],cats:{'GSX-R 1000':'Supersport','GSX-R 1000 R':'Supersport','GSX-R 750':'Supersport','GSX-R 600':'Supersport','GSX-R 125':'Supersport','Hayabusa':'Supersport','GSX-S 125':'Naked','GSX-S 750':'Naked','GSX-S 1000':'Naked','GSX-S 1000 GT':'Touring','Katana':'Naked','SV 650':'Naked','SV 650 X':'Cafe Racer / Retro','V-Strom 650':'Adventure / Touring','V-Strom 650 XT':'Adventure / Touring','V-Strom 1050':'Adventure / Touring','V-Strom 1050 XT':'Adventure / Touring','Burgman 200':'Scooter / Maxi Scooter','Burgman 400':'Scooter / Maxi Scooter','Burgman 650':'Scooter / Maxi Scooter','Burgman Street 125EX':'Scooter / Maxi Scooter','Address':'Scooter / Maxi Scooter','Address 110':'Scooter / Maxi Scooter','AN 125 HK':'Scooter / Maxi Scooter','Avenis 125':'Scooter / Maxi Scooter','DRZ 400 S':'Enduro / Off-Road','DR 650 SE':'Enduro / Off-Road'}},
+  aprilia:{models:['Caponord 1200','Dorsoduro','Pegaso 650','RS 125','RS4 125','RS 457','RS 660','RS 660 Extrema','RS 660 Factory','RSV4 Factory','RSV4 RR','Shiver 900','Tuono V4','Tuono 660'],cats:{'RS 125':'Supersport','RS4 125':'Supersport','RS 457':'Supersport','RS 660':'Supersport','RS 660 Extrema':'Supersport','RS 660 Factory':'Supersport','RSV4 Factory':'Supersport','RSV4 RR':'Supersport','Tuono V4':'Naked','Tuono 660':'Naked','Shiver 900':'Naked','Dorsoduro':'Naked','Caponord 1200':'Adventure / Touring','Pegaso 650':'Adventure / Touring'}},
+  cfmoto:{models:['150NK','250CL-X','250NK','250SR','400NK','450CL-C','450MT','450NK','450SR','650MT','650NK','700CL-X ADV'],cats:{'250SR':'Supersport','450SR':'Supersport','150NK':'Naked','250NK':'Naked','400NK':'Naked','450NK':'Naked','650NK':'Naked','250CL-X':'Cafe Racer / Retro','450CL-C':'Cafe Racer / Retro','700CL-X ADV':'Adventure / Touring','450MT':'Adventure / Touring','650MT':'Adventure / Touring'}},
+  bajaj:{models:['Avenger Street 150','Dominar 250','Dominar 400','Dominar 400 UG','Pulsar AS 150','Pulsar AS 200','Pulsar F 250','Pulsar N 125','Pulsar NS 200','Pulsar RS 200'],cats:{'Dominar 250':'Naked','Dominar 400':'Naked','Dominar 400 UG':'Naked','Pulsar F 250':'Naked','Pulsar N 125':'Naked','Pulsar NS 200':'Naked','Pulsar RS 200':'Supersport','Pulsar AS 150':'Adventure / Touring','Pulsar AS 200':'Adventure / Touring','Avenger Street 150':'Cruiser'}},
+  vespa:{models:['946 125','946 150','GTS 125','GTS 125 ABS','GTS 125 Super','GTS 125 Supersport','GTS 125 Supertech','GTS 150','GTS 300','GTS 300 Super','GTV 300','Primavera 125','Primavera 150','Sprint 125','Sprint 150'],cats:{'946 125':'Scooter / Maxi Scooter','946 150':'Scooter / Maxi Scooter','GTS 125':'Scooter / Maxi Scooter','GTS 125 ABS':'Scooter / Maxi Scooter','GTS 125 Super':'Scooter / Maxi Scooter','GTS 125 Supersport':'Scooter / Maxi Scooter','GTS 125 Supertech':'Scooter / Maxi Scooter','GTS 150':'Scooter / Maxi Scooter','GTS 300':'Scooter / Maxi Scooter','GTS 300 Super':'Scooter / Maxi Scooter','GTV 300':'Scooter / Maxi Scooter','Primavera 125':'Scooter / Maxi Scooter','Primavera 150':'Scooter / Maxi Scooter','Sprint 125':'Scooter / Maxi Scooter','Sprint 150':'Scooter / Maxi Scooter'}},
+  voge:{models:['125 R','250 Rally','250 RR','300 DS','300 Rally','500 DS','500 DSX','500 R','525 DSX','650 DS','650 DSX'],cats:{'250 RR':'Supersport','125 R':'Naked','500 R':'Naked','250 Rally':'Adventure / Touring','300 Rally':'Adventure / Touring','300 DS':'Adventure / Touring','500 DS':'Adventure / Touring','500 DSX':'Adventure / Touring','525 DSX':'Adventure / Touring','650 DS':'Adventure / Touring','650 DSX':'Adventure / Touring'}},
+  zontes:{models:['125 M','155 G1','155 U1','200 C','250 T-E','310 X','350 E','350 GK','350 R','350 T1','350 T2','350 V','368 G'],cats:{'350 R':'Supersport','125 M':'Naked','155 G1':'Naked','155 U1':'Naked','200 C':'Naked','250 T-E':'Naked','350 E':'Naked','350 GK':'Naked','350 T1':'Naked','350 T2':'Naked','350 V':'Naked','368 G':'Naked','310 X':'Adventure / Touring'}},
+  qj:{models:['ATR 125','Fort 350','LTM 125','SRK 125 R','SRK 125 S','SRK 400 RR','SRK 700','SRT 550','SRT 550 X','SRT 800','SRT 800 X','SRV 550','SRV 550 ST'],cats:{'SRK 400 RR':'Supersport','ATR 125':'Naked','LTM 125':'Naked','SRK 125 R':'Naked','SRK 125 S':'Naked','SRK 700':'Naked','Fort 350':'Cafe Racer / Retro','SRT 550':'Adventure / Touring','SRT 550 X':'Adventure / Touring','SRT 800':'Adventure / Touring','SRT 800 X':'Adventure / Touring','SRV 550':'Touring','SRV 550 ST':'Touring'}},
+  revolt:{models:['RC3','RC3+','RC5','RM5','RM5-X','RS1','RS3','RS4','RS5','RS6','RS7','RSX3','RSX4'],cats:{'RS4':'Supersport','RS5':'Supersport','RS6':'Supersport','RS7':'Supersport','RS1':'Supersport','RS3':'Supersport','RSX3':'Naked','RSX4':'Naked','RC3':'Naked','RC3+':'Naked','RC5':'Naked','RM5':'Scooter / Maxi Scooter','RM5-X':'Scooter / Maxi Scooter'}},
+  mv_agusta:{models:['Brutale 800 R','Brutale 800 RR','Brutale 800 Rosso','Brutale 1000 RR','Brutale 1000 RS','Dragster 800 RC','Dragster 800 RR','Dragster 800 Rosso','Enduro Veloce','F3 675','F3 800','F3 800 RC','Superveloce 800','Turismo Veloce 800'],cats:{'F3 675':'Supersport','F3 800':'Supersport','F3 800 RC':'Supersport','Superveloce 800':'Supersport','Brutale 800 R':'Naked','Brutale 800 RR':'Naked','Brutale 800 Rosso':'Naked','Brutale 1000 RR':'Naked','Brutale 1000 RS':'Naked','Dragster 800 RC':'Naked','Dragster 800 RR':'Naked','Dragster 800 Rosso':'Naked','Enduro Veloce':'Adventure / Touring','Turismo Veloce 800':'Touring'}},
+  hyosung:{models:['GD 250 N','GD 250 R','GT 250 R','GT 650 R','GV 250','GV 650','QH 250'],cats:{'GD 250 R':'Supersport','GT 250 R':'Supersport','GT 650 R':'Supersport','GD 250 N':'Naked','QH 250':'Naked','GV 250':'Cruiser','GV 650':'Cruiser'}},
+  jawa:{models:['250 Ceylan','250 Classic','250 Laser','300 CL','350 Twin Sport','42 Bobber','Perak','RVM 500 Adventure','RVM 500 Scrambler'],cats:{'250 Ceylan':'Cafe Racer / Retro','250 Classic':'Cafe Racer / Retro','250 Laser':'Cafe Racer / Retro','300 CL':'Cafe Racer / Retro','350 Twin Sport':'Cafe Racer / Retro','42 Bobber':'Cruiser','Perak':'Cruiser','RVM 500 Adventure':'Adventure / Touring','RVM 500 Scrambler':'Enduro / Off-Road'}},
+  kove:{models:['125 R','250 R','250 RR','510 F','510 X','800 X'],cats:{'250 RR':'Supersport','125 R':'Naked','250 R':'Naked','800 X':'Adventure / Touring','510 F':'Enduro / Off-Road','510 X':'Enduro / Off-Road'}},
+  barossa:{models:['ADV 125','GV 650','Jedi'],cats:{'ADV 125':'Scooter / Maxi Scooter','GV 650':'Cruiser','Jedi':'Naked'}},
+  benda:{models:['Chinchilla 500','LFC 700','Napoleon 500','Rock 250'],cats:{'Rock 250':'Cafe Racer / Retro','Napoleon 500':'Cafe Racer / Retro','Chinchilla 500':'Cafe Racer / Retro','LFC 700':'Touring'}},
+  bisan:{models:['Atlas 125','Ceylan','Roadstar 250','Roadstar Cub','Star'],cats:{'Roadstar 250':'Naked','Atlas 125':'Scooter / Maxi Scooter','Ceylan':'Scooter / Maxi Scooter','Roadstar Cub':'Cafe Racer / Retro','Star':'Scooter / Maxi Scooter'}},
+  daelim:{models:['Dart 125','Daystar 250','S2 125','S3 Advance 250'],cats:{'Dart 125':'Naked','Daystar 250':'Cafe Racer / Retro','S2 125':'Scooter / Maxi Scooter','S3 Advance 250':'Scooter / Maxi Scooter'}},
+  kuba:{models:['Arome 125 Pro','AZ 50','Azure 50 Pro','Bannry 125','Bevely 125','Bevely 50 Pro','Blueberry','Bluebird','Borelli 50','Brilliant 125'],cats:{'AZ 50':'Scooter / Maxi Scooter','Azure 50 Pro':'Scooter / Maxi Scooter','Bevely 50 Pro':'Scooter / Maxi Scooter','Bevely 125':'Scooter / Maxi Scooter','Blueberry':'Scooter / Maxi Scooter','Bluebird':'Scooter / Maxi Scooter','Borelli 50':'Scooter / Maxi Scooter','Arome 125 Pro':'Scooter / Maxi Scooter','Bannry 125':'Scooter / Maxi Scooter','Brilliant 125':'Scooter / Maxi Scooter'}},
+  moto_morini:{models:['Seiemmezzo','X-Cape 650'],cats:{'Seiemmezzo':'Cafe Racer / Retro','X-Cape 650':'Adventure / Touring'}},
+  piaggio:{models:['Beverly 250','Beverly 400','Beverly 500','Beverly S 400','FLY 100','FLY 150','Liberty 150','Liberty 200','Medley 150','Medley S 150','MP3 250','MP3 300','MP3 500'],cats:{'Beverly 250':'Scooter / Maxi Scooter','Beverly 400':'Scooter / Maxi Scooter','Beverly 500':'Scooter / Maxi Scooter','Beverly S 400':'Scooter / Maxi Scooter','FLY 100':'Scooter / Maxi Scooter','FLY 150':'Scooter / Maxi Scooter','Liberty 150':'Scooter / Maxi Scooter','Liberty 200':'Scooter / Maxi Scooter','Medley 150':'Scooter / Maxi Scooter','Medley S 150':'Scooter / Maxi Scooter','MP3 250':'Scooter / Maxi Scooter','MP3 300':'Scooter / Maxi Scooter','MP3 500':'Scooter / Maxi Scooter'}},
+  rieju:{models:['Aventura 500','Aventura Rally 307','Century 125','MR Pro 300','MR Pro 300i','Xplora 557','Xplora 707'],cats:{'Aventura 500':'Adventure / Touring','Aventura Rally 307':'Adventure / Touring','Xplora 557':'Adventure / Touring','Xplora 707':'Adventure / Touring','MR Pro 300':'Enduro / Off-Road','MR Pro 300i':'Enduro / Off-Road','Century 125':'Naked'}},
+  rmg:{models:['Aston 125','Clasico','Dream 150','Fantasy Pro 125','Miami 50','Milano 50','Panzer 125','Panzer Cross 125'],cats:{'Panzer 125':'Naked','Panzer Cross 125':'Enduro / Off-Road','Aston 125':'Scooter / Maxi Scooter','Clasico':'Scooter / Maxi Scooter','Dream 150':'Scooter / Maxi Scooter','Fantasy Pro 125':'Scooter / Maxi Scooter','Miami 50':'Scooter / Maxi Scooter','Milano 50':'Scooter / Maxi Scooter'}},
+  togo:{models:['800G','800S','RR800','T800','TG250','VS550'],cats:{'RR800':'Supersport','800G':'Naked','800S':'Naked','T800':'Naked','TG250':'Naked','VS550':'Cruiser'}},
+  um:{models:['Renegade Commando 125','Renegade Commando 250','Renegade Freedom 125','Renegade Freedom ABS 250','Renegade Sport S 125','Renegade Vegas 125','Renegade Vegas ABS 250'],cats:{'Renegade Commando 125':'Cruiser','Renegade Commando 250':'Cruiser','Renegade Freedom 125':'Cruiser','Renegade Freedom ABS 250':'Cruiser','Renegade Sport S 125':'Cafe Racer / Retro','Renegade Vegas 125':'Cruiser','Renegade Vegas ABS 250':'Cruiser'}}
 };
 
 function populateModels() {
@@ -1156,18 +1223,36 @@ function toggleAuth() {
   document.getElementById('inp-pw2').style.display = isLogin ? 'none' : 'block';
   document.getElementById('auth-switch').innerHTML = isLogin ? (lang==='tr'?'Hesabın yok mu? <span onclick="toggleAuth()">Kayıt ol</span>':'No account? <span onclick="toggleAuth()">Sign up</span>') : (lang==='tr'?'Hesabın var mı? <span onclick="toggleAuth()">Giriş yap</span>':'Have an account? <span onclick="toggleAuth()">Log in</span>');
 }
-function socialLogin(p) { toast(`${p} ile giriş yapılıyor...`); setTimeout(()=>showPage('pg-s1'),700); }
-function doAuth() {
-  const e = document.getElementById('inp-email').value;
-  const p = document.getElementById('inp-pw').value;
-  if (!e||!e.includes('@')) { toast('Geçerli e-posta gir'); return; }
-  if (!p||p.length<6) { toast('Şifre en az 6 karakter olmalı'); return; }
-  toast(isLogin ? 'Giriş yapılıyor...' : 'Hesap oluşturuluyor...');
-  if (isLogin) {
-    window.firebaseLogin(e, p);
+async function socialLogin(provider) {
+  if (provider === 'Google') {
+    toast('Google ile giriş yapılıyor...');
+    const res = await window.firebaseGoogleLogin();
+    if (!res.ok && res.msg) toast(res.msg);
   } else {
-    window.firebaseSignup(e, p);
+    toast('Apple girişi yakında ekleniyor');
   }
+}
+
+async function doAuth() {
+  const e = document.getElementById('inp-email').value.trim();
+  const p = document.getElementById('inp-pw').value;
+  const p2 = document.getElementById('inp-pw2').value;
+  if (!e || !e.includes('@')) { toast('Geçerli e-posta gir'); return; }
+  if (!p || p.length < 6) { toast('Şifre en az 6 karakter olmalı'); return; }
+  if (!isLogin && p !== p2) { toast('Şifreler eşleşmiyor'); return; }
+
+  const btn = document.getElementById('auth-btn');
+  btn.textContent = 'Lütfen bekle...';
+  btn.disabled = true;
+
+  const res = isLogin
+    ? await window.firebaseLogin(e, p)
+    : await window.firebaseRegister(e, p);
+
+  btn.disabled = false;
+  btn.textContent = isLogin ? 'Giriş Yap' : 'Kayıt Ol';
+
+  if (!res.ok) toast(res.msg);
 }
 
 // ── SETUP ──
