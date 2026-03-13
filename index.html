@@ -377,6 +377,24 @@ select.inp option { background: white; }
 
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 @keyframes spin { to{transform:rotate(360deg)} }
+@keyframes sv-fill { to{transform:scaleX(1)} }
+
+/* STORIES */
+.story-row{display:flex;gap:10px;padding:10px 14px 12px;overflow-x:auto;flex-shrink:0;}
+.story-row::-webkit-scrollbar{display:none;}
+.story-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
+.story-ring{width:58px;height:58px;border-radius:50%;padding:2.5px;background:linear-gradient(135deg,var(--orange),#FFAA00);display:flex;align-items:center;justify-content:center;}
+.story-ring.seen{background:var(--border2);}
+.story-ring.add{background:var(--orange);}
+.story-inner{width:100%;height:100%;border-radius:50%;background:var(--bg2);border:2.5px solid var(--bg);overflow:hidden;}
+.story-inner img{width:100%;height:100%;object-fit:cover;}
+.story-add{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
+.story-add .story-ring{width:58px;height:58px;border-radius:50%;}
+.story-label{font-size:10px;color:var(--text3);max-width:62px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sv-bar-wrap{flex:1;height:2.5px;background:rgba(255,255,255,.25);border-radius:2px;overflow:hidden;}
+.sv-bar-fill{height:100%;background:white;transform:scaleX(0);transform-origin:left;border-radius:2px;}
+.sv-bar-fill.done{transform:scaleX(1);}
+.sv-bar-fill.active{animation:sv-fill var(--dur,5s) linear forwards;}
 </style>
 
 <!-- Firebase -->
@@ -567,6 +585,13 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         </div>
       </div>
       <div class="scrl">
+        <!-- STORIES -->
+        <div class="story-row" id="story-row">
+          <div class="story-add" onclick="openAddStory()">
+            <div class="story-ring add"><svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            <span>Story</span>
+          </div>
+        </div>
         <div id="feed-posts"><div class="empty-state"><div class="empty-icon" style="font-size:32px;color:var(--border2)">●</div><div class="empty-title">Feed yükleniyor...</div></div></div>
         <div class="sp"></div>
       </div>
@@ -657,6 +682,8 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
           <div id="user-list"><div style="padding:16px 0;color:var(--text3);font-size:13px">Yükleniyor...</div></div>
         </div>
         <div style="height:14px"></div>
+        <div class="section-title">Gönderilerim</div>
+        <div id="profile-posts"><div class="empty-state" style="padding:16px 24px"><div class="empty-sub">Henüz gönderi yok 📸</div></div></div>
         <div class="section-title">Son Rotalarım</div>
         <div id="my-routes"><div class="empty-state" style="padding:16px 24px"><div class="empty-sub">Henüz rota paylaşmadın 🗺️</div></div></div>
         <div class="sp"></div>
@@ -770,7 +797,41 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     </div>
   </div>
 
+  <!-- STORY VIEWER -->
+  <div class="screen" id="s-story" style="background:#000;z-index:200">
+    <div id="sv-bars" style="display:flex;gap:4px;padding:12px 12px 6px;position:absolute;top:0;left:0;right:0;z-index:2"></div>
+    <div style="position:absolute;top:0;left:0;right:0;padding:44px 12px 8px;display:flex;align-items:center;gap:10px;z-index:2;background:linear-gradient(rgba(0,0,0,.5),transparent)">
+      <div id="sv-av" style="width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid var(--orange)"></div>
+      <div style="flex:1"><div id="sv-name" style="font-size:13px;font-weight:600;color:white"></div><div id="sv-time" style="font-size:11px;color:rgba(255,255,255,.5)"></div></div>
+      <div id="sv-del" onclick="deleteStory()" style="display:none;background:rgba(220,38,38,.7);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Sil</div>
+      <div onclick="closeStory()" style="color:white;font-size:22px;cursor:pointer;padding:4px">✕</div>
+    </div>
+    <div id="sv-body" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+      <div id="sv-prev" onclick="svPrev()" style="position:absolute;left:0;top:0;bottom:0;width:40%;cursor:pointer;z-index:1"></div>
+      <div id="sv-next" onclick="svNext()" style="position:absolute;right:0;top:0;bottom:0;width:60%;cursor:pointer;z-index:1"></div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(transparent,rgba(0,0,0,.8));z-index:2">
+      <div id="sv-caption" style="color:white;font-size:13px;line-height:1.5"></div>
+    </div>
+  </div>
+
+  <!-- STORY EKLE -->
+  <div class="overlay" id="ov-story">
+    <div class="hdr"><div class="hdr-btn" onclick="closeOv('ov-story')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div style="font-size:16px;font-weight:600;margin-left:8px">Story Ekle</div><button onclick="publishStory()" style="margin-left:auto;background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Paylaş</button></div>
+    <div class="scrl" style="padding:16px">
+      <div id="story-preview" onclick="document.getElementById('story-file').click()" style="width:100%;height:280px;background:var(--bg2);border:2px dashed var(--border2);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;overflow:hidden;position:relative;margin-bottom:16px">
+        <svg width="32" height="32" fill="none" stroke="var(--text3)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span style="font-size:13px;color:var(--text3)">Fotoğraf seç</span>
+        <img id="story-img" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+      </div>
+      <input type="file" id="story-file" accept="image/*" style="display:none" onchange="previewStory(this)">
+      <input class="inp" id="story-caption" placeholder="Ne söylemek istiyorsun? (opsiyonel)" style="margin-bottom:8px">
+      <div style="font-size:12px;color:var(--text3)">⏱ Story'ler 24 saat sonra otomatik silinir</div>
+    </div>
+  </div>
+
   <!-- TOAST -->
+
   <div class="toast" id="toast"></div>
 </div>
 
@@ -833,9 +894,11 @@ function enterApp() {
   show('s-app');
   applyProfile(window.CU);
   loadFeed();
+  loadStories();
   loadTours();
   loadUsers();
   loadMyRoutes();
+  loadProfilePosts();
   watchNotifBadge();
   switchTab('feed', document.getElementById('ni-feed'));
 }
@@ -1043,6 +1106,7 @@ async function loadFeed() {
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           <span>Paylaş</span>
         </button>
+        ${p.uid===window.CU?.uid?`<button class="act-btn" onclick="deletePost('${p.id}')" style="margin-left:auto;color:var(--red)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="19" height="19"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`:''}
       </div>
       <div class="post-caption"><strong>${p.name||'Sürücü'}</strong> ${p.caption||''}</div>
       <div class="comment-area" id="ca-${p.id}">
@@ -1129,7 +1193,10 @@ async function loadTours() {
       <div class="tc-info">📍 ${t.from||'—'} → ${t.to||'—'} &nbsp;|&nbsp; 🏍️ ${(t.participants||[]).length} katılımcı</div>
       <div class="tc-bottom">
         <div class="tc-by">${t.userName||'Sürücü'} tarafından</div>
-        <button class="tc-join" onclick="joinTour('${t.name}')">Katıl</button>
+        <div style="display:flex;gap:8px">
+          ${t.uid===window.CU?.uid?`<button onclick="deleteTour('${t.id}')" style="background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Sil</button>`:''}
+          <button class="tc-join" onclick="joinTour('${t.name}')">Katıl</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -1361,6 +1428,7 @@ async function loadRoutesFeed() {
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
       ${makeAvatar(r.uid,r.userName,null,34)}
       <div style="flex:1"><div style="font-size:13px;font-weight:600">${r.name}</div><div style="font-size:11px;color:var(--text3)">${r.userName} · ${r.distKm} km</div></div>
+      ${r.uid===window.CU?.uid?`<button onclick="deleteRoute('${r.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:4px">✕</button>`:''}
     </div>
   `).join('');
 }
@@ -1405,6 +1473,143 @@ let toastT;
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
 function timeAgo(iso){if(!iso)return'';const d=(Date.now()-new Date(iso).getTime())/1000;if(d<60)return'Az önce';if(d<3600)return Math.floor(d/60)+' dk önce';if(d<86400)return Math.floor(d/3600)+' sa önce';return Math.floor(d/86400)+' gün önce';}
 function filterCat(el){document.querySelectorAll('.catscrl .cat').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+
+// ── STORIES ──
+let storyFile=null, allStories=[], svIdx=0, svTimer=null;
+
+function openAddStory(){storyFile=null;document.getElementById('story-img').style.display='none';document.getElementById('story-caption').value='';openOv('ov-story');}
+function previewStory(inp){const f=inp.files[0];if(!f)return;storyFile=f;const r=new FileReader();r.onload=e=>{const img=document.getElementById('story-img');img.src=e.target.result;img.style.display='block';document.getElementById('story-preview').style.border='none';};r.readAsDataURL(f);}
+async function publishStory(){
+  if(!storyFile){toast('Fotoğraf seç');return;}
+  toast('Story yükleniyor...');
+  const url=await uploadCloud(storyFile);
+  const cap=document.getElementById('story-caption').value.trim();
+  const cu=window.CU||{};
+  const expires=new Date(Date.now()+24*60*60*1000).toISOString();
+  const {db,collection,addDoc}=window.FB;
+  await addDoc(collection(db,'stories'),{uid:cu.uid,name:cu.name||'Sürücü',avatarUrl:cu.avatarUrl||'',photoUrl:url,caption:cap,createdAt:new Date().toISOString(),expiresAt:expires});
+  closeOv('ov-story');toast('Story paylaşıldı! 24 saat sonra silinir ✓');loadStories();
+}
+
+async function loadStories(){
+  if(!window.FB) return;
+  const {db,collection,query,orderBy,getDocs,where}=window.FB;
+  const now=new Date().toISOString();
+  const q=query(collection(db,'stories'),where('expiresAt','>',now),orderBy('expiresAt','asc'));
+  const snap=await getDocs(q);
+  allStories=[];snap.forEach(d=>allStories.push({id:d.id,...d.data()}));
+  renderStoryRow();
+}
+
+function renderStoryRow(){
+  const row=document.getElementById('story-row');
+  // My add button always first
+  const seenIds=JSON.parse(localStorage.getItem('seenStories')||'[]');
+  const myUid=window.CU?.uid;
+  // Group by user - show one per user
+  const byUser={};
+  allStories.forEach(s=>{if(!byUser[s.uid])byUser[s.uid]=[];byUser[s.uid].push(s);});
+  let html=`<div class="story-add" onclick="openAddStory()"><div class="story-ring add"><svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span class="story-label">Story</span></div>`;
+  Object.values(byUser).forEach(stories=>{
+    const s=stories[0];
+    const seen=seenIds.includes(s.id);
+    const isMe=s.uid===myUid;
+    const idx=allStories.findIndex(x=>x.id===s.id);
+    html+=`<div class="story-item" onclick="openStory(${idx})">
+      <div class="story-ring${seen?' seen':''}">
+        <div class="story-inner">${s.avatarUrl?`<img src="${s.avatarUrl}">`:`<div style="width:100%;height:100%;background:${avColor(s.uid)};display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px">${avLetter(s.name)}</div>`}</div>
+      </div>
+      <span class="story-label">${isMe?'Sen':s.name?.split(' ')[0]||'Sürücü'}</span>
+    </div>`;
+  });
+  row.innerHTML=html;
+}
+
+function openStory(idx){
+  svIdx=idx;
+  document.getElementById('s-story').classList.add('show');
+  renderStory();
+}
+function closeStory(){
+  document.getElementById('s-story').classList.remove('show');
+  clearTimeout(svTimer);
+}
+function renderStory(){
+  clearTimeout(svTimer);
+  const s=allStories[svIdx];if(!s)return;
+  // Mark seen
+  const seen=JSON.parse(localStorage.getItem('seenStories')||'[]');
+  if(!seen.includes(s.id)){seen.push(s.id);localStorage.setItem('seenStories',JSON.stringify(seen));}
+  // Header
+  document.getElementById('sv-av').innerHTML=s.avatarUrl?`<img src="${s.avatarUrl}" style="width:100%;height:100%;object-fit:cover">`:`<div style="width:100%;height:100%;background:${avColor(s.uid)};display:flex;align-items:center;justify-content:center;color:white;font-weight:700">${avLetter(s.name)}</div>`;
+  document.getElementById('sv-name').textContent=s.name||'Sürücü';
+  document.getElementById('sv-time').textContent=timeAgo(s.createdAt);
+  document.getElementById('sv-caption').innerHTML=`<strong>${s.name||''}</strong>${s.caption?' '+s.caption:''}`;
+  // Show delete btn if own story
+  document.getElementById('sv-del').style.display=s.uid===window.CU?.uid?'block':'none';
+  document.getElementById('sv-del').dataset.storyId=s.id;
+  // Background
+  const body=document.getElementById('sv-body');
+  body.style.background=s.photoUrl?`url('${s.photoUrl}') center/cover no-repeat`:`${avColor(s.uid)}`;
+  // Progress bars
+  const dur=5;
+  document.getElementById('sv-bars').innerHTML=allStories.map((_,i)=>`<div class="sv-bar-wrap"><div class="sv-bar-fill${i<svIdx?' done':i===svIdx?' active':''}" style="--dur:${dur}s"></div></div>`).join('');
+  svTimer=setTimeout(()=>svNext(),dur*1000);
+}
+function svNext(){if(svIdx<allStories.length-1){svIdx++;renderStory();}else closeStory();}
+function svPrev(){if(svIdx>0){svIdx--;renderStory();}else closeStory();}
+async function deleteStory(){
+  const id=document.getElementById('sv-del').dataset.storyId;
+  if(!id||!window.FB) return;
+  const {db,doc,deleteDoc}=window.FB;
+  await deleteDoc(doc(db,'stories',id));
+  allStories=allStories.filter(s=>s.id!==id);
+  toast('Story silindi');
+  if(allStories.length===0){closeStory();}else{svIdx=Math.min(svIdx,allStories.length-1);renderStory();}
+  renderStoryRow();
+}
+
+// ── SİLME BUTONLARI ──
+async function deletePost(postId){
+  if(!confirm('Bu gönderiyi silmek istiyor musun?'))return;
+  if(!window.FB) return;
+  const {db,doc,deleteDoc}=window.FB;
+  await deleteDoc(doc(db,'posts',postId));
+  toast('Gönderi silindi');loadFeed();loadProfilePosts();
+}
+async function deleteTour(tourId){
+  if(!confirm('Bu turu silmek istiyor musun?'))return;
+  const {db,doc,deleteDoc}=window.FB;
+  await deleteDoc(doc(db,'tours',tourId));
+  toast('Tur silindi');loadTours();
+}
+async function deleteRoute(routeId){
+  if(!confirm('Bu rotayı silmek istiyor musun?'))return;
+  const {db,doc,deleteDoc}=window.FB;
+  await deleteDoc(doc(db,'routes',routeId));
+  toast('Rota silindi');loadMyRoutes();loadRoutesFeed();
+}
+
+// ── PROFİL BİRİKİMİ ──
+async function loadProfilePosts(){
+  if(!window.FB||!window.CU) return;
+  const {db,collection,query,where,orderBy,getDocs}=window.FB;
+  const q=query(collection(db,'posts'),where('uid','==',window.CU.uid),orderBy('createdAt','desc'));
+  const snap=await getDocs(q);
+  const el=document.getElementById('profile-posts');if(!el) return;
+  if(snap.empty){el.innerHTML='<div class="empty-state" style="padding:16px 24px"><div class="empty-sub">Henüz gönderi yok 📸</div></div>';return;}
+  const posts=[];snap.forEach(d=>posts.push({id:d.id,...d.data()}));
+  // Update stat
+  const statEl=document.getElementById('stat-posts');if(statEl)statEl.textContent=posts.length;
+  el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;padding:0 0 14px">${posts.map(p=>`
+    <div style="position:relative;aspect-ratio:1;background:${p.photoUrl?'#eee':'var(--bg2)'};overflow:hidden;cursor:pointer" onclick="viewPost('${p.id}')">
+      ${p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3);padding:8px;text-align:center">${p.caption?.substring(0,30)||'📝'}</div>`}
+      ${p.uid===window.CU?.uid?`<button onclick="event.stopPropagation();deletePost('${p.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer">✕</button>`:''}
+    </div>
+  `).join('')}</div>`;
+}
+
+
 </script>
 </body>
 </html>
