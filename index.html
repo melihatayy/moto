@@ -580,6 +580,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <div class="logo">MOTO</div>
         <div style="display:flex;gap:8px">
           <button onclick="openPost()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Paylaş</button>
+          <div class="hdr-btn" onclick="openSearch()"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
           <div class="hdr-btn" onclick="openDM()"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="badge" id="dm-badge" style="display:none"></div></div>
           <div class="hdr-btn" onclick="openNotifs()"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div class="badge" id="notif-badge" style="display:none"></div></div>
         </div>
@@ -929,7 +930,65 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     </div>
   </div>
 
+  <!-- KULLANICI ARA -->
+  <div class="overlay" id="ov-search">
+    <div class="hdr">
+      <div class="hdr-btn" onclick="closeOv('ov-search')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div style="flex:1;margin-left:8px">
+        <div style="display:flex;align-items:center;background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;padding:8px 12px;gap:8px">
+          <svg width="15" height="15" fill="none" stroke="var(--text3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="search-inp" placeholder="İsim veya @kullanıcı adı ara..." style="flex:1;border:none;background:transparent;font-size:14px;color:var(--text);font-family:inherit;outline:none" oninput="searchUsers(this.value)" autocapitalize="none" autocorrect="off">
+          <div id="search-clear" onclick="clearSearch()" style="display:none;cursor:pointer;color:var(--text3);font-size:16px">✕</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Önerilen kullanıcılar -->
+    <div id="search-suggested" class="scrl" style="flex:1;padding:0 16px">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;padding:12px 0 8px">Önerilen Sürücüler</div>
+      <div id="suggested-list"><div style="padding:16px 0;color:var(--text3);font-size:13px">Yükleniyor...</div></div>
+    </div>
+
+    <!-- Arama sonuçları -->
+    <div id="search-results" class="scrl" style="flex:1;padding:0 16px;display:none">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;padding:12px 0 8px" id="search-results-label">Sonuçlar</div>
+      <div id="results-list"></div>
+    </div>
+  </div>
+
+  <!-- KULLANICI PROFİL GÖRÜNTÜLE -->
+  <div class="overlay" id="ov-view-profile">
+    <div class="hdr">
+      <div class="hdr-btn" onclick="closeOv('ov-view-profile')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    </div>
+    <div class="scrl" style="flex:1">
+      <div id="vp-cover" style="height:100px;background:linear-gradient(135deg,#FF5500,#FF8800)"></div>
+      <div style="padding:0 18px 16px;background:var(--bg)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:-36px;margin-bottom:12px">
+          <div id="vp-av" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--bg);overflow:hidden;box-shadow:var(--shadow2)"></div>
+          <div style="display:flex;gap:8px">
+            <button id="vp-add-btn" onclick="toggleFriend()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">+ Ekle</button>
+            <button onclick="msgFromProfile()" style="background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Mesaj</button>
+          </div>
+        </div>
+        <div style="font-size:20px;font-weight:700" id="vp-name"></div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:4px" id="vp-username"></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--orange);margin-bottom:6px" id="vp-bike"></div>
+        <div id="vp-bio" style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+          <div class="ptag" id="vp-cat"></div>
+          <div class="ptag" id="vp-city"></div>
+        </div>
+      </div>
+      <div style="padding:0 16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin-bottom:10px">Gönderiler</div>
+        <div id="vp-posts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
+
 
 
   <div class="toast" id="toast"></div>
@@ -1571,6 +1630,179 @@ async function fetchLive() {
   });
 }
 function calcDist(a,b,c,d){const R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+
+// ── KULLANICI ARA & ARKADAŞ EKLE ──
+let allUsers = [], friends = new Set(), viewingUid = null, searchTimer;
+
+function openSearch() {
+  openOv('ov-search');
+  document.getElementById('search-inp').value = '';
+  document.getElementById('search-clear').style.display = 'none';
+  document.getElementById('search-suggested').style.display = 'flex';
+  document.getElementById('search-results').style.display = 'none';
+  loadSuggested();
+}
+
+function clearSearch() {
+  document.getElementById('search-inp').value = '';
+  document.getElementById('search-clear').style.display = 'none';
+  document.getElementById('search-suggested').style.display = 'flex';
+  document.getElementById('search-results').style.display = 'none';
+}
+
+async function loadSuggested() {
+  if (!window.FB) return;
+  const { db, collection, getDocs } = window.FB;
+  const snap = await getDocs(collection(db, 'users'));
+  const myUid = window.CU?.uid;
+  allUsers = [];
+  snap.forEach(d => { if (d.data().setupDone && d.id !== myUid) allUsers.push({ uid: d.id, ...d.data() }); });
+
+  // Arkadaş listesini yükle
+  const friendsSnap = await getDocs(collection(db, 'users', myUid, 'friends')).catch(() => null);
+  if (friendsSnap) friendsSnap.forEach(d => friends.add(d.id));
+
+  // Öneri: aynı kategori > aynı şehir > diğerleri
+  const myCat = window.CU?.cat || '';
+  const myCity = window.CU?.city || '';
+  const scored = allUsers.map(u => ({
+    ...u,
+    score: (u.cat === myCat ? 2 : 0) + (u.city === myCity ? 1 : 0)
+  })).sort((a, b) => b.score - a.score);
+
+  renderUserCards(scored, document.getElementById('suggested-list'));
+}
+
+function searchUsers(val) {
+  document.getElementById('search-clear').style.display = val ? 'block' : 'none';
+  if (!val.trim()) {
+    document.getElementById('search-suggested').style.display = 'flex';
+    document.getElementById('search-results').style.display = 'none';
+    return;
+  }
+  document.getElementById('search-suggested').style.display = 'none';
+  document.getElementById('search-results').style.display = 'flex';
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    const q = val.toLowerCase().trim();
+    const filtered = allUsers.filter(u =>
+      u.name?.toLowerCase().includes(q) ||
+      u.username?.toLowerCase().includes(q) ||
+      u.bike?.toLowerCase().includes(q) ||
+      u.city?.toLowerCase().includes(q)
+    );
+    document.getElementById('search-results-label').textContent = filtered.length ? `${filtered.length} sonuç` : 'Sonuç bulunamadı';
+    renderUserCards(filtered, document.getElementById('results-list'));
+  }, 300);
+}
+
+function renderUserCards(users, container) {
+  if (!container) return;
+  if (users.length === 0) {
+    container.innerHTML = '<div style="padding:24px 0;text-align:center;color:var(--text3);font-size:13px">Kullanıcı bulunamadı</div>';
+    return;
+  }
+  container.innerHTML = users.map(u => {
+    const isFriend = friends.has(u.uid);
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="viewUserProfile('${u.uid}')">
+      ${makeAvatar(u.uid, u.name, u.avatarUrl, 48)}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600;color:var(--text)">${u.name || 'Sürücü'}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:1px">${u.username ? '@' + u.username + ' · ' : ''}${u.bike || ''}</div>
+        <div style="font-size:11px;color:var(--text3)">${u.city || ''} ${u.cat ? '· ' + u.cat : ''}</div>
+      </div>
+      <button onclick="event.stopPropagation();quickAddFriend('${u.uid}','${u.name}',this)" 
+        style="flex-shrink:0;background:${isFriend ? 'var(--bg2)' : 'var(--odim)'};color:${isFriend ? 'var(--text3)' : 'var(--orange)'};border:1px solid ${isFriend ? 'var(--border)' : 'rgba(255,85,0,.2)'};border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">
+        ${isFriend ? 'Eklendi ✓' : '+ Ekle'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+async function quickAddFriend(uid, name, btn) {
+  if (friends.has(uid)) return;
+  friends.add(uid);
+  btn.textContent = 'Eklendi ✓';
+  btn.style.background = 'var(--bg2)';
+  btn.style.color = 'var(--text3)';
+  btn.style.borderColor = 'var(--border)';
+  // Firestore'a kaydet
+  if (window.FB && window.CU) {
+    const { db, doc, setDoc } = window.FB;
+    await setDoc(doc(db, 'users', window.CU.uid, 'friends', uid), { uid, name, addedAt: new Date().toISOString() });
+    // Karşı tarafa bildirim
+    sendNotif(uid, 'follow', `<strong>${window.CU.name || 'Biri'}</strong> seni ekledi`);
+  }
+  toast(`${name} eklendi! 🤝`);
+  // Profildeki takipçi sayısını güncelle
+  const el = document.getElementById('stat-takip');
+  if (el) el.textContent = parseInt(el.textContent || 0) + 1;
+}
+
+async function viewUserProfile(uid) {
+  viewingUid = uid;
+  const u = allUsers.find(x => x.uid === uid);
+  if (!u) return;
+
+  // Avatar
+  document.getElementById('vp-av').innerHTML = makeAvatar(u.uid, u.name, u.avatarUrl, 72);
+  // Cover
+  if (u.coverUrl) document.getElementById('vp-cover').style.background = `url('${u.coverUrl}') center/cover no-repeat`;
+  else document.getElementById('vp-cover').style.background = 'linear-gradient(135deg,#FF5500,#FF8800)';
+  // Info
+  document.getElementById('vp-name').textContent = u.name || 'Sürücü';
+  document.getElementById('vp-username').textContent = u.username ? '@' + u.username : '';
+  document.getElementById('vp-bike').textContent = u.bike || '';
+  document.getElementById('vp-bio').textContent = u.bio || '';
+  document.getElementById('vp-cat').textContent = u.cat || '';
+  document.getElementById('vp-city').textContent = u.city || '';
+  // Add button state
+  const addBtn = document.getElementById('vp-add-btn');
+  if (friends.has(uid)) {
+    addBtn.textContent = 'Eklendi ✓';
+    addBtn.style.background = 'var(--bg2)';
+    addBtn.style.color = 'var(--text3)';
+    addBtn.style.border = '1.5px solid var(--border)';
+  } else {
+    addBtn.textContent = '+ Ekle';
+    addBtn.style.background = 'var(--orange)';
+    addBtn.style.color = 'white';
+    addBtn.style.border = 'none';
+  }
+  // Posts
+  document.getElementById('vp-posts').innerHTML = '<div style="padding:16px;color:var(--text3);font-size:13px">Yükleniyor...</div>';
+  openOv('ov-view-profile');
+  loadUserPosts(uid);
+}
+
+async function loadUserPosts(uid) {
+  if (!window.FB) return;
+  const { db, collection, query, where, orderBy, getDocs } = window.FB;
+  const q = query(collection(db, 'posts'), where('uid', '==', uid), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  const el = document.getElementById('vp-posts');
+  if (snap.empty) { el.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:13px">Henüz gönderi yok</div>'; return; }
+  const posts = []; snap.forEach(d => posts.push(d.data()));
+  el.innerHTML = posts.map(p => `
+    <div style="aspect-ratio:1;background:${p.photoUrl ? '#eee' : 'var(--bg2)'};overflow:hidden">
+      ${p.photoUrl ? `<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0, 20) || '📝'}</div>`}
+    </div>
+  `).join('');
+}
+
+function toggleFriend() {
+  if (!viewingUid) return;
+  const u = allUsers.find(x => x.uid === viewingUid);
+  if (!u) return;
+  quickAddFriend(viewingUid, u.name, document.getElementById('vp-add-btn'));
+}
+
+function msgFromProfile() {
+  closeOv('ov-view-profile');
+  closeOv('ov-search');
+  if (viewingUid) openChat(viewingUid);
+}
 
 // ── UTILS ──
 let toastT;
