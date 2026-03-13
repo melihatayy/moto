@@ -724,7 +724,11 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 
   <!-- DM LIST -->
   <div class="overlay" id="ov-dm">
-    <div class="hdr"><div class="hdr-btn" onclick="closeOv('ov-dm')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div style="font-size:16px;font-weight:600;margin-left:8px">Sohbetler</div></div>
+    <div class="hdr">
+      <div class="hdr-btn" onclick="closeOv('ov-dm')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div style="font-size:16px;font-weight:600;margin-left:8px">Sohbetler</div>
+      <div style="margin-left:auto;background:var(--orange);color:white;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600" id="dm-total-badge" style="display:none"></div>
+    </div>
     <div class="scrl" style="padding:0 16px" id="dm-list"><div style="padding:32px 0;text-align:center;color:var(--text3)">Yükleniyor...</div></div>
   </div>
 
@@ -1400,21 +1404,66 @@ function openDM() {
   loadDMList();
 }
 async function loadDMList() {
-  if(!window.FB) return;
-  const {db,collection,getDocs}=window.FB;
-  const snap=await getDocs(collection(db,'users'));
-  const myUid=window.CU?.uid;
-  const users=[];snap.forEach(d=>{if(d.data().setupDone&&d.id!==myUid)users.push(d.data());});
-  const list=document.getElementById('dm-list');
-  if(!list) return;
-  if(users.length===0){list.innerHTML='<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz başka kullanıcı yok</div>';return;}
-  list.innerHTML=users.map(u=>`
+  if (!window.FB) return;
+  const { db, collection, getDocs, query, where, orderBy, limit } = window.FB;
+  const myUid = window.CU?.uid;
+
+  // Kullanıcıları yükle
+  const snap = await getDocs(collection(db, 'users'));
+  const users = []; snap.forEach(d => { if (d.data().setupDone && d.id !== myUid) users.push(d.data()); });
+  const list = document.getElementById('dm-list');
+  if (!list) return;
+  if (users.length === 0) { list.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz başka kullanıcı yok</div>'; return; }
+
+  // Her konuşmanın son mesajını ve okunmamış sayısını çek
+  const chatPreviews = {};
+  const unreadCounts = {};
+  try {
+    const chatSnap = await getDocs(collection(db, 'chats'));
+    for (const cd of chatSnap.docs) {
+      const data = cd.data();
+      if (!data.participants?.includes(myUid)) continue;
+      const otherUid = data.participants.find(p => p !== myUid);
+      chatPreviews[otherUid] = { lastMsg: data.lastMsg || '', updatedAt: data.updatedAt || '' };
+      // Okunmamış mesaj sayısı
+      try {
+        const msgQ = query(collection(db, 'chats', cd.id, 'messages'), where('senderUid', '!=', myUid), where('read', '==', false));
+        const msgSnap = await getDocs(msgQ);
+        if (msgSnap.size > 0) unreadCounts[otherUid] = msgSnap.size;
+      } catch(e) {}
+    }
+  } catch(e) {}
+
+  // Toplam okunmamış
+  const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + b, 0);
+  const badge = document.getElementById('dm-total-badge');
+  if (badge) { badge.textContent = totalUnread > 0 ? totalUnread : ''; badge.style.display = totalUnread > 0 ? 'block' : 'none'; }
+
+  // Son mesaja göre sırala
+  const sorted = [...users].sort((a, b) => {
+    const tA = chatPreviews[a.uid]?.updatedAt || '';
+    const tB = chatPreviews[b.uid]?.updatedAt || '';
+    return tB.localeCompare(tA);
+  });
+
+  list.innerHTML = sorted.map(u => {
+    const preview = chatPreviews[u.uid];
+    const unread = unreadCounts[u.uid] || 0;
+    return `
     <div class="dm-person" onclick="openChat('${u.uid}')">
-      <div class="dm-pav">${makeAvatar(u.uid,u.name,u.avatarUrl,46)}</div>
-      <div class="dm-pinfo"><div class="dm-pname">${u.name||'Sürücü'}</div><div class="dm-pbike">${u.bike||''}</div></div>
-      <div class="online-dot"></div>
-    </div>
-  `).join('');
+      <div class="dm-pav">${makeAvatar(u.uid, u.name, u.avatarUrl, 46)}</div>
+      <div class="dm-pinfo" style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="dm-pname">${u.name || 'Sürücü'}</div>
+          ${preview?.updatedAt ? `<div style="font-size:10px;color:var(--text3)">${timeAgo(preview.updatedAt)}</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
+          <div style="font-size:12px;color:${unread > 0 ? 'var(--text2)' : 'var(--text3)'};font-weight:${unread > 0 ? '500' : '400'};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:200px">${preview?.lastMsg || u.bike || ''}</div>
+          ${unread > 0 ? `<div style="background:var(--orange);color:white;border-radius:20px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:0 5px;flex-shrink:0">${unread}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 let chatPartner=null, chatUnsub=null;
@@ -1436,6 +1485,7 @@ async function listenChat(partnerUid) {
   const cid=chatId(window.CU.uid,partnerUid);
   const {db,collection,query,orderBy,onSnapshot}=window.FB;
   const q=query(collection(db,'chats',cid,'messages'),orderBy('createdAt','asc'));
+  let prevCount = 0;
   chatUnsub=onSnapshot(q,snap=>{
     const msgs=document.getElementById('chat-msgs');
     if(snap.empty){msgs.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">İlk mesajı sen yaz!</div>';return;}
@@ -1449,6 +1499,12 @@ async function listenChat(partnerUid) {
       msgs.appendChild(el);
     });
     msgs.scrollTop=msgs.scrollHeight;
+    // Yeni mesaj gelince ding çal
+    if (snap.size > prevCount && prevCount > 0) {
+      const last = snap.docs[snap.size - 1].data();
+      if (last.senderUid !== window.CU?.uid) playDing();
+    }
+    prevCount = snap.size;
   });
 }
 async function sendMsg() {
@@ -1477,20 +1533,79 @@ async function openNotifs() {
   loadNotifs();
 }
 async function loadNotifs() {
-  if(!window.FB||!window.CU) return;
-  const {db,collection,query,where,orderBy,getDocs,limit}=window.FB;
-  const q=query(collection(db,'notifications'),where('toUid','==',window.CU.uid),orderBy('createdAt','desc'),limit(30));
-  const snap=await getDocs(q);
-  const list=document.getElementById('notif-list');
-  if(snap.empty){list.innerHTML='<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bildirim yok 🏍️</div>';return;}
-  list.innerHTML='';
-  snap.forEach(d=>{const n=d.data();
-    const icons={like:'❤️',comment:'💬',follow:'👤',route:'🗺️'};
-    const el=document.createElement('div');el.className=`notif-item${n.read?'':' notif-unread'}`;
-    el.innerHTML=`<div class="notif-icon">${icons[n.type]||'🔔'}</div><div><div class="notif-text">${n.text}</div><div class="notif-time">${timeAgo(n.createdAt)}</div></div>`;
-    list.appendChild(el);
+  if (!window.FB || !window.CU) return;
+  const { db, collection, query, where, orderBy, getDocs, limit } = window.FB;
+  const q = query(collection(db, 'notifications'), where('toUid', '==', window.CU.uid), orderBy('createdAt', 'desc'), limit(30));
+  const snap = await getDocs(q);
+
+  // Bekleyen arkadaş isteklerini yükle
+  let requests = [];
+  try {
+    const rSnap = await getDocs(query(collection(db, 'friendRequests'), where('toUid', '==', window.CU.uid), where('status', '==', 'pending')));
+    rSnap.forEach(d => requests.push({ id: d.id, ...d.data() }));
+  } catch(e) {}
+
+  const list = document.getElementById('notif-list');
+  let html = '';
+
+  // Önce bekleyen istekler
+  requests.forEach(r => {
+    html += `<div style="background:var(--odim);border:1px solid rgba(255,85,0,.15);border-radius:14px;padding:14px;margin-bottom:10px" id="req-${r.id}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        ${makeAvatar(r.fromUid, r.fromName, r.fromAvatar, 42)}
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)"><strong>${r.fromName}</strong> seninle bağlantı kurmak istiyor 🤝</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${r.fromBike || ''} · ${timeAgo(r.createdAt)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="acceptRequest('${r.id}','${r.fromUid}','${r.fromName}')" style="flex:1;background:var(--orange);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Kabul Et</button>
+        <button onclick="declineRequest('${r.id}')" style="flex:1;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Reddet</button>
+      </div>
+    </div>`;
   });
+
+  if (snap.empty && requests.length === 0) {
+    list.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bildirim yok 🏍️</div>';
+    return;
+  }
+
+  const icons = { like: '❤️', comment: '💬', friendRequest: '🤝', follow: '👤', route: '🗺️' };
+  snap.forEach(d => {
+    const n = d.data();
+    html += `<div class="notif-item${n.read ? '' : ' notif-unread'}">
+      <div class="notif-icon">${icons[n.type] || '🔔'}</div>
+      <div><div class="notif-text">${n.text}</div><div class="notif-time">${timeAgo(n.createdAt)}</div></div>
+    </div>`;
+  });
+
+  list.innerHTML = html || '<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bildirim yok 🏍️</div>';
   markRead();
+}
+
+async function acceptRequest(reqId, fromUid, fromName) {
+  if (!window.FB || !window.CU) return;
+  const { db, doc, updateDoc, setDoc } = window.FB;
+  await updateDoc(doc(db, 'friendRequests', reqId), { status: 'accepted' });
+  await setDoc(doc(db, 'users', window.CU.uid, 'friends', fromUid), { uid: fromUid, name: fromName, addedAt: new Date().toISOString() });
+  await setDoc(doc(db, 'users', fromUid, 'friends', window.CU.uid), { uid: window.CU.uid, name: window.CU.name || 'Sürücü', addedAt: new Date().toISOString() });
+  sendNotif(fromUid, 'follow', `<strong>${window.CU.name || 'Biri'}</strong> bağlantı isteğini kabul etti ✓`);
+  playDing();
+  friends.add(fromUid);
+  const el = document.getElementById('req-' + reqId);
+  if (el) el.remove();
+  toast(`${fromName} ile bağlantı kuruldu! 🤝`);
+  const s = document.getElementById('stat-takipci');
+  if (s) s.textContent = parseInt(s.textContent || 0) + 1;
+}
+
+async function declineRequest(reqId) {
+  if (!window.FB) return;
+  const { db, doc, updateDoc } = window.FB;
+  await updateDoc(doc(db, 'friendRequests', reqId), { status: 'declined' });
+  const el = document.getElementById('req-' + reqId);
+  if (el) el.remove();
+  toast('İstek reddedildi');
 }
 async function markRead() {
   document.querySelectorAll('.notif-unread').forEach(n=>n.classList.remove('notif-unread'));
@@ -1506,10 +1621,26 @@ async function sendNotif(toUid,type,text) {
   await addDoc(collection(db,'notifications'),{toUid,type,text,fromUid:window.CU.uid,read:false,createdAt:new Date().toISOString()});
 }
 async function watchNotifBadge() {
-  if(!window.FB||!window.CU) return;
-  const {db,collection,query,where,onSnapshot}=window.FB;
-  const q=query(collection(db,'notifications'),where('toUid','==',window.CU.uid),where('read','==',false));
-  onSnapshot(q,snap=>{const b=document.getElementById('notif-badge');if(b)b.style.display=snap.size>0?'block':'none';});
+  if (!window.FB || !window.CU) return;
+  const { db, collection, query, where, onSnapshot } = window.FB;
+  let prevNotifCount = 0;
+
+  // Bildirim badge
+  const q = query(collection(db, 'notifications'), where('toUid', '==', window.CU.uid), where('read', '==', false));
+  onSnapshot(q, snap => {
+    const b = document.getElementById('notif-badge');
+    if (b) b.style.display = snap.size > 0 ? 'block' : 'none';
+    // Yeni bildirim gelince ding
+    if (snap.size > prevNotifCount && prevNotifCount >= 0) playDing();
+    prevNotifCount = snap.size;
+  });
+
+  // Arkadaş isteği badge — bildirim ikonuna eklenir
+  const rq = query(collection(db, 'friendRequests'), where('toUid', '==', window.CU.uid), where('status', '==', 'pending'));
+  onSnapshot(rq, snap => {
+    const b = document.getElementById('notif-badge');
+    if (b && snap.size > 0) b.style.display = 'block';
+  });
 }
 
 // ── HARITA & GPS ──
@@ -1632,7 +1763,7 @@ async function fetchLive() {
 function calcDist(a,b,c,d){const R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 
 // ── KULLANICI ARA & ARKADAŞ EKLE ──
-let allUsers = [], friends = new Set(), viewingUid = null, searchTimer;
+let allUsers = [], friends = new Set(), pendingRequests = new Set(), viewingUid = null, searchTimer;
 
 function openSearch() {
   openOv('ov-search');
@@ -1652,17 +1783,24 @@ function clearSearch() {
 
 async function loadSuggested() {
   if (!window.FB) return;
-  const { db, collection, getDocs } = window.FB;
+  const { db, collection, getDocs, query, where } = window.FB;
   const snap = await getDocs(collection(db, 'users'));
   const myUid = window.CU?.uid;
   allUsers = [];
   snap.forEach(d => { if (d.data().setupDone && d.id !== myUid) allUsers.push({ uid: d.id, ...d.data() }); });
 
-  // Arkadaş listesini yükle
-  const friendsSnap = await getDocs(collection(db, 'users', myUid, 'friends')).catch(() => null);
-  if (friendsSnap) friendsSnap.forEach(d => friends.add(d.id));
+  // Arkadaş listesi
+  try {
+    const fSnap = await getDocs(collection(db, 'users', myUid, 'friends'));
+    fSnap.forEach(d => friends.add(d.id));
+  } catch(e) {}
 
-  // Öneri: aynı kategori > aynı şehir > diğerleri
+  // Bekleyen istekler
+  try {
+    const pSnap = await getDocs(query(collection(db, 'friendRequests'), where('fromUid','==',myUid), where('status','==','pending')));
+    pSnap.forEach(d => pendingRequests.add(d.data().toUid));
+  } catch(e) {}
+
   const myCat = window.CU?.cat || '';
   const myCity = window.CU?.city || '';
   const scored = allUsers.map(u => ({
@@ -1704,6 +1842,11 @@ function renderUserCards(users, container) {
   }
   container.innerHTML = users.map(u => {
     const isFriend = friends.has(u.uid);
+    const isPending = pendingRequests.has(u.uid);
+    const btnText = isFriend ? 'Bağlantı ✓' : isPending ? 'İstek Gönderildi ⏳' : '+ Ekle';
+    const btnBg = isFriend || isPending ? 'var(--bg2)' : 'var(--odim)';
+    const btnColor = isFriend || isPending ? 'var(--text3)' : 'var(--orange)';
+    const btnBorder = isFriend || isPending ? 'var(--border)' : 'rgba(255,85,0,.2)';
     return `
     <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="viewUserProfile('${u.uid}')">
       ${makeAvatar(u.uid, u.name, u.avatarUrl, 48)}
@@ -1712,32 +1855,39 @@ function renderUserCards(users, container) {
         <div style="font-size:12px;color:var(--text3);margin-top:1px">${u.username ? '@' + u.username + ' · ' : ''}${u.bike || ''}</div>
         <div style="font-size:11px;color:var(--text3)">${u.city || ''} ${u.cat ? '· ' + u.cat : ''}</div>
       </div>
-      <button onclick="event.stopPropagation();quickAddFriend('${u.uid}','${u.name}',this)" 
-        style="flex-shrink:0;background:${isFriend ? 'var(--bg2)' : 'var(--odim)'};color:${isFriend ? 'var(--text3)' : 'var(--orange)'};border:1px solid ${isFriend ? 'var(--border)' : 'rgba(255,85,0,.2)'};border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">
-        ${isFriend ? 'Eklendi ✓' : '+ Ekle'}
+      <button onclick="event.stopPropagation();quickAddFriend('${u.uid}','${u.name}',this)"
+        style="flex-shrink:0;background:${btnBg};color:${btnColor};border:1px solid ${btnBorder};border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">
+        ${btnText}
       </button>
     </div>`;
   }).join('');
 }
 
 async function quickAddFriend(uid, name, btn) {
-  if (friends.has(uid)) return;
-  friends.add(uid);
-  btn.textContent = 'Eklendi ✓';
+  if (friends.has(uid) || pendingRequests.has(uid)) return;
+  pendingRequests.add(uid);
+  btn.textContent = 'İstek Gönderildi ⏳';
   btn.style.background = 'var(--bg2)';
   btn.style.color = 'var(--text3)';
   btn.style.borderColor = 'var(--border)';
-  // Firestore'a kaydet
+
   if (window.FB && window.CU) {
-    const { db, doc, setDoc } = window.FB;
-    await setDoc(doc(db, 'users', window.CU.uid, 'friends', uid), { uid, name, addedAt: new Date().toISOString() });
-    // Karşı tarafa bildirim
-    sendNotif(uid, 'follow', `<strong>${window.CU.name || 'Biri'}</strong> seni ekledi`);
+    const { db, collection, addDoc } = window.FB;
+    // Firestore'a istek yaz
+    await addDoc(collection(db, 'friendRequests'), {
+      fromUid: window.CU.uid,
+      fromName: window.CU.name || 'Sürücü',
+      fromAvatar: window.CU.avatarUrl || '',
+      fromBike: window.CU.bike || '',
+      toUid: uid,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    });
+    // Karşı tarafa bildirim gönder
+    sendNotif(uid, 'friendRequest', `<strong>${window.CU.name || 'Biri'}</strong> seninle bağlantı kurmak istiyor 🤝`);
+    playDing();
   }
-  toast(`${name} eklendi! 🤝`);
-  // Profildeki takipçi sayısını güncelle
-  const el = document.getElementById('stat-takip');
-  if (el) el.textContent = parseInt(el.textContent || 0) + 1;
+  toast(`${name} kişisine bağlantı isteği gönderildi!`);
 }
 
 async function viewUserProfile(uid) {
@@ -1802,6 +1952,23 @@ function msgFromProfile() {
   closeOv('ov-view-profile');
   closeOv('ov-search');
   if (viewingUid) openChat(viewingUid);
+}
+
+// ── SES ──
+let audioCtx = null;
+function playDing() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.setValueAtTime(880, audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.3);
+    g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+    o.start(audioCtx.currentTime);
+    o.stop(audioCtx.currentTime + 0.4);
+  } catch(e) {}
 }
 
 // ── UTILS ──
