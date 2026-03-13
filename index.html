@@ -29,10 +29,11 @@ html,body{height:100%;height:100dvh;margin:0;padding:0;}
 body{background:#F5F2EE;display:flex;justify-content:center;align-items:stretch;height:100dvh;overflow:hidden;font-family:'DM Sans',sans-serif;color:var(--text);}
 .phone{width:100%;max-width:430px;height:100dvh;background:var(--bg);border-radius:0;overflow:hidden;position:relative;display:flex;flex-direction:column;margin:0 auto;}
 
-
 /* PAGES */
 .page{display:none;flex-direction:column;flex:1;overflow:hidden;position:absolute;inset:0;background:var(--bg);}
-.page.active{display:flex;position:relative;}
+.page.active{display:flex;position:relative;flex:1;min-height:0;}
+#pg-app{display:none;flex-direction:column;flex:1;min-height:0;}
+#pg-app.active{display:flex;}
 .scrl{flex:1;overflow-y:auto;overflow-x:hidden;}
 .scrl::-webkit-scrollbar{width:3px;}
 .scrl::-webkit-scrollbar-track{background:transparent;}
@@ -339,7 +340,7 @@ select.inp option{background:white;color:var(--text);}
 .notif-time{font-size:11px;color:var(--text3);margin-top:3px;}
 
 /* Leaflet fixes */
-#leaflet-map { z-index:1; }
+#leaflet-map { z-index:1; flex:1; min-height:0; }
 .leaflet-control { z-index:10 !important; }
 .leaflet-pane { z-index:2 !important; }
 .leaflet-top, .leaflet-bottom { z-index:10 !important; }
@@ -653,10 +654,10 @@ select.inp option{background:white;color:var(--text);}
   </div>
 
   <!-- ══════ ANA UYGULAMA ══════ -->
-  <div class="page" id="pg-app" style="flex-direction:column;">
+  <div class="page" id="pg-app">
 
     <!-- FEED -->
-    <div id="tab-feed" class="tab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="tab-feed" class="tab" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
       <div class="hdr">
         <div class="logo">MOTO</div>
         <div style="display:flex;gap:8px">
@@ -686,7 +687,7 @@ select.inp option{background:white;color:var(--text);}
 
 
     <!-- ROTA TAB -->
-    <div id="tab-rota" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="tab-rota" class="tab" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
       <div class="hdr">
         <div class="logo">ROTALAR</div>
         <button id="rec-btn" onclick="toggleRecording()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">🔴 Kaydet</button>
@@ -713,7 +714,7 @@ select.inp option{background:white;color:var(--text);}
 
 
     <!-- TUR TAB -->
-    <div id="tab-tur" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="tab-tur" class="tab" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
       <div class="hdr"><div class="logo">TURLAR</div><button style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer" onclick="openCreateTour()">+ Tur Oluştur</button></div>
       <div class="scrl">
         <div id="tours-feed">
@@ -728,7 +729,7 @@ select.inp option{background:white;color:var(--text);}
     </div>
 
     <!-- İLAN TAB -->
-    <div id="tab-ilan" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="tab-ilan" class="tab" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
       <div class="hdr"><div class="logo">İLANLAR</div><button style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer" onclick="toast('İlan oluştur açılıyor...')">+ İlan Ver</button></div>
       <div class="scrl">
         <div style="margin:0 14px 12px;padding:10px 14px;background:#ECFDF5;border:1px solid #BBF7D0;border-radius:12px;font-size:12px;color:#166534">✅ <strong>Tüm ilanlar ücretsiz!</strong> Gerçek sürücülerden, doğrulanmış ilanlar.</div>
@@ -780,7 +781,7 @@ select.inp option{background:white;color:var(--text);}
     </div>
 
     <!-- PROFİL TAB -->
-    <div id="tab-profil" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="tab-profil" class="tab" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
       <div class="scrl">
         <div class="prof-cover"></div>
         <div class="prof-body">
