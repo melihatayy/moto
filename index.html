@@ -631,7 +631,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <div class="tab-content" id="tab-ilan">
       <div class="hdr">
         <div class="logo">İLANLAR</div>
-        <button onclick="toast('İlan oluştur yakında!')" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ İlan Ver</button>
+        <button onclick="openCreateListing()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ İlan Ver</button>
       </div>
       <div class="scrl">
         <div style="margin:10px 14px;padding:10px 14px;background:#ECFDF5;border:1px solid #BBF7D0;border-radius:12px;font-size:12px;color:#166534">✅ <strong>Tüm ilanlar ücretsiz!</strong> Gerçek sürücülerden, doğrulanmış ilanlar.</div>
@@ -651,16 +651,23 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <!-- PROFİL TAB -->
     <div class="tab-content" id="tab-profil">
       <div class="scrl">
-        <div class="prof-cover"></div>
+        <div class="prof-cover" id="prof-cover" onclick="triggerCover()" style="cursor:pointer;position:relative">
+          <input type="file" id="cover-input" accept="image/*" style="display:none" onchange="uploadCover(this)">
+          <div style="position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.5);color:white;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:500">📷 Arka plan</div>
+        </div>
         <div class="prof-body">
-          <div class="prof-av-wrap" onclick="triggerAvatar()">
-            <div class="prof-av" id="prof-av"><div class="prof-av-letter" id="prof-av-letter">M</div></div>
-            <div class="prof-cam"><svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:-40px;margin-bottom:10px">
+            <div class="prof-av-wrap" style="margin-top:0;margin-bottom:0" onclick="triggerAvatar()">
+              <div class="prof-av" id="prof-av"><div class="prof-av-letter" id="prof-av-letter">M</div></div>
+              <div class="prof-cam"><svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+            </div>
+            <button onclick="openEditProfile()" style="background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Profili Düzenle</button>
           </div>
           <input type="file" id="av-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
           <div class="prof-name" id="prof-name">Sürücü</div>
           <div class="prof-username" id="prof-username"></div>
           <div class="prof-bike" id="prof-bike">—</div>
+          <div id="prof-bio" style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5;display:none"></div>
           <div class="prof-tags">
             <div class="ptag" id="prof-cat">—</div>
             <div class="ptag" id="prof-city">—</div>
@@ -672,10 +679,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
             <div class="pst"><div class="pstv" id="stat-takipci">0</div><div class="pstl">Takipçi</div></div>
             <div class="pst"><div class="pstv" id="stat-takip">0</div><div class="pstl">Takip</div></div>
           </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-ghost" style="flex:1" onclick="toast('Profil düzenleme yakında!')">Düzenle</button>
-            <button class="btn btn-ghost" style="flex:1;color:var(--red)" onclick="window.fbSignOut()">Çıkış</button>
-          </div>
+          <button class="btn btn-ghost" style="color:var(--red)" onclick="window.fbSignOut()">Çıkış Yap</button>
         </div>
         <div class="conn-section" style="padding-top:14px">
           <div class="conn-title">MOTO'daki Kullanıcılar</div>
@@ -830,7 +834,103 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     </div>
   </div>
 
+  <!-- PROFİL DÜZENLE -->
+  <div class="overlay" id="ov-edit">
+    <div class="hdr">
+      <div class="hdr-btn" onclick="closeOv('ov-edit')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div style="font-size:16px;font-weight:600;margin-left:8px">Profili Düzenle</div>
+      <button onclick="saveProfile()" style="margin-left:auto;background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Kaydet</button>
+    </div>
+    <div class="scrl" style="padding:16px;display:flex;flex-direction:column;gap:14px">
+      <!-- Arka plan fotoğrafı -->
+      <div>
+        <div class="inp-label">Arka Plan Fotoğrafı</div>
+        <div id="edit-cover-preview" onclick="document.getElementById('edit-cover-input').click()" style="width:100%;height:120px;border-radius:12px;overflow:hidden;cursor:pointer;position:relative;border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#FF5500,#FF8800)">
+          <span style="color:white;font-size:13px;font-weight:500">📷 Değiştir</span>
+        </div>
+        <input type="file" id="edit-cover-input" accept="image/*" style="display:none" onchange="previewEditCover(this)">
+      </div>
+      <!-- Ad -->
+      <div><div class="inp-label">Adın Soyadın</div><input class="inp" id="edit-name" placeholder="Adın Soyadın"></div>
+      <!-- Biyografi -->
+      <div><div class="inp-label">Biyografi</div><textarea class="inp" id="edit-bio" rows="3" placeholder="Kendin hakkında birkaç kelime..." style="resize:none"></textarea></div>
+      <!-- Şehir -->
+      <div><div class="inp-label">Şehir</div>
+        <select class="inp" id="edit-city">
+          <option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option><option>Adana</option><option>Konya</option><option>Diğer</option>
+        </select>
+      </div>
+      <!-- Motor -->
+      <div><div class="inp-label">Marka</div>
+        <select class="inp" id="edit-brand" onchange="fillEditModels()">
+          <option value="">— Marka seç —</option>
+          <option value="aprilia">Aprilia</option><option value="bajaj">Bajaj</option><option value="bmw">BMW Motorrad</option><option value="cfmoto">CFmoto</option><option value="honda">Honda</option><option value="kawasaki">Kawasaki</option><option value="kove">Kove</option><option value="mv_agusta">MV Agusta</option><option value="suzuki">Suzuki</option><option value="vespa">Vespa</option><option value="voge">Voge</option><option value="yamaha">Yamaha</option><option value="zontes">Zontes</option><option value="diger">Diğer</option>
+        </select>
+      </div>
+      <div><div class="inp-label">Model</div><select class="inp" id="edit-model" disabled><option>— Önce marka seç —</option></select></div>
+      <div><div class="inp-label">Model Yılı</div>
+        <select class="inp" id="edit-year">
+          <option value="">— Yıl —</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014 ve öncesi</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- İLAN OLUŞTUR -->
+  <div class="overlay" id="ov-listing">
+    <div class="hdr">
+      <div class="hdr-btn" onclick="closeOv('ov-listing')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div style="font-size:16px;font-weight:600;margin-left:8px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;font-size:20px">İLAN VER</div>
+      <button onclick="publishListing()" style="margin-left:auto;background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer" id="listing-btn">Yayınla</button>
+    </div>
+    <div class="scrl" style="padding:16px;display:flex;flex-direction:column;gap:14px">
+      <!-- Fotoğraflar -->
+      <div>
+        <div class="inp-label">Fotoğraflar (en fazla 5)</div>
+        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px" id="listing-photos-row">
+          <div onclick="document.getElementById('listing-photo-input').click()" style="width:80px;height:80px;border-radius:10px;border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:22px;color:var(--text3)">+</div>
+        </div>
+        <input type="file" id="listing-photo-input" accept="image/*" multiple style="display:none" onchange="addListingPhotos(this)">
+      </div>
+      <!-- Marka & Model -->
+      <div><div class="inp-label">Marka</div>
+        <select class="inp" id="l-brand" onchange="fillListingModels()">
+          <option value="">— Marka seç —</option>
+          <option value="aprilia">Aprilia</option><option value="bajaj">Bajaj</option><option value="bmw">BMW Motorrad</option><option value="cfmoto">CFmoto</option><option value="honda">Honda</option><option value="kawasaki">Kawasaki</option><option value="kove">Kove</option><option value="mv_agusta">MV Agusta</option><option value="suzuki">Suzuki</option><option value="vespa">Vespa</option><option value="voge">Voge</option><option value="yamaha">Yamaha</option><option value="zontes">Zontes</option><option value="diger">Diğer</option>
+        </select>
+      </div>
+      <div><div class="inp-label">Model</div><select class="inp" id="l-model" disabled onchange="fillListingCat()"><option>— Önce marka seç —</option></select></div>
+      <div><div class="inp-label">Kategori</div>
+        <select class="inp" id="l-cat"><option>Supersport</option><option>Adventure / Touring</option><option>Naked / Streetfighter</option><option>Cafe Racer / Retro</option><option>Enduro / Off-Road</option><option>Scooter / Maxi Scooter</option><option>Cruiser</option></select>
+      </div>
+      <!-- Detaylar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div class="inp-label">Model Yılı</div><select class="inp" id="l-year"><option value="">— Yıl —</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014 ve öncesi</option></select></div>
+        <div><div class="inp-label">Kilometre</div><input class="inp" id="l-km" type="number" placeholder="12400"></div>
+      </div>
+      <div><div class="inp-label">Fiyat (₺)</div><input class="inp" id="l-price" type="number" placeholder="285000"></div>
+      <div><div class="inp-label">Şehir</div>
+        <select class="inp" id="l-city"><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option><option>Adana</option><option>Konya</option><option>Diğer</option></select>
+      </div>
+      <div><div class="inp-label">Açıklama</div><textarea class="inp" id="l-desc" rows="3" placeholder="Motor hakkında bilgi ver..." style="resize:none"></textarea></div>
+      <div id="listing-status" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--orange)"></div>
+    </div>
+  </div>
+
+  <!-- ONAY MODALI -->
+  <div class="modal-bg" id="mod-confirm">
+    <div class="modal-sheet" style="text-align:center">
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px" id="confirm-title">Emin misin?</div>
+      <div style="font-size:14px;color:var(--text3);margin-bottom:24px" id="confirm-msg">Bu işlem geri alınamaz.</div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" style="flex:1" onclick="closeModal('mod-confirm')">Hayır</button>
+        <button class="btn btn-orange" style="flex:1;background:var(--red)" id="confirm-yes">Evet, Sil</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
+
 
   <div class="toast" id="toast"></div>
 </div>
@@ -896,6 +996,7 @@ function enterApp() {
   loadFeed();
   loadStories();
   loadTours();
+  loadListings();
   loadUsers();
   loadMyRoutes();
   loadProfilePosts();
@@ -1056,6 +1157,9 @@ function applyProfile(d) {
   if(d.bike) document.getElementById('prof-bike').textContent=d.bike;
   if(d.cat) document.getElementById('prof-cat').textContent=d.cat;
   if(d.city) document.getElementById('prof-city').textContent=d.city;
+  const bioEl=document.getElementById('prof-bio');
+  if(bioEl){bioEl.textContent=d.bio||'';bioEl.style.display=d.bio?'block':'none';}
+  if(d.coverUrl){const c=document.getElementById('prof-cover');if(c)c.style.background=`url('${d.coverUrl}') center/cover no-repeat`;}
 }
 function triggerAvatar(){document.getElementById('av-input').click();}
 async function uploadAvatar(inp) {
@@ -1474,6 +1578,229 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 function timeAgo(iso){if(!iso)return'';const d=(Date.now()-new Date(iso).getTime())/1000;if(d<60)return'Az önce';if(d<3600)return Math.floor(d/60)+' dk önce';if(d<86400)return Math.floor(d/3600)+' sa önce';return Math.floor(d/86400)+' gün önce';}
 function filterCat(el){document.querySelectorAll('.catscrl .cat').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
 
+// ── PROFİL DÜZENLE ──
+let editCoverFile = null;
+
+function openEditProfile() {
+  const cu = window.CU || {};
+  document.getElementById('edit-name').value = cu.name || '';
+  document.getElementById('edit-bio').value = cu.bio || '';
+  const cityEl = document.getElementById('edit-city');
+  [...cityEl.options].forEach(o => { o.selected = o.text === cu.city; });
+  // Cover preview
+  const prev = document.getElementById('edit-cover-preview');
+  if (cu.coverUrl) prev.style.background = `url('${cu.coverUrl}') center/cover no-repeat`;
+  editCoverFile = null;
+  openOv('ov-edit');
+}
+
+function previewEditCover(inp) {
+  const f = inp.files[0]; if (!f) return;
+  editCoverFile = f;
+  const r = new FileReader();
+  r.onload = e => { document.getElementById('edit-cover-preview').style.background = `url('${e.target.result}') center/cover no-repeat`; };
+  r.readAsDataURL(f);
+}
+
+function fillEditModels() {
+  const b = document.getElementById('edit-brand').value;
+  const ms = document.getElementById('edit-model');
+  ms.innerHTML = '<option value="">— Model seç —</option>';
+  if (!b || b === 'diger') { ms.disabled = true; return; }
+  ms.disabled = false;
+  (BIKES[b]?.models || []).forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; ms.appendChild(o); });
+}
+
+async function saveProfile() {
+  const cu = window.CU || {};
+  const name = document.getElementById('edit-name').value.trim() || cu.name || 'Sürücü';
+  const bio = document.getElementById('edit-bio').value.trim();
+  const city = document.getElementById('edit-city').value;
+  const brand = document.getElementById('edit-brand').value;
+  const model = document.getElementById('edit-model').value;
+  const year = document.getElementById('edit-year').value;
+  const bike = brand && model ? model + (year ? ' · ' + year : '') : cu.bike || '';
+
+  let coverUrl = cu.coverUrl || '';
+  if (editCoverFile) {
+    toast('Yükleniyor...');
+    coverUrl = await uploadCloud(editCoverFile);
+  }
+
+  const data = { ...cu, name, bio, city, bike, coverUrl };
+  window.CU = data;
+  await window.fbSaveProfile(data);
+  applyProfile(data);
+  closeOv('ov-edit');
+  toast('Profil güncellendi ✓');
+}
+
+function triggerCover() { document.getElementById('cover-input').click(); }
+async function uploadCover(inp) {
+  const f = inp.files[0]; if (!f) return;
+  toast('Arka plan yükleniyor...');
+  const url = await uploadCloud(f);
+  document.getElementById('prof-cover').style.background = `url('${url}') center/cover no-repeat`;
+  const data = { ...window.CU, coverUrl: url };
+  window.CU = data;
+  window.fbSaveProfile(data);
+  toast('Arka plan güncellendi ✓');
+}
+
+// ── İLANLAR ──
+let listingPhotos = [];
+
+function openCreateListing() {
+  listingPhotos = [];
+  document.getElementById('listing-photos-row').innerHTML = `<div onclick="document.getElementById('listing-photo-input').click()" style="width:80px;height:80px;border-radius:10px;border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:22px;color:var(--text3)">+</div>`;
+  ['l-brand','l-model','l-year','l-km','l-price','l-desc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('l-model').disabled = true;
+  openOv('ov-listing');
+}
+
+function fillListingModels() {
+  const b = document.getElementById('l-brand').value;
+  const ms = document.getElementById('l-model');
+  ms.innerHTML = '<option value="">— Model seç —</option>';
+  if (!b || b === 'diger') { ms.disabled = true; return; }
+  ms.disabled = false;
+  (BIKES[b]?.models || []).forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; ms.appendChild(o); });
+}
+
+function fillListingCat() {
+  const b = document.getElementById('l-brand').value;
+  const m = document.getElementById('l-model').value;
+  const cat = BIKES[b]?.cats[m];
+  if (!cat) return;
+  const cs = document.getElementById('l-cat');
+  [...cs.options].forEach(o => { o.selected = o.text === cat; });
+}
+
+async function addListingPhotos(inp) {
+  const files = [...inp.files].slice(0, 5 - listingPhotos.length);
+  const row = document.getElementById('listing-photos-row');
+  for (const f of files) {
+    const reader = new FileReader();
+    await new Promise(res => {
+      reader.onload = e => {
+        const idx = listingPhotos.length;
+        listingPhotos.push({ file: f, preview: e.target.result });
+        const div = document.createElement('div');
+        div.style.cssText = 'width:80px;height:80px;border-radius:10px;overflow:hidden;position:relative;flex-shrink:0;';
+        div.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover"><button onclick="removeListingPhoto(${idx},this.parentNode)" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer">✕</button>`;
+        row.insertBefore(div, row.lastElementChild);
+        res();
+      };
+      reader.readAsDataURL(f);
+    });
+  }
+  if (listingPhotos.length >= 5) row.lastElementChild.style.display = 'none';
+}
+
+function removeListingPhoto(idx, el) {
+  listingPhotos.splice(idx, 1);
+  el.remove();
+  document.getElementById('listing-photos-row').lastElementChild.style.display = 'flex';
+}
+
+async function publishListing() {
+  const brand = document.getElementById('l-brand').value;
+  const model = document.getElementById('l-model').value;
+  const price = document.getElementById('l-price').value;
+  if (!brand) { toast('Marka seç'); return; }
+  if (!price) { toast('Fiyat gir'); return; }
+
+  const btn = document.getElementById('listing-btn');
+  btn.textContent = 'Yükleniyor...'; btn.disabled = true;
+  const st = document.getElementById('listing-status');
+  st.style.display = 'block'; st.textContent = 'Fotoğraflar yükleniyor... ⏳';
+
+  const photoUrls = [];
+  for (const p of listingPhotos) {
+    const url = await uploadCloud(p.file);
+    photoUrls.push(url);
+  }
+
+  const cu = window.CU || {};
+  const { db, collection, addDoc } = window.FB;
+  await addDoc(collection(db, 'listings'), {
+    uid: cu.uid || '',
+    userName: cu.name || 'Sürücü',
+    userAvatar: cu.avatarUrl || '',
+    brand: document.getElementById('l-brand').options[document.getElementById('l-brand').selectedIndex]?.text || brand,
+    model, cat: document.getElementById('l-cat').value,
+    year: document.getElementById('l-year').value,
+    km: document.getElementById('l-km').value,
+    price: parseInt(price),
+    city: document.getElementById('l-city').value,
+    desc: document.getElementById('l-desc').value,
+    photos: photoUrls,
+    createdAt: new Date().toISOString()
+  });
+
+  btn.disabled = false; btn.textContent = 'Yayınla';
+  st.style.display = 'none';
+  closeOv('ov-listing');
+  toast('İlan yayınlandı! 🏍️');
+  loadListings();
+}
+
+async function loadListings() {
+  if (!window.FB) return;
+  const { db, collection, query, orderBy, getDocs, limit } = window.FB;
+  const q = query(collection(db, 'listings'), orderBy('createdAt', 'desc'), limit(30));
+  const snap = await getDocs(q);
+  const el = document.getElementById('listings-feed');
+  if (snap.empty) { el.innerHTML = '<div class="empty-state"><div class="empty-title">Henüz ilan yok</div><div class="empty-sub">İlk ilanı sen ver!</div></div>'; return; }
+  const listings = []; snap.forEach(d => listings.push({ id: d.id, ...d.data() }));
+  el.innerHTML = listings.map(l => `
+    <div class="lcard">
+      <div class="limg">
+        ${l.photos?.length ? `<img src="${l.photos[0]}" style="width:100%;height:100%;object-fit:cover">` : `<div style="font-size:48px;color:var(--border2)">🏍️</div>`}
+        <div class="lfree">ÜCRETSİZ</div>
+        <div class="lprice">${parseInt(l.price).toLocaleString('tr-TR')} ₺</div>
+        ${l.uid === window.CU?.uid ? `<button onclick="deleteListing('${l.id}')" style="position:absolute;top:10px;right:10px;background:rgba(220,38,38,.8);color:white;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sil</button>` : ''}
+      </div>
+      <div class="lbody">
+        <div class="lcat">${l.brand?.toUpperCase()} · ${l.cat?.toUpperCase()}</div>
+        <div class="lname">${l.model} ${l.year ? '· ' + l.year : ''}</div>
+        <div class="ldetail">
+          ${l.km ? `<span>📍 ${parseInt(l.km).toLocaleString('tr-TR')} km</span>` : ''}
+          <span>🏙️ ${l.city || '—'}</span>
+        </div>
+      </div>
+      <div class="lseller">
+        ${makeAvatar(l.uid, l.userName, l.userAvatar, 28)}
+        <div class="lsname" style="margin-left:8px">${l.userName || 'Sürücü'}</div>
+        <div class="lverif">✓ Doğrulandı</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function deleteListing(id) {
+  confirmAction('Bu ilanı silmek istiyor musun?', async () => {
+    const { db, doc, deleteDoc } = window.FB;
+    await deleteDoc(doc(db, 'listings', id));
+    toast('İlan silindi'); loadListings();
+  });
+}
+
+// ── ONAY MODALI ──
+let confirmCallback = null;
+function confirmAction(msg, cb) {
+  confirmCallback = cb;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-yes').onclick = async () => {
+    closeModal('mod-confirm');
+    if (confirmCallback) await confirmCallback();
+    confirmCallback = null;
+  };
+  openModal('mod-confirm');
+}
+
+
+
 // ── STORIES ──
 let storyFile=null, allStories=[], svIdx=0, svTimer=null;
 
@@ -1571,23 +1898,25 @@ async function deleteStory(){
 
 // ── SİLME BUTONLARI ──
 async function deletePost(postId){
-  if(!confirm('Bu gönderiyi silmek istiyor musun?'))return;
-  if(!window.FB) return;
-  const {db,doc,deleteDoc}=window.FB;
-  await deleteDoc(doc(db,'posts',postId));
-  toast('Gönderi silindi');loadFeed();loadProfilePosts();
+  confirmAction('Bu gönderiyi silmek istiyor musun?', async () => {
+    const {db,doc,deleteDoc}=window.FB;
+    await deleteDoc(doc(db,'posts',postId));
+    toast('Gönderi silindi');loadFeed();loadProfilePosts();
+  });
 }
 async function deleteTour(tourId){
-  if(!confirm('Bu turu silmek istiyor musun?'))return;
-  const {db,doc,deleteDoc}=window.FB;
-  await deleteDoc(doc(db,'tours',tourId));
-  toast('Tur silindi');loadTours();
+  confirmAction('Bu turu silmek istiyor musun?', async () => {
+    const {db,doc,deleteDoc}=window.FB;
+    await deleteDoc(doc(db,'tours',tourId));
+    toast('Tur silindi');loadTours();
+  });
 }
 async function deleteRoute(routeId){
-  if(!confirm('Bu rotayı silmek istiyor musun?'))return;
-  const {db,doc,deleteDoc}=window.FB;
-  await deleteDoc(doc(db,'routes',routeId));
-  toast('Rota silindi');loadMyRoutes();loadRoutesFeed();
+  confirmAction('Bu rotayı silmek istiyor musun?', async () => {
+    const {db,doc,deleteDoc}=window.FB;
+    await deleteDoc(doc(db,'routes',routeId));
+    toast('Rota silindi');loadMyRoutes();loadRoutesFeed();
+  });
 }
 
 // ── PROFİL BİRİKİMİ ──
