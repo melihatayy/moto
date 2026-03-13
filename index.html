@@ -27,11 +27,12 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;height:100dvh;margin:0;padding:0;}
 body{background:#F5F2EE;display:flex;justify-content:center;align-items:stretch;height:100dvh;overflow:hidden;font-family:'DM Sans',sans-serif;color:var(--text);}
-.phone{width:100%;max-width:430px;height:100dvh;background:var(--bg);border-radius:0;overflow:hidden;position:relative;display:flex;flex-direction:column;margin:0 auto;}
+.phone{width:100%;max-width:430px;height:100dvh;background:var(--bg);border-radius:0;overflow:hidden;position:relative;display:flex;flex-direction:column;margin:0 auto;isolation:isolate;}
 
 /* PAGES */
-.page{display:none;flex-direction:column;flex:1;overflow:hidden;position:absolute;inset:0;background:var(--bg);}
-.page.active{display:flex;position:relative;flex:1;min-height:0;}
+.page{display:none;flex-direction:column;width:100%;background:var(--bg);}
+.page.active{display:flex;flex:1;min-height:0;}
+#pg-lang.active,#pg-welcome.active,#pg-auth.active,#pg-s1.active,#pg-s2.active,#pg-s3.active{flex:1;overflow-y:auto;}
 #pg-app{display:none;flex-direction:column;flex:1;min-height:0;}
 #pg-app.active{display:flex;}
 .scrl{flex:1;overflow-y:auto;overflow-x:hidden;}
@@ -473,7 +474,7 @@ select.inp option{background:white;color:var(--text);}
 
 
   <!-- ══════ LANG ══════ -->
-  <div class="page active" id="pg-lang">
+  <div class="page" id="pg-lang" style="display:flex">
     <div class="lang-wrap">
       <div class="lang-logo">MOTO</div>
       <div class="lang-sub">Dil seçin / Select language</div>
@@ -486,7 +487,7 @@ select.inp option{background:white;color:var(--text);}
   </div>
 
   <!-- ══════ WELCOME ══════ -->
-  <div class="page" id="pg-welcome" style="background:var(--text);">
+  <div class="page" id="pg-welcome" style="display:none;background:var(--text)" style="background:var(--text);">
     <div class="welcome-bg"></div>
     <div class="welcome-emoji">🏍️</div>
     <div class="welcome-logo">MOTO</div>
@@ -500,7 +501,7 @@ select.inp option{background:white;color:var(--text);}
   </div>
 
   <!-- ══════ AUTH ══════ -->
-  <div class="page" id="pg-auth">
+  <div class="page" id="pg-auth" style="display:none">
     <div class="scrl"><div class="auth-body">
       <div class="auth-logo">MOTO</div>
       <div class="auth-title" id="auth-title">Hesap Oluştur</div>
@@ -523,7 +524,7 @@ select.inp option{background:white;color:var(--text);}
   </div>
 
   <!-- ══════ SETUP 1: KİŞİSEL ══════ -->
-  <div class="page" id="pg-s1">
+  <div class="page" id="pg-s1" style="display:none">
     <div class="setup-hdr"><div class="setup-back" onclick="showPage('pg-auth')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="setup-step">1 / 3</div></div>
     <div class="setup-prog"><div class="setup-prog-fill" style="width:33%"></div></div>
     <div class="scrl"><div class="setup-body">
@@ -543,7 +544,7 @@ select.inp option{background:white;color:var(--text);}
   </div>
 
   <!-- ══════ SETUP 2: MOTOR ══════ -->
-  <div class="page" id="pg-s2">
+  <div class="page" id="pg-s2" style="display:none">
     <div class="setup-hdr"><div class="setup-back" onclick="showPage('pg-s1')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="setup-step">2 / 3</div></div>
     <div class="setup-prog"><div class="setup-prog-fill" style="width:66%"></div></div>
     <div class="scrl"><div class="setup-body">
@@ -631,7 +632,7 @@ select.inp option{background:white;color:var(--text);}
   </div>
 
   <!-- ══════ SETUP 3: DOĞRULAMA ══════ -->
-  <div class="page" id="pg-s3">
+  <div class="page" id="pg-s3" style="display:none">
     <div class="setup-hdr"><div class="setup-back" onclick="showPage('pg-s2')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="setup-step">3 / 3</div></div>
     <div class="setup-prog"><div class="setup-prog-fill" style="width:100%"></div></div>
     <div class="scrl"><div class="setup-body">
@@ -654,7 +655,7 @@ select.inp option{background:white;color:var(--text);}
   </div>
 
   <!-- ══════ ANA UYGULAMA ══════ -->
-  <div class="page" id="pg-app">
+  <div class="page" id="pg-app" style="display:none;position:relative;">
 
     <!-- FEED -->
     <div id="tab-feed" class="tab" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
@@ -1091,10 +1092,15 @@ function populateModels() {
 
 // ── PAGE NAV ──
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.position = 'absolute'; });
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active');
+    p.style.display = 'none';
+  });
   const pg = document.getElementById(id);
-  pg.classList.add('active');
-  pg.style.position = 'relative';
+  if (pg) {
+    pg.classList.add('active');
+    pg.style.display = 'flex';
+  }
 }
 
 // ── LANG ──
