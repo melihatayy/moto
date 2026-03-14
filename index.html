@@ -754,11 +754,20 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   <div class="overlay" id="ov-post">
     <div class="hdr"><div class="hdr-btn" onclick="closeOv('ov-post')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div style="font-size:16px;font-weight:600;margin-left:8px">Yeni Paylaşım</div><button onclick="publishPost()" style="margin-left:auto;background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer" id="post-btn">Paylaş</button></div>
     <div class="scrl" style="padding:16px">
-      <div id="post-preview" onclick="document.getElementById('post-file').click()" style="width:100%;height:220px;background:var(--bg2);border:2px dashed var(--border2);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;margin-bottom:16px;overflow:hidden;position:relative">
+      <div id="post-preview" style="width:100%;height:220px;background:var(--bg2);border:2px dashed var(--border2);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;overflow:hidden;position:relative">
         <svg width="32" height="32" fill="none" stroke="var(--text3)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span style="font-size:13px;color:var(--text3)">Fotoğraf ekle</span>
+        <div style="display:flex;gap:10px">
+          <button onclick="document.getElementById('post-camera').click()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px">
+            <svg width="15" height="15" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Kamera
+          </button>
+          <button onclick="document.getElementById('post-file').click()" style="background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">
+            Galeri
+          </button>
+        </div>
         <img id="post-img" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
       </div>
+      <input type="file" id="post-camera" accept="image/*" capture="environment" style="display:none" onchange="previewPost(this)">
       <input type="file" id="post-file" accept="image/*" style="display:none" onchange="previewPost(this)">
       <textarea class="inp" id="post-caption" rows="3" placeholder="Ne paylaşmak istiyorsun?" style="resize:none"></textarea>
       <div id="post-status" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--orange)"></div>
@@ -824,11 +833,20 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   <div class="overlay" id="ov-story">
     <div class="hdr"><div class="hdr-btn" onclick="closeOv('ov-story')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div style="font-size:16px;font-weight:600;margin-left:8px">Story Ekle</div><button onclick="publishStory()" style="margin-left:auto;background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Paylaş</button></div>
     <div class="scrl" style="padding:16px">
-      <div id="story-preview" onclick="document.getElementById('story-file').click()" style="width:100%;height:280px;background:var(--bg2);border:2px dashed var(--border2);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;overflow:hidden;position:relative;margin-bottom:16px">
+      <div id="story-preview" style="width:100%;height:280px;background:var(--bg2);border:2px dashed var(--border2);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;overflow:hidden;position:relative;margin-bottom:16px">
         <svg width="32" height="32" fill="none" stroke="var(--text3)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span style="font-size:13px;color:var(--text3)">Fotoğraf seç</span>
+        <div style="display:flex;gap:10px">
+          <button onclick="document.getElementById('story-camera').click()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px">
+            <svg width="15" height="15" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Kamera
+          </button>
+          <button onclick="document.getElementById('story-file').click()" style="background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">
+            Galeri
+          </button>
+        </div>
         <img id="story-img" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
       </div>
+      <input type="file" id="story-camera" accept="image/*" capture="environment" style="display:none" onchange="previewStory(this)">
       <input type="file" id="story-file" accept="image/*" style="display:none" onchange="previewStory(this)">
       <input class="inp" id="story-caption" placeholder="Ne söylemek istiyorsun? (opsiyonel)" style="margin-bottom:8px">
       <div style="font-size:12px;color:var(--text3)">⏱ Story'ler 24 saat sonra otomatik silinir</div>
@@ -889,8 +907,12 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <div>
         <div class="inp-label">Fotoğraflar (en fazla 5)</div>
         <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px" id="listing-photos-row">
+          <div onclick="document.getElementById('listing-camera').click()" style="width:80px;height:80px;border-radius:10px;background:var(--orange);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+            <svg width="22" height="22" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
           <div onclick="document.getElementById('listing-photo-input').click()" style="width:80px;height:80px;border-radius:10px;border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:22px;color:var(--text3)">+</div>
         </div>
+        <input type="file" id="listing-camera" accept="image/*" capture="environment" multiple style="display:none" onchange="addListingPhotos(this)">
         <input type="file" id="listing-photo-input" accept="image/*" multiple style="display:none" onchange="addListingPhotos(this)">
       </div>
       <!-- Marka & Model -->
@@ -975,9 +997,18 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <div style="font-size:13px;color:var(--text3);margin-bottom:4px" id="vp-username"></div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--orange);margin-bottom:6px" id="vp-bike"></div>
         <div id="vp-bio" style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5"></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
           <div class="ptag" id="vp-cat"></div>
           <div class="ptag" id="vp-city"></div>
+        </div>
+        <!-- Stats — sadece bağlantılara görünür -->
+        <div id="vp-stats" style="display:none;margin-bottom:0">
+          <div class="prof-stats">
+            <div class="pst"><div class="pstv" id="vp-stat-tur">0</div><div class="pstl">Tur</div></div>
+            <div class="pst"><div class="pstv" id="vp-stat-km">0</div><div class="pstl">km</div></div>
+            <div class="pst"><div class="pstv" id="vp-stat-conn">0</div><div class="pstl">Bağlantı</div></div>
+            <div class="pst"><div class="pstv" id="vp-stat-rota">0</div><div class="pstl">Rota</div></div>
+          </div>
         </div>
       </div>
       <!-- Bağlantı yoksa gizli profil uyarısı -->
@@ -987,9 +1018,11 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <div style="font-size:13px;color:var(--text3);line-height:1.6">Gönderileri görmek için önce bağlantı kurman gerekiyor.</div>
       </div>
       <div id="vp-content">
-        <div style="padding:0 16px">
-          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin-bottom:10px">Gönderiler</div>
-          <div id="vp-posts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px"></div>
+        <div style="padding:0 16px 16px">
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin-bottom:10px;padding-top:14px">Gönderiler</div>
+          <div id="vp-posts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;margin:0 -16px"></div>
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin:14px 0 10px">Son Rotalar</div>
+          <div id="vp-routes" class="routes-grid" style="padding:0"></div>
         </div>
       </div>
     </div>
@@ -1297,8 +1330,8 @@ async function loadFeed() {
   el.innerHTML=posts.map(p=>`
     <div class="post" data-uid="${p.uid}" data-id="${p.id}">
       <div class="post-head">
-        ${makeAvatar(p.uid,p.name,p.avatarUrl)}
-        <div><div class="post-name">${p.name||'Sürücü'}</div><div class="post-bike">${p.bike||''}</div></div>
+        <div onclick="viewUserProfile('${p.uid}')" style="cursor:pointer">${makeAvatar(p.uid,p.name,p.avatarUrl)}</div>
+        <div onclick="viewUserProfile('${p.uid}')" style="cursor:pointer;flex:1"><div class="post-name">${p.name||'Sürücü'}</div><div class="post-bike">${p.bike||''}</div></div>
         <div class="vbadge">✓ Doğrulandı</div>
       </div>
       ${p.photoUrl?`<div class="post-img"><img src="${p.photoUrl}" loading="lazy"></div>`:''}
@@ -1445,7 +1478,7 @@ async function loadTours() {
       </div>
       <div class="tc-info">📍 ${t.from||'—'} → ${t.to||'—'} &nbsp;|&nbsp; 🏍️ ${(t.participants||[]).length} katılımcı</div>
       <div class="tc-bottom">
-        <div class="tc-by">${t.userName||'Sürücü'} tarafından</div>
+        <div class="tc-by" onclick="viewUserProfile('${t.uid}')" style="cursor:pointer">${t.userName||'Sürücü'} tarafından</div>
         <div style="display:flex;gap:8px">
           ${t.uid===window.CU?.uid?`<button onclick="deleteTour('${t.id}')" style="background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Sil</button>`:''}
           <button class="tc-join" onclick="joinTour('${t.name}')">Katıl</button>
@@ -1545,15 +1578,15 @@ async function loadDMList() {
     const preview = chatPreviews[u.uid];
     const unread = unreadCounts[u.uid] || 0;
     return `
-    <div class="dm-person" onclick="openChat('${u.uid}')">
-      <div class="dm-pav">${makeAvatar(u.uid, u.name, u.avatarUrl, 46)}</div>
+    <div class="dm-person" style="cursor:pointer">
+      <div class="dm-pav" onclick="viewUserProfile('${u.uid}')">${makeAvatar(u.uid, u.name, u.avatarUrl, 46)}</div>
       <div class="dm-pinfo" style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div class="dm-pname">${u.name || 'Sürücü'}</div>
-          ${preview?.updatedAt ? `<div style="font-size:10px;color:var(--text3)">${timeAgo(preview.updatedAt)}</div>` : ''}
+        <div style="display:flex;align-items:center;justify-content:space-between" onclick="openChat('${u.uid}')">
+          <div class="dm-pname" style="font-weight:${unread > 0 ? '700' : '600'}">${u.name || 'Sürücü'}</div>
+          ${preview?.updatedAt ? `<div style="font-size:10px;color:${unread > 0 ? '#CA8A04' : 'var(--text3)'};font-weight:${unread > 0 ? '600' : '400'}">${timeAgo(preview.updatedAt)}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
-          <div style="font-size:12px;color:${unread > 0 ? 'var(--text2)' : 'var(--text3)'};font-weight:${unread > 0 ? '500' : '400'};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:200px">${preview?.lastMsg || u.bike || ''}</div>
+          <div style="font-size:12px;color:${unread > 0 ? '#92400E' : 'var(--text3)'};font-weight:${unread > 0 ? '700' : '400'};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:200px;background:${unread > 0 ? '#FEF9C3' : 'transparent'};padding:${unread > 0 ? '1px 6px' : '0'};border-radius:${unread > 0 ? '6px' : '0'}">${preview?.lastMsg || u.bike || ''}</div>
           ${unread > 0 ? `<div style="background:var(--orange);color:white;border-radius:20px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:0 5px;flex-shrink:0">${unread}</div>` : ''}
         </div>
       </div>
@@ -1682,12 +1715,7 @@ async function _sendMsg(content) {
     updatedAt: new Date().toISOString(),
     unreadFor: chatPartner.uid
   }, { merge: true });
-  // Karşı tarafa bildirim gönder
-  sendNotif(
-    chatPartner.uid,
-    'message',
-    `<strong>${window.CU.name || 'Biri'}</strong>: ${preview}`
-  );
+  // Mesaj bildirimi notifications'a gitmesin — sadece DM badge güncellenir
 }
 
 // ── BİLDİRİMLER ──
@@ -1724,7 +1752,7 @@ async function loadNotifs() {
   requests.forEach(r => {
     html += `<div style="background:var(--odim);border:1px solid rgba(255,85,0,.15);border-radius:14px;padding:14px;margin-bottom:10px" id="req-${r.id}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        ${makeAvatar(r.fromUid, r.fromName, r.fromAvatar, 42)}
+        <div onclick="closeOv('ov-notif');viewUserProfile('${r.fromUid}')" style="cursor:pointer">${makeAvatar(r.fromUid, r.fromName, r.fromAvatar, 42)}</div>
         <div style="flex:1">
           <div style="font-size:13px;font-weight:600;color:var(--text)"><strong>${r.fromName}</strong> seninle bağlantı kurmak istiyor 🤝</div>
           <div style="font-size:11px;color:var(--text3);margin-top:2px">${r.fromBike || ''} · ${timeAgo(r.createdAt)}</div>
@@ -1749,6 +1777,7 @@ async function loadNotifs() {
 
   const icons = { like: '❤️', comment: '💬', friendRequest: '🤝', follow: '👤', route: '🗺️' };
   notifs.forEach(n => {
+    if (n.type === 'message') return; // Mesajlar DM'e gidiyor, bildirimde gösterme
     html += `
     <div class="notif-item${n.read ? '' : ' notif-unread'}">
       <div class="notif-icon">${icons[n.type] || '🔔'}</div>
@@ -1886,11 +1915,11 @@ async function watchNotifBadge() {
     if (b && snap.size > 0) b.style.display = 'block';
   });
 
-  // DM badge — yeni mesaj gelince mesaj ikonuna da badge koy
+  // DM badge — unreadFor ile izle
   let prevMsgCount = -1;
-  onSnapshot(collection(db, 'chats'), async chatsSnap => {
-    let unread = 0;
+  onSnapshot(collection(db, 'chats'), chatsSnap => {
     const myUid = window.CU.uid;
+    let unread = 0;
     chatsSnap.forEach(cd => {
       const d = cd.data();
       if (d.participants?.includes(myUid) && d.unreadFor === myUid) unread++;
@@ -1980,7 +2009,7 @@ async function loadRoutesFeed() {
   el.innerHTML=routes.map(r=>`
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
       ${makeAvatar(r.uid,r.userName,null,34)}
-      <div style="flex:1"><div style="font-size:13px;font-weight:600">${r.name}</div><div style="font-size:11px;color:var(--text3)">${r.userName} · ${r.distKm} km</div></div>
+      <div style="flex:1;cursor:pointer" onclick="viewUserProfile('${r.uid}')"><div style="font-size:13px;font-weight:600">${r.name}</div><div style="font-size:11px;color:var(--text3)">${r.userName} · ${r.distKm} km</div></div>
       ${r.uid===window.CU?.uid?`<button onclick="deleteRoute('${r.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:4px">✕</button>`:''}
     </div>
   `).join('');
@@ -2221,8 +2250,16 @@ async function viewUserProfile(uid) {
   locked.style.display = isFriend ? 'none' : 'block';
   content.style.display = isFriend ? 'block' : 'none';
 
+  // Stats — sadece bağlantılara göster
+  const statsEl = document.getElementById('vp-stats');
+  if (statsEl) statsEl.style.display = isFriend ? 'block' : 'none';
+
   openOv('ov-view-profile');
-  if (isFriend) loadUserPosts(uid);
+  if (isFriend) {
+    loadUserPosts(uid);
+    loadUserStats(uid);
+    loadUserRoutes(uid);
+  }
 }
 
 async function loadUserPosts(uid) {
@@ -2231,13 +2268,69 @@ async function loadUserPosts(uid) {
   const q = query(collection(db, 'posts'), where('uid', '==', uid), orderBy('createdAt', 'desc'));
   const snap = await getDocs(q);
   const el = document.getElementById('vp-posts');
-  if (snap.empty) { el.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:13px">Henüz gönderi yok</div>'; return; }
+  if (snap.empty) { el.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:13px;grid-column:span 3">Henüz gönderi yok</div>'; return; }
   const posts = []; snap.forEach(d => posts.push(d.data()));
   el.innerHTML = posts.map(p => `
     <div style="aspect-ratio:1;background:${p.photoUrl ? '#eee' : 'var(--bg2)'};overflow:hidden">
       ${p.photoUrl ? `<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0, 20) || '📝'}</div>`}
     </div>
   `).join('');
+}
+
+async function loadUserStats(uid) {
+  if (!window.FB) return;
+  const { db, collection, query, where, getDocs } = window.FB;
+  try {
+    // Turlar
+    const tSnap = await getDocs(query(collection(db, 'tours'), where('uid', '==', uid)));
+    const t = document.getElementById('vp-stat-tur');
+    if (t) t.textContent = tSnap.size;
+
+    // Rotalar + toplam km
+    const rSnap = await getDocs(query(collection(db, 'routes'), where('uid', '==', uid)));
+    const r = document.getElementById('vp-stat-rota');
+    if (r) r.textContent = rSnap.size;
+    let totalKm = 0;
+    rSnap.forEach(d => totalKm += d.data().distKm || 0);
+    const km = document.getElementById('vp-stat-km');
+    if (km) km.textContent = totalKm >= 1000 ? (totalKm/1000).toFixed(1)+'K' : Math.round(totalKm);
+
+    // Bağlantılar
+    const fSnap = await getDocs(collection(db, 'users', uid, 'friends'));
+    const acSnap = await getDocs(query(collection(db, 'acceptedConnections'), where('uid1', '==', uid)));
+    const acSnap2 = await getDocs(query(collection(db, 'acceptedConnections'), where('uid2', '==', uid)));
+    const conn = new Set();
+    fSnap.forEach(d => conn.add(d.id));
+    acSnap.forEach(d => conn.add(d.data().uid2));
+    acSnap2.forEach(d => conn.add(d.data().uid1));
+    const c = document.getElementById('vp-stat-conn');
+    if (c) c.textContent = conn.size;
+  } catch(e) {}
+}
+
+async function loadUserRoutes(uid) {
+  if (!window.FB) return;
+  const { db, collection, query, where, orderBy, getDocs } = window.FB;
+  try {
+    const q = query(collection(db, 'routes'), where('uid', '==', uid), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    const el = document.getElementById('vp-routes');
+    if (!el) return;
+    if (snap.empty) { el.innerHTML = '<div style="font-size:13px;color:var(--text3);padding:8px 0">Henüz rota yok</div>'; return; }
+    const routes = []; snap.forEach(d => routes.push(d.data()));
+    el.innerHTML = routes.slice(0, 4).map(r => `
+      <div class="rcard">
+        <div class="rthumb">
+          <svg width="24" height="24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          <div class="rkm">${r.distKm} km</div>
+        </div>
+        <div class="rinfo">
+          <div class="rname">${r.name || 'Rota'}</div>
+          <div class="rdate">${timeAgo(r.createdAt)}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {}
 }
 
 function toggleFriend() {
@@ -2702,7 +2795,11 @@ function renderStory(){
   }
   // Header
   document.getElementById('sv-av').innerHTML=s.avatarUrl?`<img src="${s.avatarUrl}" style="width:100%;height:100%;object-fit:cover">`:`<div style="width:100%;height:100%;background:${avColor(s.uid)};display:flex;align-items:center;justify-content:center;color:white;font-weight:700">${avLetter(s.name)}</div>`;
+  document.getElementById('sv-av').style.cursor='pointer';
+  document.getElementById('sv-av').onclick=()=>{closeStory();viewUserProfile(s.uid);};
   document.getElementById('sv-name').textContent=s.name||'Sürücü';
+  document.getElementById('sv-name').style.cursor='pointer';
+  document.getElementById('sv-name').onclick=()=>{closeStory();viewUserProfile(s.uid);};
   document.getElementById('sv-time').textContent=timeAgo(s.createdAt);
   document.getElementById('sv-caption').innerHTML=`<strong>${s.name||''}</strong>${s.caption?' '+s.caption:''}`;
   // Show delete btn if own story
