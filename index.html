@@ -463,8 +463,12 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
           <svg width="14" height="14" fill="white" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="white" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="white" stroke-width="2"/></svg>
           SOS
         </button>
+        <button onclick="openNav()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          Navigasyon
+        </button>
         <button id="live-share-btn" onclick="toggleLiveShare()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Paylaş</button>
-        <button id="rec-btn" onclick="toggleRec()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Kaydet</button>
+        <button id="rec-btn" onclick="toggleRec()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Kaydet</button>
       </div>
     </div>
     <div class="rec-banner" id="rec-banner">
@@ -879,6 +883,86 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 </div>
 
 <!-- SOS OVERLAY -->
+<!-- NAVİGASYON OVERLAY -->
+<div class="ov" id="ov-nav">
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)">
+    <!-- Header -->
+    <div class="hdr">
+      <div class="hbtn" onclick="closeNav()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--orange);margin-left:8px">NAVİGASYON</div>
+      <div id="nav-profile-badge" style="margin-left:auto;font-size:10px;background:var(--odim);color:var(--orange);border:1px solid rgba(255,85,0,.2);border-radius:20px;padding:3px 10px;font-weight:600">MOTORSIKLET</div>
+    </div>
+
+    <!-- Arama kutuları -->
+    <div style="padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px">
+      <div style="position:relative">
+        <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#16A34A"></div>
+        <input id="nav-from" class="inp" placeholder="Başlangıç noktası" style="padding-left:30px;font-size:13px" oninput="navAutocomplete(this,'nav-from-list')" autocomplete="off">
+        <div id="nav-from-list" style="display:none;position:absolute;left:0;right:0;top:100%;background:var(--card);border:1.5px solid var(--border);border-radius:10px;z-index:99;max-height:160px;overflow-y:auto;box-shadow:var(--shadow)"></div>
+        <button onclick="useMyLocation()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--orange)" title="Konumumu kullan">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        </button>
+      </div>
+      <div style="position:relative">
+        <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:var(--orange)"></div>
+        <input id="nav-to" class="inp" placeholder="Varış noktası" style="padding-left:30px;font-size:13px" oninput="navAutocomplete(this,'nav-to-list')" autocomplete="off">
+        <div id="nav-to-list" style="display:none;position:absolute;left:0;right:0;top:100%;background:var(--card);border:1.5px solid var(--border);border-radius:10px;z-index:99;max-height:160px;overflow-y:auto;box-shadow:var(--shadow)"></div>
+      </div>
+      <button onclick="calcRoute()" style="background:var(--orange);color:white;border:none;border-radius:12px;padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" id="nav-calc-btn">
+        <svg width="15" height="15" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        Rota Hesapla
+      </button>
+    </div>
+
+    <!-- Rota bilgisi -->
+    <div id="nav-info" style="display:none;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border)">
+      <div style="display:flex;gap:16px;align-items:center">
+        <div style="text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--orange)" id="nav-dist">—</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">Mesafe</div>
+        </div>
+        <div style="width:1px;height:36px;background:var(--border)"></div>
+        <div style="text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--orange)" id="nav-dur">—</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">Süre</div>
+        </div>
+        <div style="width:1px;height:36px;background:var(--border)"></div>
+        <div style="text-align:center;flex:1">
+          <div style="font-size:12px;font-weight:600;color:var(--text)" id="nav-via">—</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">Güzergah</div>
+        </div>
+        <button onclick="startNavigation()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Başlat</button>
+      </div>
+    </div>
+
+    <!-- Adım adım yol tarifi -->
+    <div id="nav-steps" style="flex:1;overflow-y:auto;padding:8px 0"></div>
+
+    <!-- Harita -->
+    <div id="nav-map" style="height:240px;flex-shrink:0"></div>
+  </div>
+</div>
+
+<!-- Aktif navigasyon banner (harita üstünde) -->
+<div id="nav-active-banner" style="display:none;position:absolute;top:56px;left:0;right:0;z-index:400;margin:8px;background:var(--card);border-radius:14px;padding:12px 16px;box-shadow:0 4px 20px rgba(0,0,0,.15);border:1.5px solid var(--border)">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="width:44px;height:44px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;flex-shrink:0" id="nav-turn-icon">
+      <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="nav-next-step">Hesaplanıyor...</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px" id="nav-step-dist"></div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:13px;font-weight:700;color:var(--orange)" id="nav-rem-dist"></div>
+      <div style="font-size:11px;color:var(--text3)" id="nav-rem-time"></div>
+    </div>
+    <button onclick="stopNavigation()" style="width:32px;height:32px;background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+</div>
+
 <div class="ov" id="ov-sos">
   <div style="flex:1;background:#0a0a0a;display:flex;flex-direction:column">
     <!-- Header -->
@@ -2459,6 +2543,271 @@ async function deleteStory(){
 let map=null,mapInited=false;
 let recOn=false,recPath=[],recPoly=null,recMarker=null,recWatch=null,recStart=null,recDist=0,recLast=null,recStartCoord=null;
 let liveMarkers={},liveInterval=null;
+
+// ══════════════════════════════════════════════════════
+// NAVİGASYON — OpenRouteService + Leaflet
+// ══════════════════════════════════════════════════════
+const ORS_KEY = '5b3ce3597851110001cf6248a355e1a56bec4d23b1e63e4272f4bf08';
+let navMap = null, navMapInited = false;
+let navFromCoord = null, navToCoord = null;
+let navRouteLayer = null, navMarkers = [];
+let navSteps = [], navCurrentStep = 0;
+let navWatcher = null, navActive = false;
+let navAutocompleteTimer = null;
+
+function openNav(){
+  openOv('ov-nav');
+  setTimeout(initNavMap, 120);
+  useMyLocation();
+}
+
+function closeNav(){
+  closeOv('ov-nav');
+}
+
+function initNavMap(){
+  if(navMapInited){ navMap&&navMap.invalidateSize(); return; }
+  const el = document.getElementById('nav-map');
+  if(!el) return;
+  navMap = L.map('nav-map',{zoomControl:false,attributionControl:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(navMap);
+  navMap.setView([41.015,28.979],12);
+  navMapInited = true;
+}
+
+// Konumumu kullan
+function useMyLocation(){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    navFromCoord = [pos.coords.longitude, pos.coords.latitude];
+    // Reverse geocode
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=tr`)
+      .then(r=>r.json())
+      .then(d=>{
+        const name = d.display_name?.split(',').slice(0,2).join(',') || 'Mevcut Konum';
+        document.getElementById('nav-from').value = name;
+      }).catch(()=>{
+        document.getElementById('nav-from').value = 'Mevcut Konum';
+      });
+  },()=>{}, {enableHighAccuracy:true,timeout:8000});
+}
+
+// Otomatik tamamlama
+function navAutocomplete(inp, listId){
+  clearTimeout(navAutocompleteTimer);
+  const val = inp.value.trim();
+  const list = document.getElementById(listId);
+  if(val.length < 3){ list.style.display='none'; return; }
+  navAutocompleteTimer = setTimeout(async()=>{
+    try{
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=5&accept-language=tr&countrycodes=tr`);
+      const data = await r.json();
+      if(!data.length){ list.style.display='none'; return; }
+      list.style.display = 'block';
+      list.innerHTML = data.map(d=>`
+        <div onclick="selectNavPlace(${d.lat},${d.lon},'${d.display_name.replace(/'/g,"\\'")}','${inp.id}','${listId}')"
+          style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          ${d.display_name.split(',').slice(0,3).join(', ')}
+        </div>`).join('');
+    }catch(e){ list.style.display='none'; }
+  }, 400);
+}
+
+function selectNavPlace(lat, lon, name, inputId, listId){
+  const coord = [parseFloat(lon), parseFloat(lat)];
+  const shortName = name.split(',').slice(0,2).join(',');
+  document.getElementById(inputId).value = shortName;
+  document.getElementById(listId).style.display = 'none';
+  if(inputId === 'nav-from') navFromCoord = coord;
+  else navToCoord = coord;
+}
+
+// Rota hesapla
+async function calcRoute(){
+  if(!navFromCoord || !navToCoord){
+    toast('Başlangıç ve varış noktasını gir');
+    return;
+  }
+  const btn = document.getElementById('nav-calc-btn');
+  btn.textContent = 'Hesaplanıyor...'; btn.disabled = true;
+
+  try{
+    const body = {
+      coordinates: [navFromCoord, navToCoord],
+      profile: 'driving-car',  // ORS ücretsiz planında motorcycling mevcut değil, car kullanıyoruz
+      format: 'json',
+      instructions: true,
+      instructions_format: 'text',
+      language: 'tr',
+      units: 'km',
+      extra_info: ['surface','waytype']
+    };
+
+    const r = await fetch('https://api.openrouteservice.org/v2/directions/driving-car',{
+      method:'POST',
+      headers:{'Authorization':ORS_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+
+    if(data.error){ toast('Rota bulunamadı: '+data.error.message); btn.textContent='Rota Hesapla'; btn.disabled=false; return; }
+
+    const route = data.routes[0];
+    const summary = route.summary;
+    const distKm = (summary.distance).toFixed(1);
+    const durMin = Math.round(summary.duration/60);
+    const durText = durMin >= 60 ? Math.floor(durMin/60)+'s '+( durMin%60)+'dk' : durMin+'dk';
+
+    document.getElementById('nav-dist').textContent = distKm+' km';
+    document.getElementById('nav-dur').textContent = durText;
+    document.getElementById('nav-via').textContent = document.getElementById('nav-to').value.split(',')[0];
+    document.getElementById('nav-info').style.display = 'block';
+
+    // Adım adım talimatlar
+    navSteps = route.segments[0].steps;
+    renderNavSteps(navSteps);
+
+    // Haritaya çiz
+    drawNavRoute(route.geometry, navFromCoord, navToCoord);
+
+    btn.textContent = 'Rota Hesapla'; btn.disabled = false;
+
+  }catch(e){
+    toast('Bağlantı hatası, tekrar dene');
+    btn.textContent = 'Rota Hesapla'; btn.disabled = false;
+  }
+}
+
+function renderNavSteps(steps){
+  const el = document.getElementById('nav-steps');
+  const icons = {
+    0:  '⬆', // straight
+    1:  '↗', // slight right
+    2:  '→', // right
+    3:  '↪', // sharp right
+    4:  '↩', // sharp left
+    5:  '←', // left
+    6:  '↖', // slight left
+    7:  '↕', // u-turn
+    10: '↗', // depart
+    11: '★', // arrive
+  };
+  el.innerHTML = steps.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);${i===0?'background:var(--odim)':''}" id="nav-step-${i}">
+      <div style="width:36px;height:36px;border-radius:50%;background:${i===0?'var(--orange)':'var(--bg2)'};color:${i===0?'white':'var(--text2)'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">
+        ${icons[s.type]||'⬆'}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:${i===0?'600':'400'};color:${i===0?'var(--text)':'var(--text2)'}">${s.instruction}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${s.distance>0?(s.distance<1000?Math.round(s.distance)+' m':(s.distance/1000).toFixed(1)+' km'):'Varış'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function drawNavRoute(geometry, from, to){
+  if(!navMap) return;
+  // Temizle
+  navMarkers.forEach(m=>navMap.removeLayer(m));
+  navMarkers=[];
+  if(navRouteLayer) navMap.removeLayer(navRouteLayer);
+
+  // Polyline decode (ORS encoded geometry)
+  const coords = decodePolyline(geometry);
+
+  navRouteLayer = L.polyline(coords,{color:'#FF5500',weight:5,opacity:.85}).addTo(navMap);
+
+  const startIcon = L.divIcon({html:'<div style="width:14px;height:14px;background:#16A34A;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+  const endIcon   = L.divIcon({html:'<div style="width:14px;height:14px;background:#FF5500;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+
+  navMarkers.push(L.marker([from[1],from[0]],{icon:startIcon}).addTo(navMap));
+  navMarkers.push(L.marker([to[1],to[0]],{icon:endIcon}).addTo(navMap));
+
+  navMap.fitBounds(navRouteLayer.getBounds(),{padding:[20,20]});
+  setTimeout(()=>navMap&&navMap.invalidateSize(),100);
+}
+
+// Polyline decoder (Google/ORS format)
+function decodePolyline(str, precision=5){
+  let index=0, lat=0, lng=0, coordinates=[], shift=0, result=0, byte=null, latitude_change, longitude_change;
+  const factor = Math.pow(10, precision);
+  while(index < str.length){
+    byte=null; shift=0; result=0;
+    do{ byte=str.charCodeAt(index++)-63; result|=(byte&0x1f)<<shift; shift+=5; }while(byte>=0x20);
+    latitude_change=((result&1)?~(result>>1):(result>>1));
+    lat+=latitude_change; shift=0; result=0;
+    do{ byte=str.charCodeAt(index++)-63; result|=(byte&0x1f)<<shift; shift+=5; }while(byte>=0x20);
+    longitude_change=((result&1)?~(result>>1):(result>>1));
+    lng+=longitude_change;
+    coordinates.push([lat/factor, lng/factor]);
+  }
+  return coordinates;
+}
+
+// Navigasyonu başlat (canlı takip)
+let navRouteCoords = [], navStepIdx = 0;
+function startNavigation(){
+  const banner = document.getElementById('nav-active-banner');
+  if(!banner||!navSteps.length){ toast('Önce rota hesapla'); return; }
+  navActive = true; navStepIdx = 0;
+  banner.style.display = 'block';
+  closeNav();
+
+  // İlk adımı göster
+  updateNavBanner();
+
+  // Konum takibi başlat
+  if(navWatcher) navigator.geolocation.clearWatch(navWatcher);
+  navWatcher = navigator.geolocation.watchPosition(pos=>{
+    const lat=pos.coords.latitude, lng=pos.coords.longitude;
+    // Haritayı konuma götür
+    if(map) map.setView([lat,lng],16);
+    // Sonraki adımı kontrol et
+    checkNavProgress(lat, lng);
+  },{enableHighAccuracy:true,maximumAge:2000});
+  toast('Navigasyon başladı');
+}
+
+function updateNavBanner(){
+  if(navStepIdx >= navSteps.length){ arriveDestination(); return; }
+  const step = navSteps[navStepIdx];
+  const icons = {0:'→',1:'↗',2:'→',3:'↪',4:'↩',5:'←',6:'↖',10:'⬆',11:'★'};
+  document.getElementById('nav-next-step').textContent = step.instruction;
+  document.getElementById('nav-step-dist').textContent = step.distance>0?(step.distance<1000?Math.round(step.distance)+' m':(step.distance/1000).toFixed(1)+' km'):'';
+  // Kalan toplam
+  const remaining = navSteps.slice(navStepIdx).reduce((s,x)=>s+x.distance,0);
+  const remTime   = Math.round(navSteps.slice(navStepIdx).reduce((s,x)=>s+x.duration,0)/60);
+  document.getElementById('nav-rem-dist').textContent = remaining<1000?Math.round(remaining)+' m':(remaining/1000).toFixed(1)+' km';
+  document.getElementById('nav-rem-time').textContent = remTime+'dk kaldı';
+}
+
+function checkNavProgress(lat, lng){
+  if(navStepIdx >= navSteps.length) return;
+  const step = navSteps[navStepIdx];
+  const [wlng,wlat] = step.way_points ? [0,0] : [0,0]; // approximation
+  // 30m yaklaşınca sonraki adıma geç
+  if(step.distance < 30 || (step.way_points && calcDist(lat,lng,lat,lng)<30)){
+    navStepIdx++;
+    updateNavBanner();
+    // Adım listesini güncelle
+    document.querySelectorAll('[id^="nav-step-"]').forEach((el,i)=>{
+      el.style.background = i===navStepIdx?'var(--odim)':'';
+    });
+    const activeEl = document.getElementById('nav-step-'+navStepIdx);
+    if(activeEl) activeEl.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+
+function stopNavigation(){
+  navActive = false;
+  if(navWatcher){ navigator.geolocation.clearWatch(navWatcher); navWatcher=null; }
+  document.getElementById('nav-active-banner').style.display = 'none';
+  toast('Navigasyon durduruldu');
+}
+
+function arriveDestination(){
+  stopNavigation();
+  toast('Hedefe ulaştınız!');
+}
 
 function initMap(){
   if(mapInited){setTimeout(()=>map&&map.invalidateSize(),100);return;}
