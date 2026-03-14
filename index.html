@@ -1086,20 +1086,26 @@ async function loadFriendsList() {
   const { db, collection, getDocs, query, where } = window.FB;
   const myUid = window.CU.uid;
   try {
-    // Kendi friends subcollection
+    // 1. Kendi friends subcollection
     const snap = await getDocs(collection(db, 'users', myUid, 'friends'));
     snap.forEach(d => friends.add(d.id));
 
-    // acceptedConnections — karşı taraf kabul ettiyse buradan da bak
-    const q1 = query(collection(db, 'acceptedConnections'), where('uid1', '==', myUid));
-    const q2 = query(collection(db, 'acceptedConnections'), where('uid2', '==', myUid));
-    const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-    s1.forEach(d => { friends.add(d.data().uid2); });
-    s2.forEach(d => { friends.add(d.data().uid1); });
+    // 2. acceptedConnections — tümünü çek, client-side filtrele (index gerektirmez)
+    const acSnap = await getDocs(collection(db, 'acceptedConnections'));
+    acSnap.forEach(d => {
+      const data = d.data();
+      if (data.uid1 === myUid) friends.add(data.uid2);
+      else if (data.uid2 === myUid) friends.add(data.uid1);
+    });
 
-    // Bekleyen istekler
-    const pSnap = await getDocs(query(collection(db, 'friendRequests'), where('fromUid','==',myUid), where('status','==','pending')));
-    pSnap.forEach(d => pendingRequests.add(d.data().toUid));
+    // 3. Bekleyen istekler
+    try {
+      const pSnap = await getDocs(query(collection(db, 'friendRequests'), where('fromUid','==',myUid)));
+      pSnap.forEach(d => {
+        if (d.data().status === 'pending') pendingRequests.add(d.data().toUid);
+      });
+    } catch(e) {}
+
   } catch(e) { console.warn('loadFriendsList:', e); }
 }
 
