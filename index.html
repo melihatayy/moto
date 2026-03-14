@@ -246,7 +246,7 @@ select.inp option{background:white}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, query, orderBy, limit, where, onSnapshot, updateDoc, increment, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, query, orderBy, limit, where, onSnapshot, updateDoc, increment, deleteDoc, writeBatch, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyDHeczF5PQgDSooxxZ0p6skWs4LOXsAQto",
@@ -259,7 +259,7 @@ const app = initializeApp({
 const auth = getAuth(app);
 const db = getFirestore(app);
 const gp = new GoogleAuthProvider();
-window.FB = {auth,db,gp,doc,setDoc,getDoc,collection,getDocs,addDoc,query,orderBy,limit,where,onSnapshot,updateDoc,increment,deleteDoc,writeBatch};
+window.FB = {auth,db,gp,doc,setDoc,getDoc,collection,getDocs,addDoc,query,orderBy,limit,where,onSnapshot,updateDoc,increment,deleteDoc,writeBatch,arrayUnion};
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { show('s-lang'); return; }
@@ -1609,35 +1609,99 @@ async function loadMyPosts(){
 // TURLAR
 // ════════════════════════════════════════════
 async function loadTours(){
-  if(!window.FB)return;
+  if(!window.FB||!window.CU)return;
   const{db,collection,query,orderBy,getDocs,limit}=window.FB;
-  const snap=await getDocs(query(collection(db,'tours'),orderBy('createdAt','desc'),limit(20)));
+  const snap=await getDocs(query(collection(db,'tours'),orderBy('createdAt','desc'),limit(30)));
   const el=document.getElementById('tours-feed');
   if(snap.empty){el.innerHTML='<div class="empty-state"><div class="empty-title">Henüz tur yok</div><div class="empty-sub">İlk turu sen oluştur!</div></div>';return;}
   const tours=[];snap.forEach(d=>tours.push({id:d.id,...d.data()}));
-  el.innerHTML=tours.map(t=>`
-    <div class="tcard">
+  const myUid=window.CU.uid;
+
+  // Bekleyen tur isteklerimi yükle (gönderdiğim)
+  let myPendingTours=new Set();
+  try{
+    const ps=await getDocs(query(collection(db,'tourRequests'),where('fromUid','==',myUid),where('status','==','pending')));
+    ps.forEach(d=>myPendingTours.add(d.data().tourId));
+  }catch(e){}
+
+  el.innerHTML=tours.map(t=>{
+    const isOwner=t.uid===myUid;
+    const isParticipant=(t.participants||[]).includes(myUid);
+    const isPending=myPendingTours.has(t.id);
+    let actionBtn='';
+    if(isOwner){
+      // Tur sahibi — sil butonu
+      actionBtn=`<button onclick="deleteTour('${t.id}')" style="background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Sil</button>`;
+    }else if(isParticipant){
+      actionBtn=`<button disabled style="background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit">✓ Katıldın</button>`;
+    }else if(isPending){
+      actionBtn=`<button disabled style="background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit">⏳ İstek Gönderildi</button>`;
+    }else{
+      actionBtn=`<button class="tc-join" onclick="requestJoinTour('${t.id}','${t.uid}','${(t.name||'').replace(/'/g,"\\'")}',this)">Katıl</button>`;
+    }
+    return `
+    <div class="tcard" id="tcard-${t.id}">
       <div class="tc-head">
         <div class="tc-name">${t.name||'Tur'}</div>
         <div class="tc-badge ${t.isLive?'live-b':'soon-b'}">${t.isLive?'● CANLI':t.date?new Date(t.date).toLocaleDateString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Tarih yok'}</div>
       </div>
       <div class="tc-info">📍 ${t.from||'—'} → ${t.to||'—'} · 🏍️ ${(t.participants||[]).length} katılımcı</div>
+      ${t.desc?`<div style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5">${t.desc}</div>`:''}
       <div class="tc-foot">
         <div class="tc-by" onclick="viewProfile('${t.uid}')">${t.userName||'Sürücü'} tarafından</div>
-        <div style="display:flex;gap:6px">
-          ${t.uid===window.CU?.uid?`<button onclick="deleteTour('${t.id}')" style="background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Sil</button>`:''}
-          <button class="tc-join" onclick="joinTour('${t.name}')">Katıl</button>
-        </div>
+        ${actionBtn}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
-function openCreateTour(){openOv('ov-tour');}
+
+async function requestJoinTour(tourId, ownerUid, tourName, btn){
+  if(!window.FB||!window.CU)return;
+  const{db,collection,addDoc,where}=window.FB;
+  const cu=window.CU;
+  // Butonu güncelle
+  btn.disabled=true;btn.textContent='⏳ İstek Gönderildi';
+  btn.style.cssText='background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit';
+  try{
+    // tourRequests koleksiyonuna yaz
+    await addDoc(collection(db,'tourRequests'),{
+      tourId,tourName,
+      ownerUid,
+      fromUid:cu.uid,fromName:cu.name||'Sürücü',
+      fromAvatar:cu.avatarUrl||'',fromBike:cu.bike||'',
+      status:'pending',
+      createdAt:new Date().toISOString()
+    });
+    // Tur sahibine bildirim gönder
+    await pushNotif(ownerUid,'tourRequest',`<strong>${cu.name||'Biri'}</strong> "${tourName}" turuna katılmak istiyor 🏍️`);
+    playDing();
+    toast(`"${tourName}" için katılım isteği gönderildi!`);
+  }catch(e){
+    btn.disabled=false;btn.textContent='Katıl';toast('Hata: '+e.message);
+  }
+}
+
+function openCreateTour(){
+  ['t-name','t-from','t-to','t-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('t-date').value='';
+  openOv('ov-tour');
+}
 async function saveTour(){
   const name=document.getElementById('t-name').value.trim();
   if(!name){toast('Tur adı gir');return;}
   const{db,collection,addDoc}=window.FB;
   const cu=window.CU||{};
-  await addDoc(collection(db,'tours'),{name,from:document.getElementById('t-from').value,to:document.getElementById('t-to').value,date:document.getElementById('t-date').value,uid:cu.uid||'',userName:cu.name||'Sürücü',participants:[cu.uid||''],isLive:false,createdAt:new Date().toISOString()});
+  await addDoc(collection(db,'tours'),{
+    name,
+    from:document.getElementById('t-from').value,
+    to:document.getElementById('t-to').value,
+    date:document.getElementById('t-date').value,
+    desc:document.getElementById('t-desc').value,
+    uid:cu.uid||'',userName:cu.name||'Sürücü',
+    participants:[cu.uid||''],
+    isLive:false,
+    createdAt:new Date().toISOString()
+  });
   closeOv('ov-tour');toast(`"${name}" yayınlandı! 🏍️`);loadTours();
 }
 async function deleteTour(id){
@@ -1647,7 +1711,40 @@ async function deleteTour(id){
     toast('Tur silindi');loadTours();
   });
 }
-function joinTour(name){toast(`"${name}" için bağlantı isteği gönderildi!`);}
+
+// Tur katılım isteği kabul/red
+async function acceptTourRequest(reqId, tourId, fromUid, fromName){
+  if(!window.FB||!window.CU)return;
+  const{db,doc,updateDoc,arrayUnion,deleteDoc}=window.FB;
+  try{
+    // Turu güncelle — katılımcıya ekle
+    await updateDoc(doc(db,'tours',tourId),{participants:arrayUnion(fromUid)});
+    // İsteği sil
+    await deleteDoc(doc(db,'tourRequests',reqId));
+    // Katılan kişiye bildirim
+    await pushNotif(fromUid,'tourAccepted',`<strong>${window.CU.name||'Tur lideri'}</strong> tur katılım isteğini kabul etti ✓`);
+    playDing();
+    // Bildirim listesinde güncelle
+    const el=document.getElementById('treq-'+reqId);
+    if(el){
+      el.style.background='var(--gdim)';el.style.border='1px solid rgba(22,163,74,.2)';
+      el.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><div style="font-size:28px">🏍️</div><div><div style="font-size:14px;font-weight:600;color:var(--green)">${fromName} tura katıldı!</div></div></div>`;
+      setTimeout(()=>{if(el.parentNode)el.remove();},3000);
+    }
+    toast(`${fromName} tura kabul edildi!`);
+    loadTours();
+  }catch(e){toast('Hata: '+e.message);}
+}
+async function declineTourRequest(reqId, fromUid, tourName){
+  if(!window.FB)return;
+  const{db,doc,deleteDoc}=window.FB;
+  try{
+    await deleteDoc(doc(db,'tourRequests',reqId));
+    await pushNotif(fromUid,'tourDeclined',`"${tourName}" için tur katılım isteğin reddedildi.`);
+    const el=document.getElementById('treq-'+reqId);if(el)el.remove();
+    toast('İstek reddedildi');
+  }catch(e){}
+}
 
 // ════════════════════════════════════════════
 // İLANLAR
@@ -1934,9 +2031,15 @@ async function loadNotifs(){
     const rs=await getDocs(query(collection(db,'friendRequests'),where('toUid','==',window.CU.uid),where('status','==','pending')));
     rs.forEach(d=>requests.push({id:d.id,...d.data()}));
   }catch(e){}
+  // Bekleyen tur istekleri (benim turlarıma)
+  let tourRequests=[];
+  try{
+    const trs=await getDocs(query(collection(db,'tourRequests'),where('ownerUid','==',window.CU.uid),where('status','==','pending')));
+    trs.forEach(d=>tourRequests.push({id:d.id,...d.data()}));
+  }catch(e){}
   const list=document.getElementById('notif-list');
   let html='';
-  // İstekler önce
+  // Bağlantı istekleri önce
   requests.forEach(r=>{
     html+=`<div style="background:var(--odim);border:1px solid rgba(255,85,0,.15);border-radius:14px;padding:14px;margin-bottom:10px" id="req-${r.id}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
@@ -1949,10 +2052,25 @@ async function loadNotifs(){
         <button onclick="declineConnRequest('${r.id}')" style="flex:1;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Reddet</button>
       </div></div>`;
   });
+  // Tur katılım istekleri
+  tourRequests.forEach(r=>{
+    html+=`<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:14px;padding:14px;margin-bottom:10px" id="treq-${r.id}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div onclick="closeOv('ov-notif');viewProfile('${r.fromUid}')" style="cursor:pointer">${makeAv(r.fromUid,r.fromName,r.fromAvatar,42)}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600"><strong>${r.fromName}</strong> "${r.tourName}" turuna katılmak istiyor 🏍️</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${r.fromBike||''} · ${timeAgo(r.createdAt)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="acceptTourRequest('${r.id}','${r.tourId}','${r.fromUid}','${r.fromName}')" style="flex:1;background:var(--orange);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Kabul Et</button>
+        <button onclick="declineTourRequest('${r.id}','${r.fromUid}','${r.tourName}')" style="flex:1;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Reddet</button>
+      </div></div>`;
+  });
   // Diğer bildirimler
   const notifs=[];notifSnap.forEach(d=>notifs.push({id:d.id,...d.data()}));
   notifs.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
-  const icons={like:'❤️',comment:'💬',follow:'👤',route:'🗺️',request:'🤝',accepted:'✅'};
+  const icons={like:'❤️',comment:'💬',follow:'👤',route:'🗺️',request:'🤝',accepted:'✅',tourRequest:'🏍️',tourAccepted:'🏍️',tourDeclined:'❌'};
   notifs.forEach(n=>{
     html+=`<div class="notif-item${n.read?'':' notif-unread'}" onclick="${n.fromUid?`closeOv('ov-notif');viewProfile('${n.fromUid}')`:''}" style="${n.fromUid?'cursor:pointer':''}">
       <div class="notif-icon">${icons[n.type]||'🔔'}</div>
@@ -1988,8 +2106,12 @@ function startWatchers(){
     if(pN>=0&&snap.size>pN)playDing();
     pN=snap.size;
   });
-  // Arkadaş isteği badge (bildirim ikonuna)
+  // Bağlantı isteği badge
   onSnapshot(query(collection(db,'friendRequests'),where('toUid','==',myUid),where('status','==','pending')),snap=>{
+    if(snap.size>0){const b=document.getElementById('notif-badge');if(b)b.style.display='block';}
+  });
+  // Tur isteği badge (benim turlarıma gelen)
+  onSnapshot(query(collection(db,'tourRequests'),where('ownerUid','==',myUid),where('status','==','pending')),snap=>{
     if(snap.size>0){const b=document.getElementById('notif-badge');if(b)b.style.display='block';}
   });
   // DM badge
