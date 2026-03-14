@@ -2221,29 +2221,52 @@ function openNotifs(){
 }
 async function loadNotifs(){
   if(!window.FB||!window.CU)return;
-  const{db,collection,query,where,getDocs,limit}=window.FB;
+  const{db,collection,query,where,getDocs,doc,getDoc,limit}=window.FB;
   let notifSnap;
   try{notifSnap=await getDocs(query(collection(db,'notifications'),where('toUid','==',window.CU.uid),limit(40)));}
   catch(e){notifSnap={empty:true,forEach:()=>{}};}
-  // Bekleyen bağlantı istekleri
   let requests=[];
   try{
     const rs=await getDocs(query(collection(db,'friendRequests'),where('toUid','==',window.CU.uid),where('status','==','pending')));
     rs.forEach(d=>requests.push({id:d.id,...d.data()}));
   }catch(e){}
-  // Bekleyen tur istekleri (benim turlarıma)
   let tourRequests=[];
   try{
     const trs=await getDocs(query(collection(db,'tourRequests'),where('ownerUid','==',window.CU.uid),where('status','==','pending')));
     trs.forEach(d=>tourRequests.push({id:d.id,...d.data()}));
   }catch(e){}
+
+  // Tüm fromUid'leri topla, Firestore'dan taze çek
+  const uids=new Set();
+  requests.forEach(r=>r.fromUid&&uids.add(r.fromUid));
+  tourRequests.forEach(r=>r.fromUid&&uids.add(r.fromUid));
+  const notifArr=[];notifSnap.forEach&&notifSnap.forEach(d=>notifArr.push({id:d.id,...d.data()}));
+  notifArr.forEach(n=>n.fromUid&&uids.add(n.fromUid));
+
+  // Paralel olarak çek
+  const freshUsers={};
+  await Promise.all([...uids].map(async uid=>{
+    // Önce allUsers cache'den bak
+    const cached=allUsers.find(u=>u.uid===uid);
+    if(cached&&cached.avatarUrl){freshUsers[uid]=cached;return;}
+    // Cache'de yoksa veya avatarı boşsa Firestore'dan çek
+    try{
+      const snap=await getDoc(doc(db,'users',uid));
+      if(snap.exists())freshUsers[uid]={uid,...snap.data()};
+    }catch(e){}
+  }));
+
+  function getFreshAv(uid,fallbackName,fallbackAv){
+    const u=freshUsers[uid]||{};
+    return{av:u.avatarUrl||fallbackAv||'', nm:u.name||fallbackName||'Sürücü'};
+  }
+
   const list=document.getElementById('notif-list');
   let html='';
   // Bağlantı istekleri önce
   requests.forEach(r=>{
-    const u=allUsers.find(u=>u.uid===r.fromUid)||{};
-    const av=u.avatarUrl||r.fromAvatar||'';
-    const nm=u.name||r.fromName||'Sürücü';
+    const{av,nm}=getFreshAv(r.fromUid,r.fromName,r.fromAvatar);
+    const u=freshUsers[r.fromUid]||{};
     html+=`<div style="background:var(--odim);border:1px solid rgba(255,85,0,.15);border-radius:14px;padding:14px;margin-bottom:10px" id="req-${r.id}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
         <div onclick="closeOv('ov-notif');viewProfile('${r.fromUid}')" style="cursor:pointer">${makeAv(r.fromUid,nm,av,42)}</div>
@@ -2257,9 +2280,8 @@ async function loadNotifs(){
   });
   // Tur katılım istekleri
   tourRequests.forEach(r=>{
-    const u=allUsers.find(u=>u.uid===r.fromUid)||{};
-    const av=u.avatarUrl||r.fromAvatar||'';
-    const nm=u.name||r.fromName||'Sürücü';
+    const{av,nm}=getFreshAv(r.fromUid,r.fromName,r.fromAvatar);
+    const u=freshUsers[r.fromUid]||{};
     html+=`<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:14px;padding:14px;margin-bottom:10px" id="treq-${r.id}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
         <div onclick="closeOv('ov-notif');viewProfile('${r.fromUid}')" style="cursor:pointer">${makeAv(r.fromUid,nm,av,42)}</div>
@@ -2274,14 +2296,12 @@ async function loadNotifs(){
       </div></div>`;
   });
   // Diğer bildirimler
-  const notifs=[];notifSnap.forEach(d=>notifs.push({id:d.id,...d.data()}));
+  const notifs=notifArr;
   notifs.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
   notifs.forEach(n=>{
-    const u=n.fromUid?allUsers.find(u=>u.uid===n.fromUid)||{}:{};
-    const av=u.avatarUrl||'';
-    const nm=u.name||'';
+    const{av,nm}=n.fromUid?getFreshAv(n.fromUid,'',''):{av:'',nm:''};
     html+=`<div class="notif-item${n.read?'':' notif-unread'}" onclick="${n.fromUid?`closeOv('ov-notif');viewProfile('${n.fromUid}')`:''}" style="${n.fromUid?'cursor:pointer':''}">
-      ${n.fromUid?`<div style="flex-shrink:0" onclick="event.stopPropagation();closeOv('ov-notif');viewProfile('${n.fromUid}')">${makeAv(n.fromUid,nm,av,38)}</div>`:''}
+      ${n.fromUid?`<div style="flex-shrink:0">${makeAv(n.fromUid,nm,av,38)}</div>`:''}
       <div style="flex:1"><div class="notif-text">${n.text}</div><div class="notif-time">${timeAgo(n.createdAt)}</div></div>
       ${!n.read?'<div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>':''}
     </div>`;
