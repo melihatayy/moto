@@ -10,6 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <style>
 :root {
   --bg:#F5F2EE; --bg2:#EDEBE6; --card:#FFFFFF; --border:#E0DDD8; --border2:#D0CDC7;
@@ -2556,25 +2558,29 @@ let recOn=false,recPath=[],recPoly=null,recMarker=null,recWatch=null,recStart=nu
 let liveMarkers={},liveInterval=null;
 
 // ══════════════════════════════════════════════════════
-// NAVİGASYON — OpenRouteService + Leaflet
-// ══════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════
-// NAVİGASYON — Uygulama içi GPS navigasyon (OSRM)
+// NAVİGASYON — MapLibre GL (3D perspektif, heading)
 // ══════════════════════════════════════════════════════
 let navMap=null, navMapInited=false;
 let navFromCoord=null, navToCoord=null;
-let navRouteLayer=null, navMarkers=[];
 let navSteps=[], navStepIdx=0;
 let navWatcher=null, navActive=false;
 let navACTimer=null;
-let navUserMarker=null, navRouteCoords=[];
+let navRouteCoords=[];
 let navTotalDist=0, navTotalDur=0;
+
+// OpenStreetMap raster tile style for MapLibre
+const NAV_STYLE = {
+  version:8,
+  sources:{'osm':{type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap'}},
+  layers:[{id:'osm',type:'raster',source:'osm'}]
+};
 
 function openNav(){
   openOv('ov-nav');
-  setTimeout(()=>{ initNavMap(); useMyLocation(); }, 150);
+  setTimeout(()=>{ initNavMap(); useMyLocation(); }, 200);
 }
 function closeNav(){
+  if(navActive) stopNavigation();
   closeOv('ov-nav');
 }
 function navReset(){
@@ -2582,54 +2588,86 @@ function navReset(){
   document.getElementById('nav-panel-search').style.display='flex';
   document.getElementById('nav-panel-search').style.flexDirection='column';
 }
+
 function initNavMap(){
-  if(navMapInited){ navMap&&navMap.invalidateSize(); return; }
+  if(navMapInited){
+    navMap&&navMap.resize();
+    return;
+  }
   const el=document.getElementById('nav-map');
-  if(!el) return;
-  navMap=L.map('nav-map',{zoomControl:false,attributionControl:false});
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(navMap);
-  navMap.setView([41.015,28.979],13);
-  // Zoom kontrolü sağ alta
-  L.control.zoom({position:'bottomright'}).addTo(navMap);
+  if(!el||typeof maplibregl==='undefined') return;
+
+  navMap = new maplibregl.Map({
+    container:'nav-map',
+    style: NAV_STYLE,
+    center:[28.979,41.015],
+    zoom:13,
+    pitch:0,
+    bearing:0,
+    attributionControl:false
+  });
+
+  navMap.addControl(new maplibregl.NavigationControl({showCompass:true,showZoom:true,visualizePitch:true}),'bottom-right');
+  navMap.addControl(new maplibregl.GeolocateControl({positionOptions:{enableHighAccuracy:true},trackUserLocation:false,showAccuracyCircle:false}),'bottom-right');
+
+  navMap.on('load',()=>{
+    // Rota layer
+    navMap.addSource('route',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    navMap.addLayer({id:'route-line',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#FF5500','line-width':7,'line-opacity':0.9}});
+    navMap.addLayer({id:'route-border',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#CC4400','line-width':11,'line-opacity':0.3}},
+      'route-line');
+
+    // Kullanıcı marker source
+    navMap.addSource('user',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    navMap.addLayer({id:'user-dot-shadow',type:'circle',source:'user',paint:{'circle-radius':14,'circle-color':'#000','circle-opacity':0.2,'circle-blur':1,'circle-translate':[0,4]}});
+    navMap.addLayer({id:'user-dot',type:'circle',source:'user',paint:{'circle-radius':10,'circle-color':'#FF5500','circle-stroke-color':'#fff','circle-stroke-width':3}});
+
+    // Varış marker source
+    navMap.addSource('dest',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    navMap.addLayer({id:'dest-dot',type:'circle',source:'dest',paint:{'circle-radius':10,'circle-color':'#16A34A','circle-stroke-color':'#fff','circle-stroke-width':3}});
+  });
+
   navMapInited=true;
-  // Konuma git
+
+  // İlk konum
   navigator.geolocation&&navigator.geolocation.getCurrentPosition(p=>{
-    navMap.setView([p.coords.latitude,p.coords.longitude],14);
+    navMap.flyTo({center:[p.coords.longitude,p.coords.latitude],zoom:14,speed:1.5});
   });
 }
 
-// Mevcut konumu başlangıç yap
 function useMyLocation(){
   if(!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos=>{
     navFromCoord=[pos.coords.longitude,pos.coords.latitude];
     fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=tr`)
       .then(r=>r.json()).then(d=>{
-        document.getElementById('nav-from').value=d.address?.road?`${d.address.road}, ${d.address.town||d.address.city||''}`:d.display_name?.split(',').slice(0,2).join(',')||'Mevcut Konum';
+        const name=d.address?.road?`${d.address.road}, ${d.address.town||d.address.city||''}`
+                  :d.display_name?.split(',').slice(0,2).join(',')||'Mevcut Konum';
+        document.getElementById('nav-from').value=name;
       }).catch(()=>{ document.getElementById('nav-from').value='Mevcut Konum'; });
   },null,{enableHighAccuracy:true,timeout:8000});
 }
 
-// Otomatik tamamlama
-function navAC(inp, listId){
+function navAC(inp,listId){
   clearTimeout(navACTimer);
   const q=inp.value.trim();
   const list=document.getElementById(listId);
-  if(q.length<2){ list.style.display='none'; return; }
+  if(q.length<2){list.style.display='none';return;}
   navACTimer=setTimeout(async()=>{
     try{
       const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&accept-language=tr&countrycodes=tr`);
       const data=await r.json();
-      if(!data.length){ list.style.display='none'; return; }
+      if(!data.length){list.style.display='none';return;}
       list.style.display='block';
       list.innerHTML=data.map(d=>{
         const short=d.display_name.split(',').slice(0,3).join(', ');
         return `<div onclick="navSelect(${d.lat},${d.lon},'${d.display_name.replace(/'/g,"\\'")}','${inp.id}','${listId}')"
           style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px">${short}</div>`;
       }).join('');
-    }catch(e){ list.style.display='none'; }
+    }catch(e){list.style.display='none';}
   },350);
 }
+
 function navSelect(lat,lon,name,inpId,listId){
   const coord=[parseFloat(lon),parseFloat(lat)];
   document.getElementById(inpId).value=name.split(',').slice(0,2).join(',');
@@ -2638,33 +2676,27 @@ function navSelect(lat,lon,name,inpId,listId){
   else navToCoord=coord;
 }
 
-// Rota hesapla
 async function calcRoute(){
-  // Başlangıç yoksa mevcut konumu al
   if(!navFromCoord){
     await new Promise(res=>navigator.geolocation.getCurrentPosition(p=>{
-      navFromCoord=[p.coords.longitude,p.coords.latitude]; res();
+      navFromCoord=[p.coords.longitude,p.coords.latitude];res();
     },res,{enableHighAccuracy:true,timeout:8000}));
   }
-  if(!navToCoord){ toast('Varış noktasını gir'); return; }
-
+  if(!navToCoord){toast('Varış noktasını gir');return;}
   const btn=document.getElementById('nav-calc-btn');
-  btn.textContent='Hesaplanıyor...'; btn.disabled=true;
-
+  btn.textContent='Hesaplanıyor...';btn.disabled=true;
   try{
-    const[fLng,fLat]=navFromCoord, [tLng,tLat]=navToCoord;
+    const[fLng,fLat]=navFromCoord,[tLng,tLat]=navToCoord;
     const url=`https://router.project-osrm.org/route/v1/driving/${fLng},${fLat};${tLng},${tLat}?overview=full&geometries=polyline6&steps=true`;
     const r=await fetch(url);
     const data=await r.json();
-    if(data.code!=='Ok'){ toast('Rota bulunamadı'); btn.textContent='Rota Hesapla'; btn.disabled=false; return; }
-
+    if(data.code!=='Ok'){toast('Rota bulunamadı');btn.textContent='Rota Hesapla';btn.disabled=false;return;}
     const route=data.routes[0];
     navTotalDist=route.distance;
     navTotalDur=route.duration;
     navSteps=route.legs[0].steps;
     navRouteCoords=decodePolyline6(route.geometry);
 
-    // Özet
     const distKm=(navTotalDist/1000).toFixed(1);
     const durMin=Math.round(navTotalDur/60);
     const durTxt=durMin>=60?Math.floor(durMin/60)+'s '+(durMin%60)+'dk':durMin+' dk';
@@ -2675,45 +2707,25 @@ async function calcRoute(){
     document.getElementById('nav-arrive').textContent=arrive;
     document.getElementById('nav-rem-arrive').textContent=arrive;
 
-    // Adım listesi
     renderNavSteps(navSteps);
-
-    // Haritaya çiz
     drawNavRoute(navRouteCoords,navFromCoord,navToCoord);
 
-    // Panel geçiş
     document.getElementById('nav-panel-search').style.display='none';
     document.getElementById('nav-panel-summary').style.display='block';
-
-    btn.textContent='Rota Hesapla'; btn.disabled=false;
+    btn.textContent='Rota Hesapla';btn.disabled=false;
   }catch(e){
     console.error(e);
     toast('Bağlantı hatası: '+e.message);
-    btn.textContent='Rota Hesapla'; btn.disabled=false;
+    btn.textContent='Rota Hesapla';btn.disabled=false;
   }
 }
 
-// Adım listesi render
 function renderNavSteps(steps){
   const el=document.getElementById('nav-steps');
-  const arrowMap={
-    'turn-right':'→','turn-left':'←',
-    'turn-sharp right':'↪','turn-sharp left':'↩',
-    'turn-slight right':'↗','turn-slight left':'↖',
-    'continue':'⬆','straight':'⬆','depart':'⬆',
-    'arrive':'●','roundabout':'↻','rotary':'↻',
-    'merge':'⬆','fork':'↗','new name':'⬆','use lane':'⬆'
-  };
-  const trMap={
-    right:'Sağa dön',left:'Sola dön',
-    'sharp right':'Keskin sağa','sharp left':'Keskin sola',
-    'slight right':'Hafif sağa','slight left':'Hafif sola',
-    straight:'Düz devam et',uturn:'Geri dön',''  :'Devam et'
-  };
+  const arrowMap={'turn-right':'→','turn-left':'←','turn-sharp right':'↪','turn-sharp left':'↩','turn-slight right':'↗','turn-slight left':'↖','continue':'⬆','straight':'⬆','depart':'⬆','arrive':'●','roundabout':'↻','rotary':'↻','merge':'⬆','fork':'↗','new name':'⬆','use lane':'⬆'};
+  const trMap={right:'Sağa dön',left:'Sola dön','sharp right':'Keskin sağa','sharp left':'Keskin sola','slight right':'Hafif sağa','slight left':'Hafif sola',straight:'Düz devam et',uturn:'Geri dön'};
   el.innerHTML=steps.map((s,i)=>{
-    const m=s.maneuver||{};
-    const mod=m.modifier||'';
-    const type=m.type||'';
+    const m=s.maneuver||{};const mod=m.modifier||'';const type=m.type||'';
     const key=(type==='turn'?mod:type+(mod?' '+mod:''));
     const arrow=arrowMap[key]||arrowMap[type]||'⬆';
     const tr=type==='arrive'?'Hedefe ulaştınız':type==='depart'?'Başlangıç':(trMap[mod]||'Devam et')+(s.name?' — '+s.name:'');
@@ -2730,71 +2742,64 @@ function renderNavSteps(steps){
   }).join('');
 }
 
-// Haritaya rotayı çiz
 function drawNavRoute(coords,from,to){
-  if(!navMap) return;
-  navMarkers.forEach(m=>navMap.removeLayer(m));
-  navMarkers=[];
-  if(navRouteLayer) navMap.removeLayer(navRouteLayer);
+  if(!navMap||!navMap.isStyleLoaded()) {
+    setTimeout(()=>drawNavRoute(coords,from,to),300);
+    return;
+  }
+  // GeoJSON line
+  const geojson={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:coords.map(c=>[c[1],c[0]])}}]};
+  navMap.getSource('route')?.setData(geojson);
 
-  navRouteLayer=L.polyline(coords,{color:'#FF5500',weight:6,opacity:.9,lineCap:'round',lineJoin:'round'}).addTo(navMap);
+  // Varış noktası
+  navMap.getSource('dest')?.setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Point',coordinates:to}}]});
 
-  const mkS=L.divIcon({html:'<div style="width:14px;height:14px;background:#16A34A;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
-  const mkE=L.divIcon({html:'<div style="width:16px;height:16px;background:#FF5500;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4)"></div>',iconSize:[16,16],iconAnchor:[8,8]});
-  navMarkers.push(L.marker([from[1],from[0]],{icon:mkS}).addTo(navMap).bindPopup('Başlangıç'));
-  navMarkers.push(L.marker([to[1],to[0]],{icon:mkE}).addTo(navMap).bindPopup('Varış'));
-  navMap.fitBounds(navRouteLayer.getBounds(),{padding:[60,40]});
-  setTimeout(()=>navMap&&navMap.invalidateSize(),100);
+  // Fit bounds
+  const lngs=coords.map(c=>c[1]), lats=coords.map(c=>c[0]);
+  navMap.fitBounds([[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]],{padding:{top:120,bottom:200,left:40,right:40},duration:800});
 }
 
-// Polyline6 decoder (OSRM precision=6)
 function decodePolyline6(str){
   let i=0,lat=0,lng=0,coords=[];
   while(i<str.length){
     let b,shift=0,result=0;
-    do{ b=str.charCodeAt(i++)-63; result|=(b&0x1f)<<shift; shift+=5; }while(b>=0x20);
+    do{b=str.charCodeAt(i++)-63;result|=(b&0x1f)<<shift;shift+=5;}while(b>=0x20);
     lat+=(result&1)?~(result>>1):(result>>1);
-    shift=0; result=0;
-    do{ b=str.charCodeAt(i++)-63; result|=(b&0x1f)<<shift; shift+=5; }while(b>=0x20);
+    shift=0;result=0;
+    do{b=str.charCodeAt(i++)-63;result|=(b&0x1f)<<shift;shift+=5;}while(b>=0x20);
     lng+=(result&1)?~(result>>1):(result>>1);
     coords.push([lat/1e6,lng/1e6]);
   }
   return coords;
 }
 
-// Navigasyonu başlat
 function startNavigation(){
-  if(!navSteps.length){ toast('Önce rota hesapla'); return; }
-  navActive=true; navStepIdx=0;
-
+  if(!navSteps.length){toast('Önce rota hesapla');return;}
+  navActive=true;navStepIdx=0;
   document.getElementById('nav-panel-summary').style.display='none';
   document.getElementById('nav-panel-active').style.display='block';
   document.getElementById('nav-turn-panel').style.display='block';
+  updateTurnPanel();updateActivePanel();
 
-  updateTurnPanel();
-  updateActivePanel();
-
-  // GPS izlemeye başla
   if(navWatcher) navigator.geolocation.clearWatch(navWatcher);
   navWatcher=navigator.geolocation.watchPosition(pos=>{
     const lat=pos.coords.latitude, lng=pos.coords.longitude;
-    const heading=pos.coords.heading||0;
+    const heading=pos.coords.heading; // derece, null olabilir
 
-    // Kullanıcı marker güncelle
-    if(!navUserMarker){
-      const icon=L.divIcon({
-        html:`<div style="width:20px;height:20px;background:var(--orange);border:3px solid white;border-radius:50%;box-shadow:0 2px 10px rgba(255,85,0,.5)"></div>`,
-        iconSize:[20,20],iconAnchor:[10,10]
-      });
-      navUserMarker=L.marker([lat,lng],{icon,zIndexOffset:1000}).addTo(navMap);
-    } else {
-      navUserMarker.setLatLng([lat,lng]);
-    }
+    // Kullanıcı noktasını güncelle
+    navMap.getSource('user')?.setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Point',coordinates:[lng,lat]}}]});
 
-    // Haritayı kullanıcıya kilitle
-    navMap.setView([lat,lng],16,{animate:true,duration:0.5});
+    // 3D perspektif: pitch 60°, harita yönü heading'e döner
+    const bearing = (heading!=null&&!isNaN(heading)) ? heading : navMap.getBearing();
+    navMap.easeTo({
+      center:[lng,lat],
+      zoom:17,
+      pitch:60,
+      bearing:bearing,
+      duration:800,
+      easing:t=>t
+    });
 
-    // Adım kontrolü — en yakın adıma mı geldik?
     checkStep(lat,lng);
   },err=>{
     if(err.code===1) toast('GPS izni gerekli');
@@ -2803,44 +2808,28 @@ function startNavigation(){
   toast('Navigasyon başladı');
 }
 
-// Adım kontrol et
 function checkStep(lat,lng){
-  if(navStepIdx>=navSteps.length-1){ arriveDestination(); return; }
+  if(navStepIdx>=navSteps.length-1){arriveDestination();return;}
   const step=navSteps[navStepIdx];
-  // Step'in bitiş waypoint'i
   const wp=step.maneuver?.location;
   if(!wp) return;
   const dist=geoDistM(lat,lng,wp[1],wp[0]);
-  if(dist<25){
+  if(dist<30){
     navStepIdx++;
     renderNavSteps(navSteps);
     updateTurnPanel();
     updateActivePanel();
-    const el=document.getElementById('ns-'+navStepIdx);
-    if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'});
-    // Yaklaşınca ses uyarısı
+    document.getElementById('ns-'+navStepIdx)?.scrollIntoView({behavior:'smooth',block:'nearest'});
     playDing();
   }
 }
 
-// Dönüş panelini güncelle
 function updateTurnPanel(){
   if(navStepIdx>=navSteps.length) return;
   const step=navSteps[navStepIdx];
-  const m=step.maneuver||{};
-  const mod=m.modifier||'';
-  const type=m.type||'';
-  const arrowMap={
-    right:'→',left:'←','sharp right':'↪','sharp left':'↩',
-    'slight right':'↗','slight left':'↖',straight:'⬆',
-    arrive:'●',depart:'⬆',roundabout:'↻',uturn:'↺'
-  };
-  const trMap={
-    right:'Sağa dön',left:'Sola dön',
-    'sharp right':'Keskin sağa','sharp left':'Keskin sola',
-    'slight right':'Hafif sağa','slight left':'Hafif sola',
-    straight:'Düz devam et',uturn:'Geri dön'
-  };
+  const m=step.maneuver||{};const mod=m.modifier||'';const type=m.type||'';
+  const arrowMap={right:'→',left:'←','sharp right':'↪','sharp left':'↩','slight right':'↗','slight left':'↖',straight:'⬆',arrive:'●',depart:'⬆',roundabout:'↻',uturn:'↺'};
+  const trMap={right:'Sağa dön',left:'Sola dön','sharp right':'Keskin sağa','sharp left':'Keskin sola','slight right':'Hafif sağa','slight left':'Hafif sola',straight:'Düz devam et',uturn:'Geri dön'};
   const arrow=arrowMap[mod]||arrowMap[type]||'⬆';
   const tr=type==='arrive'?'Hedefe ulaştınız':type==='depart'?'Başlayın':(trMap[mod]||'Devam et')+(step.name?' — '+step.name:'');
   document.getElementById('nav-turn-arrow').textContent=arrow;
@@ -2849,27 +2838,30 @@ function updateTurnPanel(){
   document.getElementById('nav-turn-dist').textContent=d>0?(d<1000?Math.round(d)+' m':(d/1000).toFixed(1)+' km'):'';
 }
 
-// Alt panel güncelle
 function updateActivePanel(){
   const remDist=navSteps.slice(navStepIdx).reduce((s,x)=>s+x.distance,0);
-  const remDur =navSteps.slice(navStepIdx).reduce((s,x)=>s+(x.duration||0),0);
-  const remMin =Math.round(remDur/60);
-  const arrive =new Date(Date.now()+remDur*1000).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  const remDur=navSteps.slice(navStepIdx).reduce((s,x)=>s+(x.duration||0),0);
+  const remMin=Math.round(remDur/60);
+  const arrive=new Date(Date.now()+remDur*1000).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('nav-rem-dist').textContent=remDist<1000?Math.round(remDist)+' m':(remDist/1000).toFixed(1)+' km';
   document.getElementById('nav-rem-time').textContent=remMin<60?remMin+' dk':Math.floor(remMin/60)+'s '+(remMin%60)+'dk';
   document.getElementById('nav-rem-arrive').textContent=arrive;
 }
 
-// Navigasyonu durdur
 function stopNavigation(){
   navActive=false;
-  if(navWatcher){ navigator.geolocation.clearWatch(navWatcher); navWatcher=null; }
-  if(navUserMarker){ navMap.removeLayer(navUserMarker); navUserMarker=null; }
+  if(navWatcher){navigator.geolocation.clearWatch(navWatcher);navWatcher=null;}
+  // Kullanıcı noktasını temizle
+  navMap.getSource('user')?.setData({type:'FeatureCollection',features:[]});
+  // Perspektifi sıfırla, rotayı göster
+  navMap.easeTo({pitch:0,bearing:0,duration:600});
   document.getElementById('nav-turn-panel').style.display='none';
   document.getElementById('nav-panel-active').style.display='none';
   document.getElementById('nav-panel-summary').style.display='block';
-  // Rotayı tekrar göster
-  if(navRouteLayer) navMap.fitBounds(navRouteLayer.getBounds(),{padding:[60,40]});
+  if(navRouteCoords.length){
+    const lngs=navRouteCoords.map(c=>c[1]),lats=navRouteCoords.map(c=>c[0]);
+    navMap.fitBounds([[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]],{padding:{top:80,bottom:220,left:40,right:40},duration:600});
+  }
   toast('Navigasyon durduruldu');
 }
 
@@ -2878,28 +2870,26 @@ function arriveDestination(){
   document.getElementById('nav-turn-arrow').textContent='●';
   document.getElementById('nav-turn-text').textContent='Hedefe ulaştınız!';
   document.getElementById('nav-turn-panel').style.display='block';
-  playDing(); playDing();
+  playDing();playDing();
   toast('Hedefe ulaştınız!');
 }
 
-// İki nokta arası mesafe (metre)
 function geoDistM(lat1,lon1,lat2,lon2){
   const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-// Paylaşılan rotayı navigasyona yükle
-function navFromRoute(path, name){
-  if(!path||path.length<2){ toast('Rota verisi yok'); return; }
+function navFromRoute(path,name){
+  if(!path||path.length<2){toast('Rota verisi yok');return;}
   openNav();
   setTimeout(()=>{
-    navFromCoord=[path[0][1],path[0][0]];   // [lng,lat]
-    navToCoord  =[path[path.length-1][1],path[path.length-1][0]];
+    navFromCoord=[path[0][1],path[0][0]];
+    navToCoord=[path[path.length-1][1],path[path.length-1][0]];
     document.getElementById('nav-from').value=name+' (Başlangıç)';
-    document.getElementById('nav-to').value  =name+' (Bitiş)';
+    document.getElementById('nav-to').value=name+' (Bitiş)';
     calcRoute();
-  }, 400);
+  },500);
 }
 
 
