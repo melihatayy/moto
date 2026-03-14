@@ -1687,27 +1687,37 @@ async function loadNotifs() {
 
 async function acceptRequest(reqId, fromUid, fromName) {
   if (!window.FB || !window.CU) return;
-  const { db, doc, updateDoc, setDoc } = window.FB;
-  await updateDoc(doc(db, 'friendRequests', reqId), { status: 'accepted' });
-  await setDoc(doc(db, 'users', window.CU.uid, 'friends', fromUid), { uid: fromUid, name: fromName, addedAt: new Date().toISOString() });
-  await setDoc(doc(db, 'users', fromUid, 'friends', window.CU.uid), { uid: window.CU.uid, name: window.CU.name || 'Sürücü', addedAt: new Date().toISOString() });
+  const { db, doc, updateDoc, setDoc, deleteDoc } = window.FB;
+
+  try {
+    // updateDoc yerine deleteDoc — kuralda sorun olabilir, sil daha güvenli
+    await deleteDoc(doc(db, 'friendRequests', reqId));
+  } catch(e) {
+    console.warn('friendRequest delete failed, trying update:', e);
+    try { await updateDoc(doc(db, 'friendRequests', reqId), { status: 'accepted' }); } catch(e2) { console.error('update also failed:', e2); }
+  }
+
+  try {
+    await setDoc(doc(db, 'users', window.CU.uid, 'friends', fromUid), { uid: fromUid, name: fromName, addedAt: new Date().toISOString() });
+    await setDoc(doc(db, 'users', fromUid, 'friends', window.CU.uid), { uid: window.CU.uid, name: window.CU.name || 'Sürücü', addedAt: new Date().toISOString() });
+  } catch(e) { console.error('friends setDoc failed:', e); toast('Hata oluştu: ' + e.message); return; }
+
   sendNotif(fromUid, 'follow', `<strong>${window.CU.name || 'Biri'}</strong> bağlantı isteğini kabul etti ✓`);
   playDing();
   friends.add(fromUid);
 
-  // İstek kartını "Artık bağlantılısınız" mesajıyla güncelle
+  // İstek kartını güncelle
   const el = document.getElementById('req-' + reqId);
   if (el) {
     el.style.background = 'var(--gdim)';
-    el.style.borderColor = 'rgba(22,163,74,.2)';
-    el.innerHTML = `<div style="display:flex;align-items:center;gap:10px">
+    el.style.border = '1px solid rgba(22,163,74,.2)';
+    el.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:4px 0">
       <div style="font-size:28px">🤝</div>
       <div>
         <div style="font-size:14px;font-weight:600;color:var(--green)">${fromName} ile artık bağlantılısınız!</div>
         <div style="font-size:12px;color:var(--text3);margin-top:2px">Birbirinizin profilini görebilir ve mesajlaşabilirsiniz.</div>
       </div>
     </div>`;
-    // 3 saniye sonra kaldır
     setTimeout(() => { if (el.parentNode) el.remove(); }, 3000);
   }
 
@@ -1719,8 +1729,12 @@ async function acceptRequest(reqId, fromUid, fromName) {
 
 async function declineRequest(reqId) {
   if (!window.FB) return;
-  const { db, doc, updateDoc } = window.FB;
-  await updateDoc(doc(db, 'friendRequests', reqId), { status: 'declined' });
+  const { db, doc, updateDoc, deleteDoc } = window.FB;
+  try {
+    await deleteDoc(doc(db, 'friendRequests', reqId));
+  } catch(e) {
+    try { await updateDoc(doc(db, 'friendRequests', reqId), { status: 'declined' }); } catch(e2) {}
+  }
   const el = document.getElementById('req-' + reqId);
   if (el) el.remove();
   toast('İstek reddedildi');
