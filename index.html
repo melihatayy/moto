@@ -654,7 +654,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 <!-- KULLANICI PROFİL GÖRÜNTÜLEME -->
 <div class="ov" id="ov-view-profile">
   <div class="hdr">
-    <div class="hbtn" onclick="closeOv('ov-view-profile')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <div class="hbtn" onclick="closeOv('ov-view-profile');if(vpPostsUnsub){vpPostsUnsub();vpPostsUnsub=null;}"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
   </div>
   <div class="scrl">
     <div id="vp-cover" style="height:100px;background:linear-gradient(135deg,#FF5500,#FF8800)"></div>
@@ -1255,7 +1255,12 @@ async function uploadAvatar(inp){
   const avEl=document.getElementById('prof-av');
   avEl.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
   window.CU.avatarUrl=url;
-  window.fbSaveProfile({...window.CU,avatarUrl:url});
+  await window.fbSaveProfile({...window.CU,avatarUrl:url});
+  // allUsers cache'ini güncelle
+  const idx=allUsers.findIndex(u=>u.uid===window.CU.uid);
+  if(idx>=0) allUsers[idx].avatarUrl=url;
+  // Feed realtime olduğu için otomatik güncellenir, ama post dökümanlarını da güncelle
+  _updateMyPostsAvatar(url);
   toast('Profil fotoğrafı güncellendi ✓');
 }
 async function uploadCover(inp){
@@ -1288,6 +1293,9 @@ async function saveEditProfile(){
   const data={...cu,name,bio,city,bike};
   window.CU=data;
   await window.fbSaveProfile(data);
+  // allUsers cache güncelle
+  const idx=allUsers.findIndex(u=>u.uid===data.uid);
+  if(idx>=0) allUsers[idx]={...allUsers[idx],...data};
   applyProfile(data);
   closeOv('ov-edit');
   toast('Profil güncellendi ✓');
@@ -1574,16 +1582,18 @@ async function viewProfile(uid){
 function vpConnAction(){}
 function vpMsg(){if(vpUid){closeOv('ov-view-profile');openChat(vpUid);}}
 
+let vpPostsUnsub = null;
 async function loadVPPosts(uid){
-  const{db,collection,query,where,getDocs}=window.FB;
+  const{db,collection,query,where,onSnapshot}=window.FB;
   const el=document.getElementById('vp-posts');
-  try{
-    const snap=await getDocs(query(collection(db,'posts'),where('uid','==',uid)));
+  if(vpPostsUnsub){vpPostsUnsub();vpPostsUnsub=null;}
+  el.innerHTML='<div style="grid-column:span 3;padding:16px;color:var(--text3);font-size:13px;text-align:center">Yükleniyor...</div>';
+  vpPostsUnsub=onSnapshot(query(collection(db,'posts'),where('uid','==',uid)),snap=>{
     if(snap.empty){el.innerHTML='<div style="color:var(--text3);font-size:13px;grid-column:span 3;padding:16px 0">Gönderi yok</div>';return;}
     const posts=[];snap.forEach(d=>posts.push(d.data()));
     posts.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
     el.innerHTML=posts.map(p=>`<div style="aspect-ratio:1;background:${p.photoUrl?'#eee':'var(--bg2)'};overflow:hidden">${p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,20)||'📝'}</div>`}</div>`).join('');
-  }catch(e){el.innerHTML='';}
+  });
 }
 async function loadVPStats(uid){
   const{db,collection,query,where,getDocs}=window.FB;
@@ -1647,45 +1657,62 @@ async function loadConnectionsList(){
 // ════════════════════════════════════════════
 // FEED
 // ════════════════════════════════════════════
-async function loadFeed(){
-  if(!window.FB)return;
-  const{db,collection,query,orderBy,limit,getDocs}=window.FB;
-  const snap=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(30)));
-  const el=document.getElementById('feed-posts');
-  if(snap.empty){el.innerHTML='<div class="empty-state"><div class="empty-title">Henüz gönderi yok</div><div class="empty-sub">İlk paylaşımı sen yap!</div></div>';return;}
-  const posts=[];snap.forEach(d=>posts.push({id:d.id,...d.data()}));
-  el.innerHTML=posts.map(p=>`
-    <div class="post">
-      <div class="post-head" onclick="viewProfile('${p.uid}')">
-        ${makeAv(p.uid,p.name,p.avatarUrl)}
-        <div><div class="post-name">${p.name||'Sürücü'}</div><div class="post-bike">${p.bike||''}</div></div>
-        <div class="vbadge">✓</div>
-        ${p.uid===window.CU?.uid?`<button onclick="event.stopPropagation();confirmAction('Gönderiyi Sil','Bu gönderiyi silmek istiyor musun?',()=>deletePost('${p.id}'))" style="margin-left:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:4px">✕</button>`:''}
-      </div>
-      ${p.photoUrl?`<div class="post-img"><img src="${p.photoUrl}" loading="lazy"></div>`:''}
-      <div class="post-actions">
-        <button class="act" id="like-${p.id}" onclick="toggleLike(this,'${p.uid}','${p.id}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          <span>${p.likes||0}</span>
-        </button>
-        <button class="act" onclick="toggleComment('${p.id}')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>${p.commentCount||0}</span>
-        </button>
-        <button class="act" onclick="shareUrl()">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          Paylaş
-        </button>
-      </div>
-      <div class="post-cap"><strong onclick="viewProfile('${p.uid}')" style="cursor:pointer">${p.name||'Sürücü'}</strong> ${p.caption||''}</div>
-      <div class="cmt-area" id="ca-${p.id}">
-        <div class="cmt-list" id="cl-${p.id}"></div>
-        <div class="cmt-row">
-          <input class="cmt-inp" id="ci-cmt-${p.id}" placeholder="Yorum yaz..." onkeydown="if(event.key==='Enter')submitComment('${p.uid}','${p.id}')">
-          <button class="cmt-send" onclick="submitComment('${p.uid}','${p.id}')">Gönder</button>
-        </div>
-      </div>
-    </div>`).join('');
+let feedUnsub = null;
+function loadFeed(){
+  if(!window.FB) return;
+  const{db,collection,query,orderBy,limit,onSnapshot} = window.FB;
+  const el = document.getElementById('feed-posts');
+  el.innerHTML = '<div class="empty-state"><div class="empty-title">Yükleniyor...</div></div>';
+  if(feedUnsub) feedUnsub();
+  feedUnsub = onSnapshot(
+    query(collection(db,'posts'), orderBy('createdAt','desc'), limit(40)),
+    snap => {
+      if(snap.empty){
+        el.innerHTML='<div class="empty-state"><div class="empty-title">Henüz gönderi yok</div><div class="empty-sub">İlk paylaşımı sen yap!</div></div>';
+        return;
+      }
+      const posts=[];snap.forEach(d=>posts.push({id:d.id,...d.data()}));
+      // Her gönderi için avatarı allUsers cache'den taze al
+      el.innerHTML=posts.map(p=>{
+        const freshUser = allUsers.find(u=>u.uid===p.uid);
+        const avatarUrl = (p.uid===window.CU?.uid) ? window.CU.avatarUrl : (freshUser?.avatarUrl||p.avatarUrl||'');
+        const name      = (p.uid===window.CU?.uid) ? (window.CU.name||p.name) : (freshUser?.name||p.name||'Sürücü');
+        const bike      = (p.uid===window.CU?.uid) ? (window.CU.bike||p.bike) : (freshUser?.bike||p.bike||'');
+        return `
+        <div class="post">
+          <div class="post-head" onclick="viewProfile('${p.uid}')">
+            ${makeAv(p.uid,name,avatarUrl)}
+            <div><div class="post-name">${name}</div><div class="post-bike">${bike}</div></div>
+            <div class="vbadge">✓</div>
+            ${p.uid===window.CU?.uid?`<button onclick="event.stopPropagation();confirmAction('Gönderiyi Sil','Bu gönderiyi silmek istiyor musun?',()=>deletePost('${p.id}'))" style="margin-left:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:4px">✕</button>`:''}
+          </div>
+          ${p.photoUrl?`<div class="post-img"><img src="${p.photoUrl}" loading="lazy"></div>`:''}
+          <div class="post-actions">
+            <button class="act" id="like-${p.id}" onclick="toggleLike(this,'${p.uid}','${p.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span>${p.likes||0}</span>
+            </button>
+            <button class="act" onclick="toggleComment('${p.id}')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>${p.commentCount||0}</span>
+            </button>
+            <button class="act" onclick="shareUrl()">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Paylaş
+            </button>
+          </div>
+          <div class="post-cap"><strong onclick="viewProfile('${p.uid}')" style="cursor:pointer">${name}</strong> ${p.caption||''}</div>
+          <div class="cmt-area" id="ca-${p.id}">
+            <div class="cmt-list" id="cl-${p.id}"></div>
+            <div class="cmt-row">
+              <input class="cmt-inp" id="ci-cmt-${p.id}" placeholder="Yorum yaz..." onkeydown="if(event.key==='Enter')submitComment('${p.uid}','${p.id}')">
+              <button class="cmt-send" onclick="submitComment('${p.uid}','${p.id}')">Gönder</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  );
 }
 
 function toggleLike(btn,ownerUid,postId){
@@ -1758,8 +1785,38 @@ async function deletePost(postId){
   toast('Gönderi silindi');loadFeed();
 }
 
-// Yeni postu anında grid başına ekle
-function _prependToMyGrid(p){
+// Avatar güncellenince Firestore'daki eski postları da güncelle
+async function _updateMyPostsAvatar(newUrl){
+  if(!window.FB||!window.CU) return;
+  const{db,collection,query,where,getDocs,doc,updateDoc}=window.FB;
+  try{
+    const snap=await getDocs(query(collection(db,'posts'),where('uid','==',window.CU.uid)));
+    snap.forEach(d=>updateDoc(doc(db,'posts',d.id),{avatarUrl:newUrl}).catch(()=>{}));
+  }catch(e){}
+}
+
+async function publishPost(){
+  const cap=document.getElementById('post-caption').value.trim();
+  if(!cap&&!postFile){toast('Fotoğraf veya açıklama ekle');return;}
+  const btn=document.getElementById('post-pub-btn');btn.textContent='Yükleniyor...';btn.disabled=true;
+  let photoUrl='';
+  if(postFile)photoUrl=await uploadCloud(postFile);
+  const{db,collection,addDoc}=window.FB;
+  const cu=window.CU||{};
+  // Her zaman güncel avatar ve isimle kaydet
+  const postData={
+    uid:cu.uid||'', name:cu.name||'Sürücü',
+    bike:cu.bike||'', avatarUrl:cu.avatarUrl||'',
+    caption:cap, photoUrl,
+    createdAt:new Date().toISOString(), likes:0, commentCount:0
+  };
+  const ref=await addDoc(collection(db,'posts'),postData);
+  btn.disabled=false;btn.textContent='Paylaş';
+  closeOv('ov-post');toast('Paylaşıldı! 🏍️');
+  // Profil grid'ine anında ekle
+  _prependToMyGrid({id:ref.id,...postData});
+  // Feed realtime onSnapshot ile otomatik güncellenir
+}
   const grid=document.getElementById('my-posts-grid');if(!grid)return;
   // "Henüz gönderi yok" metnini temizle
   const empty=grid.querySelector('div[style*="grid-column"]');if(empty)empty.remove();
