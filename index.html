@@ -1829,11 +1829,11 @@ async function watchNotifBadge() {
     const b = document.getElementById('notif-badge');
     if (b && snap.size > 0) b.style.display = 'block';
   });
+  // DM badge — unreadFor alanını izle
   let prevMsgCount = -1;
-  onSnapshot(collection(db, 'chats'), chatsSnap => {
-    const myUid = window.CU.uid;
-    let unread = 0;
-    chatsSnap.forEach(cd => { const d = cd.data(); if (d.participants?.includes(myUid) && d.unreadFor === myUid) unread++; });
+  const myUid = window.CU.uid;
+  onSnapshot(query(collection(db, 'chats'), where('unreadFor', '==', myUid)), chatsSnap => {
+    const unread = chatsSnap.size;
     const dmb = document.getElementById('dm-badge');
     if (dmb) dmb.style.display = unread > 0 ? 'block' : 'none';
     if (prevMsgCount >= 0 && unread > prevMsgCount) playDing();
