@@ -1602,26 +1602,52 @@ async function listenChat(partnerUid) {
   if(chatUnsub)chatUnsub();
   if(!window.FB||!window.CU) return;
   const cid=chatId(window.CU.uid,partnerUid);
-  const {db,collection,query,orderBy,onSnapshot}=window.FB;
+  const {db,collection,query,orderBy,onSnapshot,doc,updateDoc,writeBatch}=window.FB;
   const q=query(collection(db,'chats',cid,'messages'),orderBy('createdAt','asc'));
   let prevCount = 0;
-  chatUnsub=onSnapshot(q,snap=>{
+  chatUnsub=onSnapshot(q,async snap=>{
     const msgs=document.getElementById('chat-msgs');
     if(snap.empty){msgs.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">İlk mesajı sen yaz!</div>';return;}
     msgs.innerHTML='';
+    const myUid=window.CU?.uid;
+    const toMarkRead=[];
     snap.forEach(d=>{
-      const m=d.data();const isMe=m.senderUid===window.CU?.uid;
-      const el=document.createElement('div');el.className=`msg ${isMe?'me':'them'}`;
+      const m=d.data();
+      const isMe=m.senderUid===myUid;
+      const el=document.createElement('div');
+      el.className=`msg ${isMe?'me':'them'}`;
       const time=m.createdAt?new Date(m.createdAt).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):'';
-      if(m.photoUrl) el.innerHTML=`<img src="${m.photoUrl}" style="width:100%;max-width:200px;border-radius:10px;display:block"><div class="msg-time">${time}</div>`;
-      else el.innerHTML=`${m.text}<div class="msg-time">${time}</div>`;
+      // Okundu tiki — sadece kendi mesajlarında
+      const readTick = isMe ? `<div class="msg-read-tick" style="display:flex;justify-content:flex-end;gap:2px;margin-top:2px">
+        <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+          <path d="M1 5l3 3 5-7" stroke="${m.read ? '#3B82F6' : 'rgba(255,255,255,0.5)'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          ${m.read ? `<path d="M5 5l3 3 5-7" stroke="#3B82F6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+        </svg>
+        <span style="font-size:10px;color:${m.read ? '#3B82F6' : 'rgba(255,255,255,0.5)'};">${time}</span>
+      </div>` : `<div class="msg-time">${time}</div>`;
+
+      if(m.photoUrl) el.innerHTML=`<img src="${m.photoUrl}" style="width:100%;max-width:200px;border-radius:10px;display:block">${readTick}`;
+      else el.innerHTML=`${m.text}${readTick}`;
       msgs.appendChild(el);
+
+      // Karşı taraftan gelen okunmamış mesajları işaretle
+      if(!isMe && !m.read) toMarkRead.push(d.id);
     });
     msgs.scrollTop=msgs.scrollHeight;
+
+    // Okundu olarak işaretle
+    if(toMarkRead.length>0){
+      toMarkRead.forEach(msgId=>{
+        updateDoc(doc(db,'chats',cid,'messages',msgId),{read:true}).catch(()=>{});
+      });
+      // Chat doc'taki unreadFor'u temizle
+      updateDoc(doc(db,'chats',cid),{unreadFor:null}).catch(()=>{});
+    }
+
     // Yeni mesaj gelince ding çal
     if (snap.size > prevCount && prevCount > 0) {
       const last = snap.docs[snap.size - 1].data();
-      if (last.senderUid !== window.CU?.uid) playDing();
+      if (last.senderUid !== myUid) playDing();
     }
     prevCount = snap.size;
   });
@@ -1638,11 +1664,30 @@ async function sendPhoto(inp) {
   const url=await uploadCloud(f);await _sendMsg({text:'',photoUrl:url});
 }
 async function _sendMsg(content) {
-  const myUid=window.CU.uid;
-  const cid=chatId(myUid,chatPartner.uid);
-  const {db,collection,addDoc,doc,setDoc}=window.FB;
-  await addDoc(collection(db,'chats',cid,'messages'),{senderUid:myUid,senderName:window.CU.name||'Sürücü',text:content.text,photoUrl:content.photoUrl,createdAt:new Date().toISOString()});
-  await setDoc(doc(db,'chats',cid),{participants:[myUid,chatPartner.uid],lastMsg:content.text||'📷',updatedAt:new Date().toISOString()},{merge:true});
+  const myUid = window.CU.uid;
+  const cid = chatId(myUid, chatPartner.uid);
+  const { db, collection, addDoc, doc, setDoc } = window.FB;
+  const preview = content.text ? content.text.substring(0, 60) : '📷 Fotoğraf';
+  await addDoc(collection(db, 'chats', cid, 'messages'), {
+    senderUid: myUid,
+    senderName: window.CU.name || 'Sürücü',
+    text: content.text,
+    photoUrl: content.photoUrl,
+    read: false,
+    createdAt: new Date().toISOString()
+  });
+  await setDoc(doc(db, 'chats', cid), {
+    participants: [myUid, chatPartner.uid],
+    lastMsg: preview,
+    updatedAt: new Date().toISOString(),
+    unreadFor: chatPartner.uid
+  }, { merge: true });
+  // Karşı tarafa bildirim gönder
+  sendNotif(
+    chatPartner.uid,
+    'message',
+    `<strong>${window.CU.name || 'Biri'}</strong>: ${preview}`
+  );
 }
 
 // ── BİLDİRİMLER ──
@@ -1822,23 +1867,38 @@ async function sendNotif(toUid, type, text, refId='') {
 async function watchNotifBadge() {
   if (!window.FB || !window.CU) return;
   const { db, collection, query, where, onSnapshot } = window.FB;
-  let prevNotifCount = 0;
+  let prevNotifCount = -1; // -1 = ilk yükleme, ding çalma
 
-  // Bildirim badge
+  // Bildirim badge + ding
   const q = query(collection(db, 'notifications'), where('toUid', '==', window.CU.uid), where('read', '==', false));
   onSnapshot(q, snap => {
     const b = document.getElementById('notif-badge');
     if (b) b.style.display = snap.size > 0 ? 'block' : 'none';
-    // Yeni bildirim gelince ding
-    if (snap.size > prevNotifCount && prevNotifCount >= 0) playDing();
+    // İlk yüklemede ding çalma, sonrasında yeni bildirim gelince çal
+    if (prevNotifCount >= 0 && snap.size > prevNotifCount) playDing();
     prevNotifCount = snap.size;
   });
 
-  // Arkadaş isteği badge — bildirim ikonuna eklenir
+  // Arkadaş isteği badge
   const rq = query(collection(db, 'friendRequests'), where('toUid', '==', window.CU.uid), where('status', '==', 'pending'));
   onSnapshot(rq, snap => {
     const b = document.getElementById('notif-badge');
     if (b && snap.size > 0) b.style.display = 'block';
+  });
+
+  // DM badge — yeni mesaj gelince mesaj ikonuna da badge koy
+  let prevMsgCount = -1;
+  onSnapshot(collection(db, 'chats'), async chatsSnap => {
+    let unread = 0;
+    const myUid = window.CU.uid;
+    chatsSnap.forEach(cd => {
+      const d = cd.data();
+      if (d.participants?.includes(myUid) && d.unreadFor === myUid) unread++;
+    });
+    const dmb = document.getElementById('dm-badge');
+    if (dmb) dmb.style.display = unread > 0 ? 'block' : 'none';
+    if (prevMsgCount >= 0 && unread > prevMsgCount) playDing();
+    prevMsgCount = unread;
   });
 }
 
