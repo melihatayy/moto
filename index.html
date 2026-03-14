@@ -459,30 +459,35 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 
   <!-- ROTALAR TAB -->
   <div class="tab" id="tab-rota">
-    <div class="hdr">
+    <!-- Sadece logo header -->
+    <div class="hdr" style="border-bottom:none">
       <div class="logo">ROTALAR</div>
-      <div style="display:flex;gap:6px">
-        <button onclick="openSOS()" style="background:var(--red);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">
-          <svg width="14" height="14" fill="white" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="white" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="white" stroke-width="2"/></svg>
-          SOS
-        </button>
-        <button onclick="openNav()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">
-          <svg width="14" height="14" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-          Navigasyon
-        </button>
-        <button id="live-share-btn" onclick="toggleLiveShare()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Paylaş</button>
-        <button id="rec-btn" onclick="toggleRec()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Kaydet</button>
-      </div>
     </div>
+    <!-- Kayıt banner -->
     <div class="rec-banner" id="rec-banner">
       <div class="rdot"></div>
       <span>Kaydediliyor...</span>
       <span id="rec-stats" style="margin-left:auto;opacity:.85;font-size:11px"></span>
     </div>
-    <div id="map-el"></div>
+    <!-- Harita — kalan alanı doldurur -->
+    <div id="map-el" style="flex:1;min-height:0"></div>
+    <!-- Paylaşılan rotalar -->
     <div class="routes-list">
       <div style="padding:8px 14px 4px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">Paylaşılan Rotalar</div>
       <div id="routes-feed" style="padding:0 14px 14px"></div>
+    </div>
+    <!-- Alt aksiyon çubuğu -->
+    <div style="flex-shrink:0;display:flex;gap:8px;padding:10px 14px calc(10px + var(--safe));background:var(--card);border-top:1px solid var(--border)">
+      <button onclick="openSOS()" style="width:44px;height:44px;border-radius:12px;background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;flex-shrink:0">SOS</button>
+      <button onclick="openNav()" style="flex:1;height:44px;border-radius:12px;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        Navigasyon
+      </button>
+      <button onclick="toggleLiveShare()" id="live-share-btn" style="flex:1;height:44px;border-radius:12px;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        Paylaş
+      </button>
+      <button id="rec-btn" onclick="toggleRec()" style="flex:1;height:44px;border-radius:12px;background:var(--orange);color:white;border:none;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">● Rota Oluştur</button>
     </div>
   </div>
 
@@ -493,7 +498,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <div style="display:flex;gap:6px">
         <button onclick="openLobbies()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          Telsiz
+          Intercom
         </button>
         <button onclick="openCreateTour()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Tur Oluştur</button>
       </div>
