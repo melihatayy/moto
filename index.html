@@ -1993,14 +1993,13 @@ async function loadTours(){
 
 async function requestJoinTour(tourId, ownerUid, tourName, btn){
   if(!window.FB||!window.CU)return;
-  const{db,collection,addDoc,where}=window.FB;
+  const{db,collection,addDoc,doc,onSnapshot}=window.FB;
   const cu=window.CU;
-  // Butonu güncelle
-  btn.disabled=true;btn.textContent='⏳ İstek Gönderildi';
-  btn.style.cssText='background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit';
+  btn.disabled=true;
+  btn.textContent='İstek Gönderiliyor...';
+  btn.style.cssText='background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:default';
   try{
-    // tourRequests koleksiyonuna yaz
-    await addDoc(collection(db,'tourRequests'),{
+    const ref=await addDoc(collection(db,'tourRequests'),{
       tourId,tourName,
       ownerUid,
       fromUid:cu.uid,fromName:cu.name||'Sürücü',
@@ -2008,10 +2007,32 @@ async function requestJoinTour(tourId, ownerUid, tourName, btn){
       status:'pending',
       createdAt:new Date().toISOString()
     });
-    // Tur sahibine bildirim gönder
     await pushNotif(ownerUid,'tourRequest',`<strong>${cu.name||'Biri'}</strong> "${tourName}" turuna katılmak istiyor`);
     playDing();
-    toast(`"${tourName}" için katılım isteği gönderildi!`);
+
+    // Butonu "bekleniyor" yap
+    btn.textContent='⏳ Yanıt bekleniyor...';
+
+    // Canlı dinle — kabul/red gelince butonu güncelle
+    const unsub=onSnapshot(doc(db,'tourRequests',ref.id), snap=>{
+      if(!snap.exists()){
+        // Döküman silindi = kabul edildi (acceptTourRequest siliyor)
+        unsub();
+        btn.textContent='✓ Kabul edildi!';
+        btn.style.cssText='background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:default';
+        playDing();
+        toast(`"${tourName}" turuna kabul edildin!`);
+        loadTours(); // listeyi güncelle
+        return;
+      }
+      const status=snap.data().status;
+      if(status==='declined'){
+        unsub();
+        btn.textContent='✗ Reddedildi';
+        btn.style.cssText='background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:default';
+        toast(`"${tourName}" isteğin reddedildi.`);
+      }
+    });
   }catch(e){
     btn.disabled=false;btn.textContent='Katıl';toast('Hata: '+e.message);
   }
@@ -2055,7 +2076,8 @@ async function acceptTourRequest(reqId, tourId, fromUid, fromName){
   try{
     // Turu güncelle — katılımcıya ekle
     await updateDoc(doc(db,'tours',tourId),{participants:arrayUnion(fromUid)});
-    // İsteği sil
+    // Önce accepted yaz (karşı taraf snapshot dinliyor), sonra sil
+    await updateDoc(doc(db,'tourRequests',reqId),{status:'accepted'});
     await deleteDoc(doc(db,'tourRequests',reqId));
     // Katılan kişiye bildirim
     await pushNotif(fromUid,'tourAccepted',`<strong>${window.CU.name||'Tur lideri'}</strong> tur katılım isteğini kabul etti ✓`);
