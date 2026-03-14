@@ -1645,9 +1645,17 @@ async function openNotifs() {
 }
 async function loadNotifs() {
   if (!window.FB || !window.CU) return;
-  const { db, collection, query, where, orderBy, getDocs, limit } = window.FB;
-  const q = query(collection(db, 'notifications'), where('toUid', '==', window.CU.uid), orderBy('createdAt', 'desc'), limit(30));
-  const snap = await getDocs(q);
+  const { db, collection, query, where, getDocs, limit } = window.FB;
+
+  // orderBy kaldırıldı — Firestore composite index gerektiriyor, client-side sort yapıyoruz
+  const q = query(collection(db, 'notifications'), where('toUid', '==', window.CU.uid), limit(30));
+  let snap;
+  try {
+    snap = await getDocs(q);
+  } catch(e) {
+    console.error('Notif error:', e);
+    snap = { empty: true, forEach: () => {} };
+  }
 
   // Bekleyen arkadaş isteklerini yükle
   let requests = [];
@@ -1681,25 +1689,25 @@ async function loadNotifs() {
     return;
   }
 
-  const icons = { like: '❤️', comment: '💬', friendRequest: '🤝', follow: '👤', route: '🗺️', tag: '🏷️' };
-  snap.forEach(d => {
-    const n = d.data();
-    const isRead = n.read;
+  // Client-side sort: en yeniden en eskiye
+  const notifs = [];
+  snap.forEach(d => notifs.push({ id: d.id, ...d.data() }));
+  notifs.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+  const icons = { like: '❤️', comment: '💬', friendRequest: '🤝', follow: '👤', route: '🗺️' };
+  notifs.forEach(n => {
     html += `
-    <div class="notif-item" style="opacity:${isRead ? '0.6' : '1'};background:${isRead ? 'transparent' : 'rgba(255,85,0,0.04)'};border-radius:12px;padding:10px;margin-bottom:2px;transition:opacity .3s">
-      <div style="display:flex;align-items:center;gap:10px">
-        ${n.fromAvatar ? `<div style="width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="${n.fromAvatar}" style="width:100%;height:100%;object-fit:cover"></div>` : `<div class="notif-icon">${icons[n.type] || '🔔'}</div>`}
-        <div style="flex:1">
-          <div class="notif-text">${n.text}</div>
-          <div class="notif-time">${timeAgo(n.createdAt)}${isRead ? ' · Görüldü' : ''}</div>
-        </div>
-        ${!isRead ? '<div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>' : ''}
+    <div class="notif-item${n.read ? '' : ' notif-unread'}">
+      <div class="notif-icon">${icons[n.type] || '🔔'}</div>
+      <div style="flex:1">
+        <div class="notif-text">${n.text}</div>
+        <div class="notif-time">${timeAgo(n.createdAt)}</div>
       </div>
+      ${!n.read ? '<div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>' : ''}
     </div>`;
   });
 
   list.innerHTML = html || '<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bildirim yok 🏍️</div>';
-  // Görüldü olarak işaretle
   setTimeout(() => markRead(), 1500);
 }
 
