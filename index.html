@@ -486,7 +486,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <div style="display:flex;gap:6px">
         <button onclick="openLobbies()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          Intercom
+          Telsiz
         </button>
         <button onclick="openCreateTour()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Tur Oluştur</button>
       </div>
@@ -871,30 +871,30 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 <div class="ov" id="ov-sos">
   <div style="flex:1;background:#0a0a0a;display:flex;flex-direction:column;overflow:hidden">
     <!-- Header -->
-    <div style="padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0">
+    <div style="padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0">
       <div class="hbtn" onclick="closeOv('ov-sos')" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)"><svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--red)">⚠️ ACİL YARDIM</div>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:0 16px 12px;display:flex;flex-direction:column;gap:8px;margin-top:12px"><!-- Konum -->
+    <!-- Konum -->
     <div id="sos-location" style="margin:0 16px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;font-size:12px;color:rgba(255,255,255,.6)">
       ?? Konum alınıyor...
     </div>
     <!-- SOS Seçenekleri -->
-    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
-      <button onclick="sendSOS('crash')" style="background:#DC2626;color:white;border:none;border-radius:16px;padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
-        <span style="font-size:24px">??</span>
+    <div style="flex:1;overflow-y:auto;padding:0 16px;display:flex;flex-direction:column;gap:8px">
+      <button onclick="sendSOS('crash')" style="background:#DC2626;color:white;border:none;border-radius:16px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:32px">??</span>
         <div><div>KAZA YAPTIM</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">Bağlantılarıma konumumu gönder</div></div>
       </button>
-      <button onclick="sendSOS('breakdown')" style="background:#D97706;color:white;border:none;border-radius:16px;padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
-        <span style="font-size:24px">??</span>
+      <button onclick="sendSOS('breakdown')" style="background:#D97706;color:white;border:none;border-radius:16px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:32px">??</span>
         <div><div>YOLDA KALDIM</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">Motor arızası, yardım lazım</div></div>
       </button>
-      <button onclick="sendSOS('fuel')" style="background:#2563EB;color:white;border:none;border-radius:16px;padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
-        <span style="font-size:24px">⛽</span>
+      <button onclick="sendSOS('fuel')" style="background:#2563EB;color:white;border:none;border-radius:16px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:22px">⛽</span>
         <div><div>YAKIT BİTTİ</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">En yakın istasyona yönlendir</div></div>
       </button>
-      <button onclick="sendSOS('help')" style="background:#16A34A;color:white;border:none;border-radius:16px;padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
-        <span style="font-size:24px">??</span>
+      <button onclick="sendSOS('help')" style="background:#16A34A;color:white;border:none;border-radius:16px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:32px">??</span>
         <div><div>GENEL YARDIM</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">Diğer sürücülere duyur</div></div>
       </button>
     </div>
@@ -904,26 +904,26 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <a href="tel:112" style="background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);border-radius:12px;padding:9px;text-align:center;text-decoration:none">
           <div style="font-size:16px;margin-bottom:2px">??</div>
-          <div style="font-size:12px;font-weight:700;color:white">112</div>
+          <div style="font-size:13px;font-weight:700;color:white">112</div>
           <div style="font-size:10px;color:rgba(255,255,255,.5)">Ambulans / İtfaiye</div>
         </a>
         <a href="tel:155" style="background:rgba(37,99,235,.2);border:1px solid rgba(37,99,235,.4);border-radius:12px;padding:9px;text-align:center;text-decoration:none">
           <div style="font-size:16px;margin-bottom:2px">??</div>
-          <div style="font-size:12px;font-weight:700;color:white">155</div>
+          <div style="font-size:13px;font-weight:700;color:white">155</div>
           <div style="font-size:10px;color:rgba(255,255,255,.5)">Polis İmdat</div>
         </a>
         <a href="tel:156" style="background:rgba(22,163,74,.2);border:1px solid rgba(22,163,74,.4);border-radius:12px;padding:9px;text-align:center;text-decoration:none">
           <div style="font-size:16px;margin-bottom:2px">??</div>
-          <div style="font-size:12px;font-weight:700;color:white">156</div>
+          <div style="font-size:13px;font-weight:700;color:white">156</div>
           <div style="font-size:10px;color:rgba(255,255,255,.5)">Jandarma</div>
         </a>
         <a href="tel:177" style="background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);border-radius:12px;padding:9px;text-align:center;text-decoration:none">
           <div style="font-size:16px;margin-bottom:2px">??</div>
-          <div style="font-size:12px;font-weight:700;color:white">177</div>
+          <div style="font-size:13px;font-weight:700;color:white">177</div>
           <div style="font-size:10px;color:rgba(255,255,255,.5)">İtfaiye</div>
         </a>
       </div>
-    </div></div>
+    </div>
   </div>
 </div>
 
@@ -987,19 +987,19 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     </div>
     <!-- SOS Seçenekleri -->
     <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
-      <button onclick="sendSOS('crash')" style="background:#DC2626;color:white;border:none;border-radius:16px;padding:18px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+      <button onclick="sendSOS('crash')" style="background:#DC2626;color:white;border:none;border-radius:16px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
         <span style="font-size:32px">??</span>
         <div><div>KAZA YAPTIM</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">Bağlantılarıma konumumu gönder</div></div>
       </button>
-      <button onclick="sendSOS('breakdown')" style="background:#D97706;color:white;border:none;border-radius:16px;padding:18px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+      <button onclick="sendSOS('breakdown')" style="background:#D97706;color:white;border:none;border-radius:16px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
         <span style="font-size:32px">??</span>
         <div><div>YOLDA KALDIM</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">Motor arızası, yardım lazım</div></div>
       </button>
-      <button onclick="sendSOS('fuel')" style="background:#2563EB;color:white;border:none;border-radius:16px;padding:18px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
-        <span style="font-size:32px">⛽</span>
+      <button onclick="sendSOS('fuel')" style="background:#2563EB;color:white;border:none;border-radius:16px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:22px">⛽</span>
         <div><div>YAKIT BİTTİ</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">En yakın istasyona yönlendir</div></div>
       </button>
-      <button onclick="sendSOS('help')" style="background:#16A34A;color:white;border:none;border-radius:16px;padding:18px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+      <button onclick="sendSOS('help')" style="background:#16A34A;color:white;border:none;border-radius:16px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
         <span style="font-size:32px">??</span>
         <div><div>GENEL YARDIM</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">Diğer sürücülere duyur</div></div>
       </button>
@@ -1008,23 +1008,23 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <div style="margin:16px;border-top:1px solid rgba(255,255,255,.1);padding-top:16px">
       <div style="font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Acil Servisler</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <a href="tel:112" style="background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);border-radius:12px;padding:12px;text-align:center;text-decoration:none">
-          <div style="font-size:20px;margin-bottom:4px">??</div>
+        <a href="tel:112" style="background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);border-radius:12px;padding:9px;text-align:center;text-decoration:none">
+          <div style="font-size:16px;margin-bottom:2px">??</div>
           <div style="font-size:13px;font-weight:700;color:white">112</div>
           <div style="font-size:10px;color:rgba(255,255,255,.5)">Ambulans / İtfaiye</div>
         </a>
-        <a href="tel:155" style="background:rgba(37,99,235,.2);border:1px solid rgba(37,99,235,.4);border-radius:12px;padding:12px;text-align:center;text-decoration:none">
-          <div style="font-size:20px;margin-bottom:4px">??</div>
+        <a href="tel:155" style="background:rgba(37,99,235,.2);border:1px solid rgba(37,99,235,.4);border-radius:12px;padding:9px;text-align:center;text-decoration:none">
+          <div style="font-size:16px;margin-bottom:2px">??</div>
           <div style="font-size:13px;font-weight:700;color:white">155</div>
           <div style="font-size:10px;color:rgba(255,255,255,.5)">Polis İmdat</div>
         </a>
-        <a href="tel:156" style="background:rgba(22,163,74,.2);border:1px solid rgba(22,163,74,.4);border-radius:12px;padding:12px;text-align:center;text-decoration:none">
-          <div style="font-size:20px;margin-bottom:4px">??</div>
+        <a href="tel:156" style="background:rgba(22,163,74,.2);border:1px solid rgba(22,163,74,.4);border-radius:12px;padding:9px;text-align:center;text-decoration:none">
+          <div style="font-size:16px;margin-bottom:2px">??</div>
           <div style="font-size:13px;font-weight:700;color:white">156</div>
           <div style="font-size:10px;color:rgba(255,255,255,.5)">Jandarma</div>
         </a>
-        <a href="tel:177" style="background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);border-radius:12px;padding:12px;text-align:center;text-decoration:none">
-          <div style="font-size:20px;margin-bottom:4px">??</div>
+        <a href="tel:177" style="background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);border-radius:12px;padding:9px;text-align:center;text-decoration:none">
+          <div style="font-size:16px;margin-bottom:2px">??</div>
           <div style="font-size:13px;font-weight:700;color:white">177</div>
           <div style="font-size:10px;color:rgba(255,255,255,.5)">İtfaiye</div>
         </a>
@@ -1878,7 +1878,7 @@ function _prependToMyGrid(p){
 // My posts — profil açılınca yükle
 async function loadMyPosts(){
   if(!window.FB||!window.CU)return;
-  const{db,collection,query,where,getDocs}=window.FB;
+  const{db,collection,query,where,orderBy,getDocs}=window.FB;
   const snap=await getDocs(query(collection(db,'posts'),where('uid','==',window.CU.uid)));
   const el=document.getElementById('my-posts-grid');if(!el)return;
   if(snap.empty){el.innerHTML='<div style="grid-column:span 3;padding:16px;color:var(--text3);font-size:13px;text-align:center">Henüz gönderi yok ??</div>';return;}
@@ -2989,7 +2989,7 @@ async function joinVoiceRoom(){
   toast('Sesli kanala bağlandın ??️');
 
   // Bağlantılara bildirim
-  connUsers.forEach(u => pushNotif(u.uid,'voice',`??️ <strong>${cu.name||'Biri'}</strong> intercomda — Turlar → Intercom`));
+  connUsers.forEach(u => pushNotif(u.uid,'voice',`??️ <strong>${cu.name||'Biri'}</strong> intercomda — Turlar → Telsiz`));
 }
 
 // ── Üye listesini render et ──
