@@ -1487,7 +1487,10 @@ async function loadUsers() {
         <div class="conn-name">${u.name || 'Sürücü'}</div>
         <div class="conn-bike">${u.bike || ''}</div>
       </div>
-      <button class="conn-btn add" onclick="event.stopPropagation();openChatFromFriend('${u.uid}')">Mesaj</button>
+      <div style="display:flex;gap:6px">
+        <button class="conn-btn add" onclick="event.stopPropagation();openChatFromFriend('${u.uid}')">Mesaj</button>
+        <button onclick="event.stopPropagation();confirmAction('${u.name || 'Bu kişi'} ile bağlantıyı koparmak istiyor musun?',()=>disconnectFriend('${u.uid}'))" style="background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer">Kopar</button>
+      </div>
     </div>
   `).join('');
 }
@@ -2060,16 +2063,19 @@ async function viewUserProfile(uid) {
     addBtn.style.background = 'var(--bg2)';
     addBtn.style.color = 'var(--text3)';
     addBtn.style.border = '1.5px solid var(--border)';
+    addBtn.onclick = () => confirmDisconnect();
   } else if (isPending) {
     addBtn.textContent = 'İstek Gönderildi ⏳';
     addBtn.style.background = 'var(--bg2)';
     addBtn.style.color = 'var(--text3)';
     addBtn.style.border = '1.5px solid var(--border)';
+    addBtn.onclick = () => {};
   } else {
     addBtn.textContent = '+ Bağlantı Kur';
     addBtn.style.background = 'var(--orange)';
     addBtn.style.color = 'white';
     addBtn.style.border = 'none';
+    addBtn.onclick = () => toggleFriend();
   }
 
   // Mesaj butonu sadece bağlantılara
@@ -2106,6 +2112,46 @@ function toggleFriend() {
   const u = allUsers.find(x => x.uid === viewingUid);
   if (!u) return;
   quickAddFriend(viewingUid, u.name, document.getElementById('vp-add-btn'));
+}
+
+function confirmDisconnect() {
+  if (!viewingUid) return;
+  const u = allUsers.find(x => x.uid === viewingUid);
+  confirmAction(`${u?.name || 'Bu kişi'} ile bağlantıyı koparmak istiyor musun?`, () => disconnectFriend(viewingUid));
+}
+
+async function disconnectFriend(uid) {
+  if (!window.FB || !window.CU) return;
+  const { db, doc, deleteDoc } = window.FB;
+  try {
+    await deleteDoc(doc(db, 'users', window.CU.uid, 'friends', uid));
+    await deleteDoc(doc(db, 'users', uid, 'friends', window.CU.uid));
+  } catch(e) {}
+  friends.delete(uid);
+
+  // Butonu güncelle
+  const addBtn = document.getElementById('vp-add-btn');
+  if (addBtn) {
+    addBtn.textContent = '+ Bağlantı Kur';
+    addBtn.style.background = 'var(--orange)';
+    addBtn.style.color = 'white';
+    addBtn.style.border = 'none';
+    addBtn.onclick = () => toggleFriend();
+  }
+  // Gizliliği geri al
+  const locked = document.getElementById('vp-locked');
+  const content = document.getElementById('vp-content');
+  if (locked) locked.style.display = 'block';
+  if (content) content.style.display = 'none';
+  const msgBtn = document.getElementById('vp-msg-btn');
+  if (msgBtn) msgBtn.style.display = 'none';
+
+  // Stat güncelle
+  const s = document.getElementById('stat-baglantilar');
+  if (s) s.textContent = Math.max(0, parseInt(s.textContent || 0) - 1);
+
+  loadUsers();
+  toast('Bağlantı koparıldı');
 }
 
 function msgFromProfile() {
