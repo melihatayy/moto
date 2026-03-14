@@ -682,10 +682,6 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
           </div>
           <button class="btn btn-ghost" style="color:var(--red)" onclick="window.fbSignOut()">Çıkış Yap</button>
         </div>
-        <div class="conn-section" style="padding-top:14px">
-          <div class="conn-title">Bağlantılarım <span id="conn-count"></span></div>
-          <div id="conn-list"><div style="padding:16px 0;color:var(--text3);font-size:13px">Yükleniyor...</div></div>
-        </div>
         <div style="height:14px"></div>
         <div class="section-title">Gönderilerim</div>
         <div id="profile-posts"><div class="empty-state" style="padding:16px 24px"><div class="empty-sub">Henüz gönderi yok 📸</div></div></div>
@@ -1467,32 +1463,10 @@ async function loadUsers() {
   window._users = allU;
   allUsers = allU;
 
-  // Sadece arkadaşları göster profilde
-  const friendList = allU.filter(u => friends.has(u.uid));
-  const list = document.getElementById('conn-list');
-  if (!list) return;
-
   // Bağlantı sayısını güncelle
+  const friendList = allU.filter(u => friends.has(u.uid));
   const statEl = document.getElementById('stat-baglantilar');
   if (statEl) statEl.textContent = friendList.length;
-
-  if (friendList.length === 0) {
-    list.innerHTML = '<div style="padding:16px 0;color:var(--text3);font-size:13px">Henüz bağlantın yok — 🔍 ile sürücü bul!</div>';
-    return;
-  }
-  list.innerHTML = friendList.map(u => `
-    <div class="conn-item" onclick="viewUserProfile('${u.uid}')">
-      ${makeAvatar(u.uid, u.name, u.avatarUrl, 44)}
-      <div class="conn-info">
-        <div class="conn-name">${u.name || 'Sürücü'}</div>
-        <div class="conn-bike">${u.bike || ''}</div>
-      </div>
-      <div style="display:flex;gap:6px">
-        <button class="conn-btn add" onclick="event.stopPropagation();openChatFromFriend('${u.uid}')">Mesaj</button>
-        <button onclick="event.stopPropagation();confirmAction('${u.name || 'Bu kişi'} ile bağlantıyı koparmak istiyor musun?',()=>disconnectFriend('${u.uid}'))" style="background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer">Kopar</button>
-      </div>
-    </div>
-  `).join('');
 }
 
 function openChatFromFriend(uid) {
@@ -1720,11 +1694,27 @@ async function acceptRequest(reqId, fromUid, fromName) {
   sendNotif(fromUid, 'follow', `<strong>${window.CU.name || 'Biri'}</strong> bağlantı isteğini kabul etti ✓`);
   playDing();
   friends.add(fromUid);
+
+  // İstek kartını "Artık bağlantılısınız" mesajıyla güncelle
   const el = document.getElementById('req-' + reqId);
-  if (el) el.remove();
+  if (el) {
+    el.style.background = 'var(--gdim)';
+    el.style.borderColor = 'rgba(22,163,74,.2)';
+    el.innerHTML = `<div style="display:flex;align-items:center;gap:10px">
+      <div style="font-size:28px">🤝</div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--green)">${fromName} ile artık bağlantılısınız!</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Birbirinizin profilini görebilir ve mesajlaşabilirsiniz.</div>
+      </div>
+    </div>`;
+    // 3 saniye sonra kaldır
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 3000);
+  }
+
   toast(`${fromName} ile bağlantı kuruldu! 🤝`);
   const s = document.getElementById('stat-baglantilar');
   if (s) s.textContent = parseInt(s.textContent || 0) + 1;
+  loadUsers();
 }
 
 async function declineRequest(reqId) {
@@ -2182,33 +2172,43 @@ async function loadConnectionsList() {
   try {
     const snap = await getDocs(collection(db, 'users', window.CU.uid, 'friends'));
     if (snap.empty) {
-      list.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bağlantın yok<br><span style="font-size:13px">Sürücüleri bulmak için 🔍 kullan</span></div>';
+      list.innerHTML = '<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">🔍</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div><div style="font-size:13px">Sürücüleri bulmak için büyüteç ikonunu kullan</div></div>';
       return;
     }
     const friendUids = [];
     snap.forEach(d => friendUids.push(d.data().uid));
-    // Detayları allUsers'tan al
     const connUsers = allUsers.filter(u => friendUids.includes(u.uid));
-    // allUsers'ta olmayan uidler için fallback
-    const missing = friendUids.filter(uid => !allUsers.find(u => u.uid === uid));
 
-    const countEl = document.getElementById('conn-count');
-    if (countEl) countEl.textContent = '· ' + friendUids.length;
     const statEl = document.getElementById('stat-baglantilar');
     if (statEl) statEl.textContent = friendUids.length;
 
     list.innerHTML = connUsers.map(u => `
-      <div class="conn-item" onclick="closeOv('ov-connections');viewUserProfile('${u.uid}')">
+      <div class="conn-item" id="conn-item-${u.uid}" onclick="closeOv('ov-connections');viewUserProfile('${u.uid}')">
         ${makeAvatar(u.uid, u.name, u.avatarUrl, 44)}
         <div class="conn-info">
           <div class="conn-name">${u.name || 'Sürücü'}</div>
-          <div class="conn-bike">${u.bike || ''}</div>
+          <div class="conn-bike">${u.bike || ''} ${u.city ? '· ' + u.city : ''}</div>
         </div>
-        <button onclick="event.stopPropagation();closeOv('ov-connections');openChat('${u.uid}')" class="conn-btn add">Mesaj</button>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button onclick="event.stopPropagation();closeOv('ov-connections');openChat('${u.uid}')" class="conn-btn add">Mesaj</button>
+          <button onclick="event.stopPropagation();confirmAction('Bu bağlantıyı çıkartmak istiyor musun?',()=>disconnectFromList('${u.uid}'))" style="width:32px;height:32px;background:var(--bg2);color:var(--text3);border:1.5px solid var(--border);border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit">✕</button>
+        </div>
       </div>
-    `).join('') + (missing.length ? `<div style="padding:8px 0;font-size:12px;color:var(--text3)">${missing.length} bağlantı yüklenmedi</div>` : '');
+    `).join('');
   } catch(e) {
     list.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Yüklenemedi</div>';
+  }
+}
+
+async function disconnectFromList(uid) {
+  await disconnectFriend(uid);
+  // Listeden kaldır
+  const el = document.getElementById('conn-item-' + uid);
+  if (el) el.remove();
+  // Boş liste kontrolü
+  const list = document.getElementById('connections-list');
+  if (list && !list.querySelector('.conn-item')) {
+    list.innerHTML = '<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">🔍</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div></div>';
   }
 }
 
