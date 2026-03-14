@@ -927,46 +927,80 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   </div>
 </div>
 
-<!-- LOBBY LİSTESİ -->
+<!-- KANAL OLUŞTURma + DAVET — sadece kanal sahibi görür -->
 <div class="ov" id="ov-lobbies">
   <div class="hdr">
     <div class="hbtn" onclick="closeOv('ov-lobbies')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--orange);margin-left:8px">🎙️ SESLİ KANALLAR</div>
-    <button onclick="createLobby()" style="margin-left:auto;background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Kanal Aç</button>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--orange);margin-left:8px">🎙️ SESLİ KANAL</div>
   </div>
-  <div class="scrl" style="padding:0 16px" id="lobbies-list">
-    <div style="padding:32px 0;text-align:center;color:var(--text3)">Yükleniyor...</div>
+  <div class="scrl" style="padding:16px">
+    <div style="background:var(--bg2);border-radius:14px;padding:16px;margin-bottom:16px">
+      <div class="lbl">Kanal Adı</div>
+      <input class="inp" id="lobby-name-inp" placeholder="Örn: Boğaz Turu Kanalı" style="margin-bottom:0">
+    </div>
+    <button onclick="startLobby()" class="btn btn-or" style="margin-bottom:12px">🎙️ Kanalı Başlat</button>
+    <div style="font-size:12px;color:var(--text3);text-align:center">Kanal başlatınca istediğin kişileri davet edebilirsin</div>
   </div>
 </div>
 
-<!-- SESLİ İLETİŞİM — LOBBY İÇİ -->
+<!-- SESLİ KANAL — AKTİF EKRAN -->
 <div class="ov" id="ov-voice">
   <div style="flex:1;background:#0a0a0a;display:flex;flex-direction:column;overflow:hidden">
-    <!-- Header -->
     <div style="padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0">
       <button onclick="leaveVoice()" style="width:36px;height:36px;background:rgba(255,255,255,.08);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
         <svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
-      <div>
+      <div style="flex:1">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--orange)" id="voice-lobby-name">Kanal</div>
         <div id="voice-status" style="font-size:11px;color:rgba(255,255,255,.4)">Bağlanıyor...</div>
       </div>
-      <button onclick="leaveVoice()" style="margin-left:auto;background:#DC2626;color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">📞 Çık</button>
+      <!-- Davet butonu — sadece kanal sahibine gösterilir -->
+      <button id="voice-invite-btn" onclick="openVoiceInvite()" style="display:none;background:rgba(255,255,255,.08);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Davet</button>
+      <button onclick="leaveVoice()" style="background:#DC2626;color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">📞 Çık</button>
     </div>
-    <!-- Üyeler grid -->
     <div style="flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start" id="voice-members"></div>
-    <!-- Kontroller -->
-    <div style="padding:20px 16px calc(20px + var(--safe));border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;gap:20px;flex-shrink:0">
+    <div style="padding:20px 16px calc(20px + var(--safe));border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0">
       <button id="ptt-btn" onclick="toggleMic()" style="width:72px;height:72px;border-radius:50%;background:var(--orange);color:white;border:none;font-size:26px;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(255,85,0,.4)">🎙️</button>
-      <div style="text-align:center">
-        <div id="ptt-label" style="font-size:12px;color:rgba(255,255,255,.5);margin-top:6px">Mikrofon kapalı</div>
-      </div>
+      <div id="ptt-label" style="font-size:12px;color:rgba(255,255,255,.5)">Mikrofon kapalı</div>
     </div>
   </div>
 </div>
 
+<!-- DAVET GÖNDERme EKRANı — kanal içinden -->
+<div class="ov" id="ov-voice-invite">
+  <div class="hdr">
+    <div class="hbtn" onclick="closeOv('ov-voice-invite')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <div style="font-size:16px;font-weight:600;margin-left:8px">Davet Et</div>
+  </div>
+  <div class="scrl" style="padding:0 16px" id="voice-invite-list"></div>
+</div>
+
+<!-- GELEN ÇAĞRI EKRANI — her ekranda üstte çıkar -->
+<div id="call-incoming" style="display:none;position:absolute;top:0;left:0;right:0;z-index:999;padding:12px 16px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-bottom:2px solid var(--orange);box-shadow:0 8px 32px rgba(0,0,0,.6)">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div id="call-av" style="flex-shrink:0"></div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">Sesli Arama</div>
+      <div id="call-name" style="font-size:15px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      <div id="call-lobby" style="font-size:12px;color:var(--orange);margin-top:1px"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <button onclick="declineCall()" style="width:44px;height:44px;border-radius:50%;background:#DC2626;color:white;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(220,38,38,.5)">📵</button>
+      <button onclick="acceptCall()" style="width:44px;height:44px;border-radius:50%;background:#16A34A;color:white;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(22,163,74,.5)">📞</button>
+    </div>
+  </div>
+  <!-- Ses animasyonu -->
+  <div style="display:flex;justify-content:center;margin-top:8px;gap:3px" id="call-pulse">
+    <div style="width:3px;background:var(--orange);border-radius:2px;animation:blink .6s infinite alternate" id="cp1"></div>
+    <div style="width:3px;background:var(--orange);border-radius:2px;animation:blink .6s .15s infinite alternate" id="cp2"></div>
+    <div style="width:3px;background:var(--orange);border-radius:2px;animation:blink .6s .3s infinite alternate" id="cp3"></div>
+    <div style="width:3px;background:var(--orange);border-radius:2px;animation:blink .6s .45s infinite alternate" id="cp4"></div>
+    <div style="width:3px;background:var(--orange);border-radius:2px;animation:blink .6s .6s infinite alternate" id="cp5"></div>
+  </div>
+</div>
+
 <!-- CANLI KONUM AKTIF BANNER -->
-<div id="live-share-banner" style="display:none;position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,#16A34A,#15803d);color:white;padding:8px 16px;font-size:12px;font-weight:600;z-index:200;display:none;align-items:center;gap:8px">
+<div id="live-share-banner" style="display:none;position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,#16A34A,#15803d);color:white;padding:8px 16px;font-size:12px;font-weight:600;z-index:200;align-items:center;gap:8px">
   <div style="width:8px;height:8px;background:white;border-radius:50%;animation:blink 1s infinite"></div>
   <span>Canlı konum paylaşılıyor</span>
   <span id="live-share-count" style="margin-left:4px;opacity:.8"></span>
@@ -1043,6 +1077,7 @@ function switchTab(name,el){
   document.querySelectorAll('.nav .ni').forEach(n=>n.classList.remove('on'));
   el.classList.add('on');
   if(name==='rota')setTimeout(initMap,80);
+  if(name==='profil')loadMyPosts();
 }
 
 // ════════════════════════════════════════════
@@ -1699,17 +1734,41 @@ async function publishPost(){
   if(postFile)photoUrl=await uploadCloud(postFile);
   const{db,collection,addDoc}=window.FB;
   const cu=window.CU||{};
-  await addDoc(collection(db,'posts'),{uid:cu.uid||'',name:cu.name||'Sürücü',bike:cu.bike||'',avatarUrl:cu.avatarUrl||'',caption:cap,photoUrl,createdAt:new Date().toISOString(),likes:0,commentCount:0});
+  const postData={uid:cu.uid||'',name:cu.name||'Sürücü',bike:cu.bike||'',avatarUrl:cu.avatarUrl||'',caption:cap,photoUrl,createdAt:new Date().toISOString(),likes:0,commentCount:0};
+  const ref=await addDoc(collection(db,'posts'),postData);
   btn.disabled=false;btn.textContent='Paylaş';
-  closeOv('ov-post');toast('Paylaşıldı! 🏍️');loadFeed();loadMyPosts();
+  closeOv('ov-post');toast('Paylaşıldı! 🏍️');
+  // Anında profile grid'e ekle
+  _prependToMyGrid({id:ref.id,...postData});
+  // Feed'i yenile
+  loadFeed();
 }
 async function deletePost(postId){
   const{db,doc,deleteDoc}=window.FB;
   await deleteDoc(doc(db,'posts',postId));
-  toast('Gönderi silindi');loadFeed();loadMyPosts();
+  // Grid'den anında kaldır
+  const el=document.getElementById('pg-'+postId);
+  if(el)el.remove();
+  // Boş mu kaldı?
+  const grid=document.getElementById('my-posts-grid');
+  if(grid&&!grid.querySelector('[id^="pg-"]'))grid.innerHTML='<div style="grid-column:span 3;padding:16px;color:var(--text3);font-size:13px;text-align:center">Henüz gönderi yok 📸</div>';
+  toast('Gönderi silindi');loadFeed();
 }
 
-// My posts
+// Yeni postu anında grid başına ekle
+function _prependToMyGrid(p){
+  const grid=document.getElementById('my-posts-grid');if(!grid)return;
+  // "Henüz gönderi yok" metnini temizle
+  const empty=grid.querySelector('div[style*="grid-column"]');if(empty)empty.remove();
+  const div=document.createElement('div');
+  div.id='pg-'+p.id;
+  div.style.cssText='aspect-ratio:1;background:'+(p.photoUrl?'#eee':'var(--bg2)')+';overflow:hidden;position:relative';
+  div.innerHTML=(p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,30)||'📝'}</div>`)+
+    `<button onclick="confirmAction('Gönderiyi Sil','Bu gönderiyi silmek istiyor musun?',()=>deletePost('${p.id}'))" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer">✕</button>`;
+  grid.prepend(div);
+}
+
+// My posts — profil açılınca yükle
 async function loadMyPosts(){
   if(!window.FB||!window.CU)return;
   const{db,collection,query,where,orderBy,getDocs}=window.FB;
@@ -1718,7 +1777,7 @@ async function loadMyPosts(){
   if(snap.empty){el.innerHTML='<div style="grid-column:span 3;padding:16px;color:var(--text3);font-size:13px;text-align:center">Henüz gönderi yok 📸</div>';return;}
   const posts=[];snap.forEach(d=>posts.push({id:d.id,...d.data()}));
   el.innerHTML=posts.map(p=>`
-    <div style="aspect-ratio:1;background:${p.photoUrl?'#eee':'var(--bg2)'};overflow:hidden;position:relative">
+    <div id="pg-${p.id}" style="aspect-ratio:1;background:${p.photoUrl?'#eee':'var(--bg2)'};overflow:hidden;position:relative">
       ${p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,30)||'📝'}</div>`}
       <button onclick="confirmAction('Gönderiyi Sil','Bu gönderiyi silmek istiyor musun?',()=>deletePost('${p.id}'))" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer">✕</button>
     </div>`).join('');
@@ -2240,6 +2299,8 @@ function startWatchers(){
     if(pM>=0&&snap.size>pM)playDing();
     pM=snap.size;
   });
+  // Sesli kanal davetlerini izle
+  watchVoiceInvites();
 }
 
 // ════════════════════════════════════════════
@@ -2654,115 +2715,213 @@ function stopLiveShare(){
 }
 
 // ════════════════════════════════════════════
-// LOBBY SESLİ İLETİŞİM — WebRTC Mesh + Firebase Signaling
+// SESLİ KANAL — DAVET TABANLI WebRTC MESH
 // ════════════════════════════════════════════
 // Koleksiyonlar:
-//   voiceLobbies/{lobbyId}             — lobby meta
-//   voiceLobbies/{lobbyId}/members/{uid} — odadaki üyeler
-//   voiceLobbies/{lobbyId}/signals/{id}  — WebRTC sinyaller
+//   voiceLobbies/{lobbyId}               — kanal meta (ownerUid, name, active)
+//   voiceLobbies/{lobbyId}/members/{uid} — aktif üyeler
+//   voiceLobbies/{lobbyId}/signals/{id}  — WebRTC offer/answer/candidate
+//   voiceInvites/{inviteId}              — davetler (fromUid→toUid)
 //
-// Mesh topoloji: N üye → her biri diğerleriyle P2P bağlantı kurar
-// Küçük UID = initiator (offer gönderir), büyük UID = answer verir
+// Sadece kanal sahibi davet gönderebilir.
+// Davet gelince call-incoming banner gösterilir (hangi ekranda olunursa olsun).
+// Kabul → joinLobby, Reddet → inviteyi sil.
 
 const ICE_CFG = {
   iceServers:[
     {urls:'stun:stun.l.google.com:19302'},
     {urls:'stun:stun1.l.google.com:19302'},
     {urls:'stun:global.stun.twilio.com:3478'},
-    {urls:'turn:a.relay.metered.ca:80',      username:'openrelayproject', credential:'openrelayproject'},
-    {urls:'turn:a.relay.metered.ca:443',     username:'openrelayproject', credential:'openrelayproject'},
-    {urls:'turn:a.relay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject'},
-    {urls:'turns:a.relay.metered.ca:443?transport=tcp',username:'openrelayproject', credential:'openrelayproject'}
+    {urls:'turn:a.relay.metered.ca:80',      username:'openrelayproject',credential:'openrelayproject'},
+    {urls:'turn:a.relay.metered.ca:443',     username:'openrelayproject',credential:'openrelayproject'},
+    {urls:'turn:a.relay.metered.ca:443?transport=tcp', username:'openrelayproject',credential:'openrelayproject'},
+    {urls:'turns:a.relay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}
   ],
   iceCandidatePoolSize:10
 };
 
 // ── State ──
-let lobbyStream  = null;   // LocalMediaStream
-let lobbyPeers   = {};     // uid → {pc: RTCPeerConnection, audio: HTMLAudioElement}
-let lobbyUnsubs  = [];     // Firestore unsubscribers
-let lobbyMemberRef = null; // Kendi member doc ref
-let lobbyId      = null;
-let lobbyMicOn   = false;
-let processedSigs = new Set();
+let lobbyStream    = null;
+let lobbyPeers     = {};       // uid → {pc, audio}
+let lobbyUnsubs    = [];
+let lobbyMemberRef = null;
+let lobbyId        = null;
+let lobbyOwnerId   = null;     // kanalı açan kişinin uid
+let lobbyMicOn     = false;
+let processedSigs  = new Set();
+let pendingInviteId= null;     // kabul bekleyen davet id
+let pendingLobbyId = null;     // kabul bekleyen lobby id
+let pendingLobbyName=null;
+let inviteRingTimer= null;
+let callUnsub      = null;     // davet watcher unsub
 
-// ════ LOBBY LİSTESİ ════
-
+// ════ TELSIZ BUTONUNA BASILINCA ════
 function openLobbies(){
+  // Kanal adı input'u temizle, overlay aç
+  const inp = document.getElementById('lobby-name-inp');
+  if(inp) inp.value = '';
   openOv('ov-lobbies');
-  loadLobbies();
 }
 
-async function loadLobbies(){
+// ════ KANAL BAŞLAT ════
+async function startLobby(){
   if(!window.FB || !window.CU) return;
-  const {db, collection, query, orderBy, getDocs, where} = window.FB;
-  const listEl = document.getElementById('lobbies-list');
-  try {
-    const snap = await getDocs(query(collection(db,'voiceLobbies'), orderBy('createdAt','desc')));
-    if(snap.empty){
-      listEl.innerHTML = `<div style="padding:48px 0;text-align:center;color:var(--text3)">
-        <div style="font-size:40px;margin-bottom:12px">🎙️</div>
-        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px">Açık kanal yok</div>
-        <div style="font-size:13px">İlk kanalı sen aç!</div>
-      </div>`;
-      return;
-    }
-    const lobbies = [];
-    snap.forEach(d => lobbies.push({id:d.id,...d.data()}));
-    listEl.innerHTML = lobbies.map(lb => {
-      const memberCount = lb.memberCount || 0;
-      const isActive = memberCount > 0;
-      return `<div style="background:var(--card);border:1.5px solid ${isActive?'var(--orange)':'var(--border)'};border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px">
-        <div style="width:48px;height:48px;border-radius:50%;background:${isActive?'var(--orange)':'var(--bg2)'};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
-          ${isActive?'🔴':'🎙️'}
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:700">${lb.name||'Kanal'}</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:2px">${lb.ownerName||'—'} · ${memberCount} üye${isActive?' · <span style="color:var(--orange)">Canlı</span>':''}</div>
-        </div>
-        <button onclick="joinLobby('${lb.id}','${(lb.name||'').replace(/'/g,"\\'")}',this)"
-          style="background:${isActive?'var(--orange)':'var(--bg2)'};color:${isActive?'white':'var(--text2)'};border:${isActive?'none':'1.5px solid var(--border)'};border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;flex-shrink:0">
-          ${isActive?'Katıl':'Gir'}
-        </button>
-      </div>`;
-    }).join('');
-  } catch(e) {
-    listEl.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Yüklenemedi</div>';
-  }
-}
-
-async function createLobby(){
-  if(!window.FB || !window.CU) return;
-  const name = prompt('Kanal adı:');
-  if(!name || !name.trim()) return;
-  const {db, collection, addDoc, doc, updateDoc} = window.FB;
+  const name = (document.getElementById('lobby-name-inp')?.value||'').trim() || (window.CU.name||'Sürücü') + "'in Kanalı";
+  const {db, collection, addDoc} = window.FB;
   const cu = window.CU;
   const ref = await addDoc(collection(db,'voiceLobbies'),{
-    name: name.trim(),
-    ownerUid: cu.uid,
+    name,
+    ownerUid:  cu.uid,
     ownerName: cu.name||'Sürücü',
+    active:    true,
     memberCount: 0,
     createdAt: new Date().toISOString()
   });
-  loadLobbies();
-  // Hemen katıl
-  await joinLobby(ref.id, name.trim(), null);
+  closeOv('ov-lobbies');
+  await joinLobby(ref.id, name, cu.uid);
+}
+
+// ════ DAVET GÖNDER — sadece kanal sahibi ════
+function openVoiceInvite(){
+  openOv('ov-voice-invite');
+  const listEl = document.getElementById('voice-invite-list');
+  // Bağlantılar arasından kanalda olmayanları göster
+  const connUsers = allUsers.filter(u => myConns.has(u.uid));
+  if(!connUsers.length){
+    listEl.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Davet edecek bağlantın yok</div>';
+    return;
+  }
+  listEl.innerHTML = connUsers.map(u => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      ${makeAv(u.uid, u.name, u.avatarUrl, 44)}
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600">${u.name||'Sürücü'}</div>
+        <div style="font-size:12px;color:var(--text3)">${u.bike||''}</div>
+      </div>
+      <button onclick="sendVoiceInvite('${u.uid}','${(u.name||'').replace(/'/g,"\\'")}',this)"
+        style="background:var(--orange);color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">
+        📞 Ara
+      </button>
+    </div>`).join('');
+}
+
+async function sendVoiceInvite(toUid, toName, btn){
+  if(!window.FB || !window.CU || !lobbyId) return;
+  const {db, collection, addDoc} = window.FB;
+  const cu = window.CU;
+  if(btn){ btn.textContent='Çağrılıyor...'; btn.disabled=true; }
+  await addDoc(collection(db,'voiceInvites'),{
+    lobbyId,
+    lobbyName: document.getElementById('voice-lobby-name')?.textContent?.replace('🎙️ ','') || 'Kanal',
+    fromUid:  cu.uid,
+    fromName: cu.name||'Sürücü',
+    fromAvatar: cu.avatarUrl||'',
+    toUid,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  });
+  // Davete alınan kişiye bildirim
+  await pushNotif(toUid,'voiceInvite',`📞 <strong>${cu.name||'Biri'}</strong> seni sesli kanala davet etti`);
+  playDing();
+  toast(`${toName} arandı 📞`);
+  setTimeout(()=>{ if(btn){btn.textContent='📞 Ara';btn.disabled=false;} }, 15000);
+}
+
+// ════ GELEN DAVET İZLEYİCİ — startWatchers içinde çağrılır ════
+function watchVoiceInvites(){
+  if(!window.FB || !window.CU) return;
+  const {db, collection, query, where, onSnapshot} = window.FB;
+  const myUid = window.CU.uid;
+  if(callUnsub){ callUnsub(); callUnsub=null; }
+  callUnsub = onSnapshot(
+    query(collection(db,'voiceInvites'), where('toUid','==',myUid), where('status','==','pending')),
+    snap => {
+      snap.docChanges().forEach(change => {
+        if(change.type === 'added'){
+          const inv = change.doc.data();
+          showIncomingCall(change.doc.id, inv);
+        }
+        if(change.type === 'removed'){
+          // Karşı taraf kanalı kapattı / iptal etti
+          hideIncomingCall();
+        }
+      });
+    }
+  );
+}
+
+// ── Gelen çağrı UI ──
+let callRingAudio = null;
+function showIncomingCall(inviteId, inv){
+  pendingInviteId  = inviteId;
+  pendingLobbyId   = inv.lobbyId;
+  pendingLobbyName = inv.lobbyName||'Kanal';
+  // Puls bar yüksekliklerini set et
+  [1,2,3,4,5].forEach(i=>{
+    const el = document.getElementById('cp'+i);
+    if(el) el.style.height = (8 + Math.random()*20)+'px';
+  });
+  document.getElementById('call-av').innerHTML = makeAv(inv.fromUid, inv.fromName, inv.fromAvatar, 40);
+  document.getElementById('call-name').textContent = inv.fromName||'Sürücü';
+  document.getElementById('call-lobby').textContent = '🎙️ ' + pendingLobbyName;
+  document.getElementById('call-incoming').style.display = 'block';
+  // Zil animasyonu
+  clearInterval(inviteRingTimer);
+  inviteRingTimer = setInterval(()=>playDing(), 2000);
+  playDing();
+  // 30 sn sonra otomatik reddet
+  setTimeout(()=>{
+    if(pendingInviteId === inviteId) declineCall();
+  }, 30000);
+}
+
+function hideIncomingCall(){
+  document.getElementById('call-incoming').style.display = 'none';
+  clearInterval(inviteRingTimer);
+  pendingInviteId = null; pendingLobbyId = null; pendingLobbyName = null;
+}
+
+async function acceptCall(){
+  if(!pendingLobbyId || !pendingInviteId) return;
+  const lid = pendingLobbyId;
+  const lname = pendingLobbyName;
+  const iid = pendingInviteId;
+  hideIncomingCall();
+  // Daveti güncelle
+  const {db, doc, updateDoc} = window.FB;
+  updateDoc(doc(db,'voiceInvites',iid),{status:'accepted'}).catch(()=>{});
+  await joinLobby(lid, lname, null);
+}
+
+async function declineCall(){
+  if(!pendingInviteId) return;
+  const {db, doc, updateDoc} = window.FB;
+  updateDoc(doc(db,'voiceInvites',pendingInviteId),{status:'declined'}).catch(()=>{});
+  hideIncomingCall();
+  toast('Arama reddedildi');
 }
 
 // ════ LOBBY'E GİR ════
-
-async function joinLobby(id, name, btn){
-  if(btn){ btn.textContent='Bağlanıyor...'; btn.disabled=true; }
+async function joinLobby(id, name, ownerUid){
   lobbyId = id;
+  lobbyOwnerId = ownerUid || window.CU?.uid; // ilk girerken ownerUid bilinmez, Firebase'den çekilir
   document.getElementById('voice-lobby-name').textContent = '🎙️ ' + (name||'Kanal');
   document.getElementById('voice-status').textContent = 'Mikrofon izni alınıyor...';
   document.getElementById('voice-members').innerHTML = '';
-  closeOv('ov-lobbies');
   openOv('ov-voice');
+  // Davet butonunu sadece kanal sahibine göster — lobby dökümanından ownerUid al
+  const {db, doc, getDoc, collection, setDoc, updateDoc, increment, onSnapshot, addDoc, deleteDoc} = window.FB;
+  try {
+    const lobbySnap = await getDoc(doc(db,'voiceLobbies',id));
+    if(lobbySnap.exists()) lobbyOwnerId = lobbySnap.data().ownerUid;
+  } catch(e){}
+  const isOwner = lobbyOwnerId === window.CU?.uid;
+  const invBtn = document.getElementById('voice-invite-btn');
+  if(invBtn) invBtn.style.display = isOwner ? 'block' : 'none';
 
   // Mikrofon izni
   try {
-    lobbyStream = await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    lobbyStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
   } catch(e) {
     document.getElementById('voice-status').textContent = '🔴 Mikrofon izni reddedildi';
     toast('Mikrofon izni gerekli — tarayıcı ayarlarından ver');
@@ -2770,17 +2929,14 @@ async function joinLobby(id, name, btn){
   }
 
   const cu = window.CU;
-  const {db, collection, doc, setDoc, updateDoc, increment, onSnapshot, addDoc, deleteDoc} = window.FB;
-
   // Odaya kayıt
-  lobbyMemberRef = doc(db, 'voiceLobbies', lobbyId, 'members', cu.uid);
-  await setDoc(lobbyMemberRef, {
-    uid: cu.uid, name: cu.name||'Sürücü',
-    avatarUrl: cu.avatarUrl||'', bike: cu.bike||'',
-    micOn: false, joinedAt: new Date().toISOString()
+  lobbyMemberRef = doc(db,'voiceLobbies',lobbyId,'members',cu.uid);
+  await setDoc(lobbyMemberRef,{
+    uid:cu.uid, name:cu.name||'Sürücü',
+    avatarUrl:cu.avatarUrl||'', bike:cu.bike||'',
+    micOn:false, joinedAt:new Date().toISOString()
   });
-  // Member count +1
-  updateDoc(doc(db,'voiceLobbies',lobbyId), {memberCount: increment(1)}).catch(()=>{});
+  updateDoc(doc(db,'voiceLobbies',lobbyId),{memberCount:increment(1)}).catch(()=>{});
 
   document.getElementById('voice-status').textContent = '🟢 Bağlandı';
 
@@ -2791,12 +2947,9 @@ async function joinLobby(id, name, btn){
     renderLobbyMembers(snap);
     if(firstSnap){
       firstSnap = false;
-      // Odada zaten olanlarla bağlan (küçük UID offer gönderir)
       snap.forEach(d => {
         const uid = d.id;
-        if(uid !== cu.uid && cu.uid < uid && !lobbyPeers[uid]){
-          connectToPeer(uid, true);
-        }
+        if(uid !== cu.uid && cu.uid < uid && !lobbyPeers[uid]) connectToPeer(uid, true);
       });
       return;
     }
@@ -2808,12 +2961,11 @@ async function joinLobby(id, name, btn){
       }
       if(change.type === 'removed') disconnectPeer(uid);
       if(change.type === 'modified'){
-        // Mic durumu güncelle
         const data = change.doc.data();
-        const el = document.getElementById('lm-mic-'+uid);
-        if(el) el.textContent = data.micOn ? '🔊' : '🔇';
-        const wave = document.getElementById('lm-wave-'+uid);
-        if(wave) wave.style.display = data.micOn ? 'block' : 'none';
+        const micEl = document.getElementById('lm-mic-'+uid);
+        if(micEl) micEl.textContent = data.micOn ? '🔊' : '🔇';
+        const waveEl = document.getElementById('lm-wave-'+uid);
+        if(waveEl) waveEl.style.display = data.micOn ? 'block' : 'none';
       }
     });
   });
@@ -2830,14 +2982,13 @@ async function joinLobby(id, name, btn){
       if(sig.to !== cu.uid) return;
       processedSigs.add(sigId);
       deleteDoc(change.doc.ref).catch(()=>{});
-      if(sig.type==='offer')     await onOffer(sig.from, sig.sdp);
+      if(sig.type==='offer')          await onOffer(sig.from, sig.sdp);
       else if(sig.type==='answer')    await onAnswer(sig.from, sig.sdp);
       else if(sig.type==='candidate') await onCandidate(sig.from, sig.candidate);
     });
   });
   lobbyUnsubs.push(u2);
 
-  // Mikrofonu direkt aç
   setLobbyMic(true);
   toast('Sesli kanala bağlandın 🎙️');
 }
@@ -2852,7 +3003,7 @@ function renderLobbyMembers(snap){
   el.innerHTML = members.map(m => {
     const isMe = m.uid === window.CU?.uid;
     return `<div id="lm-${m.uid}" style="background:${m.micOn?'rgba(255,85,0,.12)':'rgba(255,255,255,.04)'};border:1.5px solid ${m.micOn?'rgba(255,85,0,.3)':'rgba(255,255,255,.08)'};border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;transition:all .3s">
-      ${makeAv(m.uid, m.name, m.avatarUrl, 52)}
+      ${makeAv(m.uid,m.name,m.avatarUrl,52)}
       <div style="font-size:12px;font-weight:600;color:white;text-align:center;max-width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${m.name||'Sürücü'}${isMe?' ✦':''}</div>
       <div id="lm-mic-${m.uid}" style="font-size:16px">${m.micOn?'🔊':'🔇'}</div>
       <div id="lm-wave-${m.uid}" style="display:${m.micOn?'block':'none'}">
@@ -2869,165 +3020,114 @@ function renderLobbyMembers(snap){
 }
 
 // ════ WebRTC PEER YÖNETİMİ ════
-
 async function connectToPeer(remoteUid, isInitiator){
   if(lobbyPeers[remoteUid]) return;
   const cu = window.CU;
   const {db, collection, addDoc} = window.FB;
   const signalsColl = collection(db,'voiceLobbies',lobbyId,'signals');
-
   const pc = new RTCPeerConnection(ICE_CFG);
-  // Ses için <audio> oluştur
   const audio = document.createElement('audio');
-  audio.autoplay = true; audio.style.display='none';
+  audio.autoplay=true; audio.style.display='none';
   document.body.appendChild(audio);
-  lobbyPeers[remoteUid] = {pc, audio};
+  lobbyPeers[remoteUid] = {pc, audio, candidateQueue:[]};
 
-  // Yerel ses track'lerini ekle
-  if(lobbyStream){
-    lobbyStream.getTracks().forEach(t => pc.addTrack(t, lobbyStream));
-  }
+  if(lobbyStream) lobbyStream.getTracks().forEach(t=>pc.addTrack(t,lobbyStream));
 
-  // ICE candidate → Firestore
   pc.onicecandidate = e => {
     if(e.candidate){
-      addDoc(signalsColl,{
-        from:cu.uid, to:remoteUid,
-        type:'candidate', candidate:e.candidate.toJSON(),
-        ts:Date.now()
-      }).catch(()=>{});
+      addDoc(signalsColl,{from:cu.uid,to:remoteUid,type:'candidate',candidate:e.candidate.toJSON(),ts:Date.now()}).catch(()=>{});
     }
   };
-
-  // Karşıdan gelen ses
-  pc.ontrack = e => {
-    audio.srcObject = e.streams[0];
-  };
-
-  // Bağlantı durumu log
+  pc.ontrack = e => { audio.srcObject = e.streams[0]; };
   pc.onconnectionstatechange = () => {
-    console.log(`Peer ${remoteUid}: ${pc.connectionState}`);
-    if(pc.connectionState === 'failed'){
-      // Yeniden dene
+    if(pc.connectionState==='failed'){
       disconnectPeer(remoteUid);
-      setTimeout(() => { if(lobbyId) connectToPeer(remoteUid, cu.uid < remoteUid); }, 2000);
+      setTimeout(()=>{ if(lobbyId) connectToPeer(remoteUid, cu.uid<remoteUid); },2000);
     }
   };
 
   if(isInitiator){
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
-    await addDoc(signalsColl,{
-      from:cu.uid, to:remoteUid,
-      type:'offer', sdp:offer.sdp,
-      ts:Date.now()
-    });
+    await addDoc(signalsColl,{from:cu.uid,to:remoteUid,type:'offer',sdp:offer.sdp,ts:Date.now()});
   }
 }
 
 async function onOffer(fromUid, sdp){
-  if(!lobbyPeers[fromUid]) await connectToPeer(fromUid, false);
+  if(!lobbyPeers[fromUid]) await connectToPeer(fromUid,false);
   const peer = lobbyPeers[fromUid]; if(!peer) return;
-  const {pc} = peer;
-  const cu = window.CU;
-  const {db, collection, addDoc} = window.FB;
-  try {
-    await pc.setRemoteDescription({type:'offer', sdp});
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    await addDoc(collection(db,'voiceLobbies',lobbyId,'signals'),{
-      from:cu.uid, to:fromUid,
-      type:'answer', sdp:answer.sdp,
-      ts:Date.now()
-    });
-  } catch(e){ console.error('onOffer err:', e); }
+  const {db,collection,addDoc}=window.FB;
+  try{
+    await peer.pc.setRemoteDescription({type:'offer',sdp});
+    // Kuyrukta bekleyen ICE candidate'leri uygula
+    for(const c of (peer.candidateQueue||[])) await peer.pc.addIceCandidate(new RTCIceCandidate(c)).catch(()=>{});
+    peer.candidateQueue=[];
+    const answer = await peer.pc.createAnswer();
+    await peer.pc.setLocalDescription(answer);
+    await addDoc(collection(db,'voiceLobbies',lobbyId,'signals'),{from:window.CU.uid,to:fromUid,type:'answer',sdp:answer.sdp,ts:Date.now()});
+  }catch(e){console.error('onOffer:',e);}
 }
 
 async function onAnswer(fromUid, sdp){
-  const peer = lobbyPeers[fromUid]; if(!peer) return;
-  if(peer.pc.signalingState === 'have-local-offer'){
-    await peer.pc.setRemoteDescription({type:'answer', sdp}).catch(e=>console.error('onAnswer:', e));
+  const peer=lobbyPeers[fromUid]; if(!peer) return;
+  if(peer.pc.signalingState==='have-local-offer'){
+    await peer.pc.setRemoteDescription({type:'answer',sdp}).catch(e=>console.error('onAnswer:',e));
   }
 }
 
-async function onCandidate(fromUid, candidateJson){
-  const peer = lobbyPeers[fromUid]; if(!peer || !candidateJson) return;
+async function onCandidate(fromUid, cJson){
+  const peer=lobbyPeers[fromUid]; if(!peer||!cJson) return;
   if(peer.pc.remoteDescription){
-    await peer.pc.addIceCandidate(new RTCIceCandidate(candidateJson)).catch(()=>{});
+    await peer.pc.addIceCandidate(new RTCIceCandidate(cJson)).catch(()=>{});
   } else {
-    // Remote description henüz yok — kuyruğa al
-    if(!peer.candidateQueue) peer.candidateQueue = [];
-    peer.candidateQueue.push(candidateJson);
+    if(!peer.candidateQueue) peer.candidateQueue=[];
+    peer.candidateQueue.push(cJson);
   }
 }
 
 function disconnectPeer(uid){
-  const peer = lobbyPeers[uid];
-  if(!peer) return;
-  peer.pc.close();
-  peer.audio.remove();
-  delete lobbyPeers[uid];
+  const peer=lobbyPeers[uid]; if(!peer) return;
+  peer.pc.close(); peer.audio.remove(); delete lobbyPeers[uid];
 }
 
 // ════ MİKROFON ════
-
-function toggleMic(){
-  setLobbyMic(!lobbyMicOn);
-}
+function toggleMic(){ setLobbyMic(!lobbyMicOn); }
 
 function setLobbyMic(on){
-  lobbyMicOn = on;
-  if(lobbyStream){
-    lobbyStream.getAudioTracks().forEach(t => { t.enabled = on; });
-  }
-  const btn = document.getElementById('ptt-btn');
-  const lbl = document.getElementById('ptt-label');
-  if(btn){
-    btn.style.background   = on ? '#DC2626' : 'var(--orange)';
-    btn.style.boxShadow    = on ? '0 4px 24px rgba(220,38,38,.5)' : '0 4px 20px rgba(255,85,0,.4)';
-    btn.style.transform    = on ? 'scale(1.08)' : 'scale(1)';
-    btn.textContent        = on ? '🔴' : '🎙️';
-  }
-  if(lbl){
-    lbl.textContent = on ? '🔴 Mikrofon açık — kesmek için dokun' : '🎙️ Mikrofon kapalı — açmak için dokun';
-    lbl.style.color = on ? '#F87171' : 'rgba(255,255,255,.5)';
-  }
-  // Firestore'da mic durumunu güncelle
-  if(lobbyMemberRef && window.FB){
-    window.FB.updateDoc(lobbyMemberRef, {micOn: on}).catch(()=>{});
-  }
+  lobbyMicOn=on;
+  if(lobbyStream) lobbyStream.getAudioTracks().forEach(t=>{t.enabled=on;});
+  const btn=document.getElementById('ptt-btn');
+  const lbl=document.getElementById('ptt-label');
+  if(btn){btn.style.background=on?'#DC2626':'var(--orange)';btn.style.boxShadow=on?'0 4px 24px rgba(220,38,38,.5)':'0 4px 20px rgba(255,85,0,.4)';btn.style.transform=on?'scale(1.08)':'scale(1)';btn.textContent=on?'🔴':'🎙️';}
+  if(lbl){lbl.textContent=on?'🔴 Mikrofon açık — kesmek için dokun':'🎙️ Mikrofon kapalı — açmak için dokun';lbl.style.color=on?'#F87171':'rgba(255,255,255,.5)';}
+  if(lobbyMemberRef&&window.FB) window.FB.updateDoc(lobbyMemberRef,{micOn:on}).catch(()=>{});
 }
 
 // ════ KANALDAN ÇIK ════
-
 async function leaveVoice(){
   setLobbyMic(false);
-  // Tüm peer bağlantılarını kapat
-  Object.keys(lobbyPeers).forEach(uid => disconnectPeer(uid));
-  lobbyPeers = {};
-  // Stream durdur
-  if(lobbyStream){ lobbyStream.getTracks().forEach(t=>t.stop()); lobbyStream=null; }
-  // Firestore listener'ları temizle
+  Object.keys(lobbyPeers).forEach(uid=>disconnectPeer(uid));
+  lobbyPeers={};
+  if(lobbyStream){lobbyStream.getTracks().forEach(t=>t.stop());lobbyStream=null;}
   lobbyUnsubs.forEach(u=>u()); lobbyUnsubs=[];
   processedSigs.clear();
-  // Odadan çık
-  if(lobbyMemberRef && window.FB){
-    const {deleteDoc, doc, updateDoc, increment} = window.FB;
+  if(lobbyMemberRef&&window.FB){
+    const{deleteDoc,doc,updateDoc,increment}=window.FB;
     await deleteDoc(lobbyMemberRef).catch(()=>{});
-    if(lobbyId){
-      updateDoc(doc(window.FB.db,'voiceLobbies',lobbyId),{memberCount:increment(-1)}).catch(()=>{});
-    }
-    lobbyMemberRef = null;
+    if(lobbyId) updateDoc(doc(window.FB.db,'voiceLobbies',lobbyId),{memberCount:increment(-1)}).catch(()=>{});
+    lobbyMemberRef=null;
   }
-  lobbyId = null; lobbyMicOn = false;
+  lobbyId=null; lobbyOwnerId=null; lobbyMicOn=false;
   closeOv('ov-voice');
+  closeOv('ov-voice-invite');
   toast('Sesli kanaldan çıkıldı');
 }
 
-// Eski isimlere alias
+// Alias
 function openVoiceChat(){ openLobbies(); }
 function startTalk(){ setLobbyMic(true); }
 function stopTalk(){  setLobbyMic(false); }
+
 </script>
 </body>
 </html>
