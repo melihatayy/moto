@@ -483,10 +483,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
         Navigasyon
       </button>
-      <button onclick="toggleLiveShare()" id="live-share-btn" style="flex:1;height:44px;border-radius:12px;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-        Paylaş
-      </button>
+
       <button id="rec-btn" onclick="toggleRec()" style="flex:1;height:44px;border-radius:12px;background:var(--orange);color:white;border:none;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">● Rota Oluştur</button>
     </div>
   </div>
@@ -499,6 +496,10 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <button onclick="openLobbies()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
           Intercom
+        </button>
+        <button id="tour-live-btn" onclick="toggleTourLive()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;display:none;align-items:center;gap:5px">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          Canlı Konum
         </button>
         <button onclick="openCreateTour()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Tur Oluştur</button>
       </div>
@@ -1227,7 +1228,7 @@ function switchTab(name,el){
   document.querySelectorAll('.nav .ni').forEach(n=>n.classList.remove('on'));
   el.classList.add('on');
   if(name==='rota')setTimeout(initMap,80);
-  if(name==='profil')loadMyPosts();
+  if(name==='tur')checkActiveTour();
   if(name==='profil')loadMyPosts();
 }
 
@@ -3112,29 +3113,6 @@ async function deleteRoute(id){
 }
 
 // Canlı konum
-async function saveLive(lat,lng,speed){
-  if(!window.FB||!window.CU)return;
-  const{db,doc,setDoc}=window.FB;
-  await setDoc(doc(db,'live',window.CU.uid),{uid:window.CU.uid,name:window.CU.name||'',lat,lng,speed,updatedAt:new Date().toISOString()});
-}
-async function clearLive(){
-  if(!window.FB||!window.CU)return;
-  const{db,doc,deleteDoc}=window.FB;
-  try{await deleteDoc(doc(db,'live',window.CU.uid));}catch(e){}
-}
-function startLiveWatch(){if(liveInterval)return;liveInterval=setInterval(fetchLive,8000);}
-async function fetchLive(){
-  if(!window.FB||!map)return;
-  const{db,collection,getDocs}=window.FB;
-  const snap=await getDocs(collection(db,'live'));
-  const myUid=window.CU?.uid;
-  snap.forEach(d=>{
-    const u=d.data();if(u.uid===myUid)return;
-    const icon=L.divIcon({html:`<div style="width:12px;height:12px;background:#16A34A;border:2px solid white;border-radius:50%;box-shadow:0 0 4px rgba(0,0,0,.3)"></div>`,iconSize:[12,12],iconAnchor:[6,6]});
-    if(liveMarkers[u.uid])liveMarkers[u.uid].setLatLng([u.lat,u.lng]);
-    else liveMarkers[u.uid]=L.marker([u.lat,u.lng],{icon}).bindPopup(`${u.name} · ${u.speed} km/h`).addTo(map);
-  });
-}
 function calcDist(a,b,c,d){
   const R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;
   const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)**2;
@@ -3235,54 +3213,136 @@ async function sendSOS(type){
 }
 
 // ════════════════════════════════════════════
-// CANLI KONUM PAYLAŞIMI
+// CANLI KONUM — sadece aktif tur katılımcıları
 // ════════════════════════════════════════════
-let liveShareOn = false, liveShareWatch = null, liveShareConnCount = 0;
+let liveShareOn=false, liveShareWatch=null;
+let myActiveTourId=null;   // Şu an içinde bulunduğum tur
 
-async function toggleLiveShare(){
+// Turlar sekmesi açıldığında hangi turda olduğumu bul
+async function checkActiveTour(){
+  if(!window.FB||!window.CU) return;
+  const{db,collection,query,where,getDocs}=window.FB;
+  const myUid=window.CU.uid;
+  // Lider olduğum aktif tur
+  let snap=await getDocs(query(collection(db,'tours'),where('ownerUid','==',myUid),where('active','==',true))).catch(()=>null);
+  if(snap&&!snap.empty){
+    myActiveTourId=snap.docs[0].id;
+    showTourLiveBtn();
+    return;
+  }
+  // Katılımcı olduğum tur (participants array'inde uid var)
+  snap=await getDocs(query(collection(db,'tours'),where('participants','array-contains',myUid),where('active','==',true))).catch(()=>null);
+  if(snap&&!snap.empty){
+    myActiveTourId=snap.docs[0].id;
+    showTourLiveBtn();
+    return;
+  }
+  myActiveTourId=null;
+  hideTourLiveBtn();
+}
+
+function showTourLiveBtn(){
+  const btn=document.getElementById('tour-live-btn');
+  if(btn) btn.style.display='flex';
+}
+function hideTourLiveBtn(){
+  const btn=document.getElementById('tour-live-btn');
+  if(btn) btn.style.display='none';
+}
+
+async function toggleTourLive(){
   if(liveShareOn){ stopLiveShare(); return; }
+  if(!myActiveTourId){ toast('Aktif bir turda değilsin'); return; }
   startLiveShare();
 }
 
 function startLiveShare(){
   if(!navigator.geolocation){ toast('GPS izni gerekli'); return; }
-  liveShareOn = true;
-  const btn = document.getElementById('live-share-btn');
-  if(btn){ btn.style.background='var(--green)'; btn.style.color='white'; btn.style.border='none'; btn.textContent='Aktif'; }
-  const banner = document.getElementById('live-share-banner');
+  liveShareOn=true;
+  const btn=document.getElementById('tour-live-btn');
+  if(btn){ btn.style.background='#16A34A'; btn.style.color='white'; btn.style.border='none'; btn.querySelector('svg').style.stroke='white'; }
+  // Banner göster
+  const banner=document.getElementById('live-share-banner');
   if(banner){ banner.style.display='flex'; }
+  const cnt=document.getElementById('live-share-count');
+  if(cnt) cnt.textContent='(tur katılımcılarına görünüyor)';
 
-  // Bağlantı sayısını göster
-  if(window.FB && window.CU){
-    const {db,collection,getDocs} = window.FB;
-    getDocs(collection(db,'connections')).then(snap=>{
-      let cnt=0;
-      snap.forEach(d=>{const v=d.data();if(v.uid1===window.CU.uid||v.uid2===window.CU.uid)cnt++;});
-      liveShareConnCount=cnt;
-      const el=document.getElementById('live-share-count');
-      if(el)el.textContent=`(${cnt} bağlantına görünüyor)`;
-    }).catch(()=>{});
-  }
-
-  liveShareWatch = navigator.geolocation.watchPosition(pos=>{
+  liveShareWatch=navigator.geolocation.watchPosition(pos=>{
     const{latitude:lat,longitude:lng,speed}=pos.coords;
-    saveLive(lat,lng,Math.round((speed||0)*3.6));
-  },err=>{},{enableHighAccuracy:true,maximumAge:2000});
-
+    saveLive(lat,lng,Math.round((speed||0)*3.6),myActiveTourId);
+  },()=>{},{enableHighAccuracy:true,maximumAge:2000});
   toast('Canlı konum paylaşımı başladı');
 }
 
 function stopLiveShare(){
-  liveShareOn = false;
-  if(liveShareWatch) navigator.geolocation.clearWatch(liveShareWatch);
-  liveShareWatch = null;
+  liveShareOn=false;
+  if(liveShareWatch){ navigator.geolocation.clearWatch(liveShareWatch); liveShareWatch=null; }
   clearLive();
-  const btn = document.getElementById('live-share-btn');
-  if(btn){ btn.style.background='var(--bg2)'; btn.style.color='var(--text2)'; btn.style.border='1.5px solid var(--border)'; btn.textContent='+ Paylaş'; }
-  const banner = document.getElementById('live-share-banner');
+  const btn=document.getElementById('tour-live-btn');
+  if(btn){ btn.style.background='var(--bg2)'; btn.style.color='var(--text2)'; btn.style.border='1.5px solid var(--border)'; }
+  const banner=document.getElementById('live-share-banner');
   if(banner) banner.style.display='none';
-  toast('Canlı konum paylaşımı durduruldu');
+  toast('Canlı konum durduruldu');
 }
+
+async function saveLive(lat,lng,speed,tourId){
+  if(!window.FB||!window.CU) return;
+  const{db,doc,setDoc}=window.FB;
+  await setDoc(doc(db,'live',window.CU.uid),{
+    uid:window.CU.uid, name:window.CU.name||'',
+    avatarUrl:window.CU.avatarUrl||'',
+    lat,lng,speed,
+    tourId:tourId||myActiveTourId||null,
+    updatedAt:new Date().toISOString()
+  });
+}
+
+async function clearLive(){
+  if(!window.FB||!window.CU) return;
+  const{db,doc,deleteDoc}=window.FB;
+  try{ await deleteDoc(doc(db,'live',window.CU.uid)); }catch(e){}
+}
+
+function startLiveWatch(){
+  if(liveInterval) return;
+  liveInterval=setInterval(fetchLive,8000);
+}
+
+// Sadece aynı turdaki katılımcıları haritada göster
+async function fetchLive(){
+  if(!window.FB||!map||!myActiveTourId) return;
+  const{db,collection,query,where,getDocs}=window.FB;
+  const myUid=window.CU?.uid;
+  // Önce turdaki katılımcıları bul
+  let tourParticipants=new Set();
+  try{
+    const{getDoc,doc}=window.FB;
+    const tSnap=await getDoc(doc(db,'tours',myActiveTourId));
+    if(tSnap.exists()){
+      const t=tSnap.data();
+      tourParticipants=new Set([...(t.participants||[]),t.ownerUid]);
+    }
+  }catch(e){}
+
+  // Live koleksiyonundan sadece bu turun üyelerini al
+  const snap=await getDocs(query(collection(db,'live'),where('tourId','==',myActiveTourId))).catch(()=>null);
+  if(!snap) return;
+  snap.forEach(d=>{
+    const u=d.data();
+    if(u.uid===myUid) return;
+    if(!tourParticipants.has(u.uid)) return; // tur dışı → gösterme
+    const icon=L.divIcon({
+      html:`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <div style="width:12px;height:12px;background:#16A34A;border:2px solid white;border-radius:50%;box-shadow:0 0 4px rgba(0,0,0,.3)"></div>
+        <div style="font-size:9px;background:rgba(0,0,0,.6);color:white;padding:1px 4px;border-radius:4px;white-space:nowrap">${u.name||''}</div>
+      </div>`,
+      iconSize:[40,28],iconAnchor:[20,14]
+    });
+    if(liveMarkers[u.uid]) liveMarkers[u.uid].setLatLng([u.lat,u.lng]);
+    else liveMarkers[u.uid]=L.marker([u.lat,u.lng],{icon}).bindPopup(`${u.name} · ${u.speed} km/h`).addTo(map);
+  });
+}
+
 
 // ════════════════════════════════════════════
 // ══════════════════════════════════════════════════════
