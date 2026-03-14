@@ -458,7 +458,14 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   <div class="tab" id="tab-rota">
     <div class="hdr">
       <div class="logo">ROTALAR</div>
-      <button id="rec-btn" onclick="toggleRec()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">● Kaydet</button>
+      <div style="display:flex;gap:6px">
+        <button onclick="openSOS()" style="background:var(--red);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" fill="white" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="white" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="white" stroke-width="2"/></svg>
+          SOS
+        </button>
+        <button id="live-share-btn" onclick="toggleLiveShare()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">📍 Paylaş</button>
+        <button id="rec-btn" onclick="toggleRec()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">● Kaydet</button>
+      </div>
     </div>
     <div class="rec-banner" id="rec-banner">
       <div class="rdot"></div>
@@ -476,7 +483,13 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   <div class="tab" id="tab-tur">
     <div class="hdr">
       <div class="logo">TURLAR</div>
-      <button onclick="openCreateTour()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Tur Oluştur</button>
+      <div style="display:flex;gap:6px">
+        <button onclick="openVoiceChat()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Telsiz
+        </button>
+        <button onclick="openCreateTour()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Tur Oluştur</button>
+      </div>
     </div>
     <div class="scrl">
       <div id="tours-feed"><div class="empty-state"><div class="empty-title">Yükleniyor...</div></div></div>
@@ -852,6 +865,95 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <button class="btn btn-or" style="flex:1;background:var(--red)" id="confirm-yes-btn">Evet</button>
     </div>
   </div>
+</div>
+
+<!-- SOS OVERLAY -->
+<div class="ov" id="ov-sos">
+  <div style="flex:1;background:#0a0a0a;display:flex;flex-direction:column">
+    <!-- Header -->
+    <div style="padding:16px;display:flex;align-items:center;gap:12px">
+      <div class="hbtn" onclick="closeOv('ov-sos')" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)"><svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--red)">⚠️ ACİL YARDIM</div>
+    </div>
+    <!-- Konum -->
+    <div id="sos-location" style="margin:0 16px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;font-size:12px;color:rgba(255,255,255,.6)">
+      📍 Konum alınıyor...
+    </div>
+    <!-- SOS Seçenekleri -->
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
+      <button onclick="sendSOS('crash')" style="background:#DC2626;color:white;border:none;border-radius:16px;padding:18px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:32px">🚨</span>
+        <div><div>KAZA YAPTIM</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">Bağlantılarıma konumumu gönder</div></div>
+      </button>
+      <button onclick="sendSOS('breakdown')" style="background:#D97706;color:white;border:none;border-radius:16px;padding:18px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:32px">🔧</span>
+        <div><div>YOLDA KALDIM</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">Motor arızası, yardım lazım</div></div>
+      </button>
+      <button onclick="sendSOS('fuel')" style="background:#2563EB;color:white;border:none;border-radius:16px;padding:18px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:32px">⛽</span>
+        <div><div>YAKIT BİTTİ</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">En yakın istasyona yönlendir</div></div>
+      </button>
+      <button onclick="sendSOS('help')" style="background:#16A34A;color:white;border:none;border-radius:16px;padding:18px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:32px">🆘</span>
+        <div><div>GENEL YARDIM</div><div style="font-size:12px;font-weight:400;opacity:.8;margin-top:2px">Diğer sürücülere duyur</div></div>
+      </button>
+    </div>
+    <!-- Hızlı Aramalar -->
+    <div style="margin:16px;border-top:1px solid rgba(255,255,255,.1);padding-top:16px">
+      <div style="font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Acil Servisler</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <a href="tel:112" style="background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);border-radius:12px;padding:12px;text-align:center;text-decoration:none">
+          <div style="font-size:20px;margin-bottom:4px">🚑</div>
+          <div style="font-size:13px;font-weight:700;color:white">112</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.5)">Ambulans / İtfaiye</div>
+        </a>
+        <a href="tel:155" style="background:rgba(37,99,235,.2);border:1px solid rgba(37,99,235,.4);border-radius:12px;padding:12px;text-align:center;text-decoration:none">
+          <div style="font-size:20px;margin-bottom:4px">🚔</div>
+          <div style="font-size:13px;font-weight:700;color:white">155</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.5)">Polis İmdat</div>
+        </a>
+        <a href="tel:156" style="background:rgba(22,163,74,.2);border:1px solid rgba(22,163,74,.4);border-radius:12px;padding:12px;text-align:center;text-decoration:none">
+          <div style="font-size:20px;margin-bottom:4px">👮</div>
+          <div style="font-size:13px;font-weight:700;color:white">156</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.5)">Jandarma</div>
+        </a>
+        <a href="tel:177" style="background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);border-radius:12px;padding:12px;text-align:center;text-decoration:none">
+          <div style="font-size:20px;margin-bottom:4px">🔥</div>
+          <div style="font-size:13px;font-weight:700;color:white">177</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.5)">İtfaiye</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SESLİ İLETİŞİM (TELSIZ) OVERLAY -->
+<div class="ov" id="ov-voice">
+  <div style="flex:1;background:#0f0f0f;display:flex;flex-direction:column">
+    <div style="padding:16px;display:flex;align-items:center;gap:12px">
+      <div class="hbtn" onclick="leaveVoice()" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)"><svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--orange)">🎙️ TELSIZ</div>
+      <div id="voice-status" style="margin-left:auto;font-size:12px;color:rgba(255,255,255,.5)">Bağlanıyor...</div>
+    </div>
+    <!-- Aktif konuşmacılar -->
+    <div style="flex:1;padding:16px;overflow-y:auto" id="voice-members"></div>
+    <!-- Mikrofon aç/kapat -->
+    <div style="padding:24px 16px calc(24px + var(--safe));display:flex;flex-direction:column;align-items:center;gap:16px;border-top:1px solid rgba(255,255,255,.1)">
+      <button id="ptt-btn" onclick="toggleTalk()"
+        style="width:90px;height:90px;border-radius:50%;background:var(--orange);color:white;border:4px solid rgba(255,255,255,.2);font-size:28px;cursor:pointer;transition:all .2s;box-shadow:0 0 0 0 rgba(255,85,0,.5)">
+        🎙️
+      </button>
+      <div id="ptt-label" style="font-size:13px;color:rgba(255,255,255,.5)">Mikrofona dokunarak başla</div>
+    </div>
+  </div>
+</div>
+
+<!-- CANLI KONUM AKTIF BANNER -->
+<div id="live-share-banner" style="display:none;position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,#16A34A,#15803d);color:white;padding:8px 16px;font-size:12px;font-weight:600;z-index:200;display:none;align-items:center;gap:8px">
+  <div style="width:8px;height:8px;background:white;border-radius:50%;animation:blink 1s infinite"></div>
+  <span>Canlı konum paylaşılıyor</span>
+  <span id="live-share-count" style="margin-left:4px;opacity:.8"></span>
+  <button onclick="toggleLiveShare()" style="margin-left:auto;background:rgba(0,0,0,.2);color:white;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">Durdur</button>
 </div>
 
 <!-- TOAST -->
@@ -2406,6 +2508,426 @@ function confirmAction(title,msg,cb){
   };
   openModal('mod-confirm');
 }
+
+// ════════════════════════════════════════════
+// SOS / ACİL YARDIM
+// ════════════════════════════════════════════
+let sosLocation = null;
+
+function openSOS(){
+  openOv('ov-sos');
+  // Konumu al
+  const locEl = document.getElementById('sos-location');
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const {latitude:lat, longitude:lng} = pos.coords;
+      sosLocation = {lat, lng};
+      const mapsLink = `https://maps.google.com/?q=${lat},${lng}`;
+      locEl.innerHTML = `📍 <strong style="color:white">Konum alındı</strong><br><span style="font-size:11px">${lat.toFixed(5)}, ${lng.toFixed(5)}</span><br><a href="${mapsLink}" target="_blank" style="color:#60A5FA;font-size:11px">Google Maps'te aç →</a>`;
+    }, err=>{
+      locEl.innerHTML = '📍 <span style="color:#F87171">Konum alınamadı — GPS izni ver</span>';
+    },{enableHighAccuracy:true,timeout:8000});
+  } else {
+    locEl.innerHTML = '📍 <span style="color:#F87171">GPS desteklenmiyor</span>';
+  }
+}
+
+async function sendSOS(type){
+  if(!window.FB || !window.CU){ toast('Giriş yapman gerekiyor'); return; }
+  const cu = window.CU;
+  const {db, collection, addDoc, getDocs} = window.FB;
+
+  const typeLabels = {
+    crash:     '🚨 KAZA — ' + (cu.name||'Biri') + ' kaza yaptı!',
+    breakdown: '🔧 YOLDA KALDI — ' + (cu.name||'Biri') + ' yardım istiyor!',
+    fuel:      '⛽ YAKIT BİTTİ — ' + (cu.name||'Biri') + ' yardım istiyor!',
+    help:      '🆘 ACİL YARDIM — ' + (cu.name||'Biri') + ' yardım istiyor!'
+  };
+  const msg = typeLabels[type] || '🆘 Yardım isteniyor!';
+  const locText = sosLocation
+    ? ` 📍 Konum: https://maps.google.com/?q=${sosLocation.lat},${sosLocation.lng}`
+    : '';
+
+  // Firestore'a SOS kaydı yaz
+  try{
+    await addDoc(collection(db,'sos'),{
+      uid: cu.uid, name: cu.name||'Sürücü', bike: cu.bike||'',
+      type, msg: msg+locText,
+      lat: sosLocation?.lat||null, lng: sosLocation?.lng||null,
+      createdAt: new Date().toISOString()
+    });
+  }catch(e){}
+
+  // Tüm bağlantılara bildirim gönder
+  const connSnap = await getDocs(collection(db,'connections')).catch(()=>({forEach:()=>{}}));
+  const connUids = [];
+  connSnap.forEach(d=>{
+    const v=d.data();
+    if(v.uid1===cu.uid) connUids.push(v.uid2);
+    else if(v.uid2===cu.uid) connUids.push(v.uid1);
+  });
+
+  for(const uid of connUids){
+    await pushNotif(uid, 'sos', `${msg}${locText}`);
+  }
+
+  playDing();
+  toast('SOS gönderildi! Bağlantıların bilgilendirildi. 🚨');
+  closeOv('ov-sos');
+
+  // Haritada pin
+  if(map && sosLocation){
+    L.marker([sosLocation.lat, sosLocation.lng],{
+      icon: L.divIcon({
+        html:`<div style="background:#DC2626;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid white;box-shadow:0 0 8px rgba(220,38,38,.6);animation:blink 1s infinite">🆘</div>`,
+        iconSize:[32,32], iconAnchor:[16,16]
+      })
+    }).bindPopup(`<strong>${msg}</strong>`).addTo(map).openPopup();
+  }
+}
+
+// ════════════════════════════════════════════
+// CANLI KONUM PAYLAŞIMI
+// ════════════════════════════════════════════
+let liveShareOn = false, liveShareWatch = null, liveShareConnCount = 0;
+
+async function toggleLiveShare(){
+  if(liveShareOn){ stopLiveShare(); return; }
+  startLiveShare();
+}
+
+function startLiveShare(){
+  if(!navigator.geolocation){ toast('GPS izni gerekli'); return; }
+  liveShareOn = true;
+  const btn = document.getElementById('live-share-btn');
+  if(btn){ btn.style.background='var(--green)'; btn.style.color='white'; btn.style.border='none'; btn.textContent='📍 Canlı'; }
+  const banner = document.getElementById('live-share-banner');
+  if(banner){ banner.style.display='flex'; }
+
+  // Bağlantı sayısını göster
+  if(window.FB && window.CU){
+    const {db,collection,getDocs} = window.FB;
+    getDocs(collection(db,'connections')).then(snap=>{
+      let cnt=0;
+      snap.forEach(d=>{const v=d.data();if(v.uid1===window.CU.uid||v.uid2===window.CU.uid)cnt++;});
+      liveShareConnCount=cnt;
+      const el=document.getElementById('live-share-count');
+      if(el)el.textContent=`(${cnt} bağlantına görünüyor)`;
+    }).catch(()=>{});
+  }
+
+  liveShareWatch = navigator.geolocation.watchPosition(pos=>{
+    const{latitude:lat,longitude:lng,speed}=pos.coords;
+    saveLive(lat,lng,Math.round((speed||0)*3.6));
+  },err=>{},{enableHighAccuracy:true,maximumAge:2000});
+
+  toast('Canlı konum paylaşımı başladı 📍');
+}
+
+function stopLiveShare(){
+  liveShareOn = false;
+  if(liveShareWatch) navigator.geolocation.clearWatch(liveShareWatch);
+  liveShareWatch = null;
+  clearLive();
+  const btn = document.getElementById('live-share-btn');
+  if(btn){ btn.style.background='var(--bg2)'; btn.style.color='var(--text2)'; btn.style.border='1.5px solid var(--border)'; btn.textContent='📍 Paylaş'; }
+  const banner = document.getElementById('live-share-banner');
+  if(banner) banner.style.display='none';
+  toast('Canlı konum paylaşımı durduruldu');
+}
+
+// ════════════════════════════════════════════
+// SESLİ İLETİŞİM (TELSIZ) — WebRTC
+// ════════════════════════════════════════════
+// ════════════════════════════════════════════
+// SESLİ İLETİŞİM — WebRTC P2P via Firebase Signaling
+// ════════════════════════════════════════════
+// Mimari:
+//   voiceRooms/{roomId}/members/{uid}  — odadaki üyeler
+//   voiceRooms/{roomId}/signals/{id}   — WebRTC offer/answer/candidate
+//   Oda ID = bağlantı UID'leri sıralanmış join (herkese açık kanal)
+
+const ICE_SERVERS = {
+  iceServers:[
+    {urls:'stun:stun.l.google.com:19302'},
+    {urls:'stun:stun1.l.google.com:19302'},
+    {urls:'stun:stun2.l.google.com:19302'}
+  ]
+};
+
+let voiceStream = null;
+let voicePeers  = {};   // uid → RTCPeerConnection
+let voiceAudios = {};   // uid → <audio>
+let voiceRoom   = null; // Firestore room ref
+let voiceUnsubs = [];   // Firestore listeners to clean up
+let isMicOn     = false;
+let voiceRoomId = null;
+
+// ── Kanala gir ──
+function openVoiceChat(){
+  openOv('ov-voice');
+  joinVoiceRoom();
+}
+
+async function joinVoiceRoom(){
+  if(!window.FB || !window.CU){ toast('Giriş yapman gerekiyor'); return; }
+  const cu = window.CU;
+  const statusEl  = document.getElementById('voice-status');
+  const membersEl = document.getElementById('voice-members');
+
+  // Bağlantı listesini çek
+  const connUsers = allUsers.filter(u => myConns.has(u.uid));
+  if(!connUsers.length){
+    membersEl.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:32px 0;font-size:13px">Bağlantın olmadan sesli kanal kullanamazsın</div>';
+    statusEl.textContent = 'Bağlantı yok';
+    return;
+  }
+
+  // Oda ID: kullanıcı + bağlantılarının UID'leri sıralı → ortak oda
+  const allUids = [cu.uid, ...connUsers.map(u=>u.uid)].sort();
+  voiceRoomId = 'room_' + allUids.join('_').substring(0,60);
+
+  const {db, collection, doc, setDoc, onSnapshot, addDoc, getDocs, deleteDoc, where, query} = window.FB;
+
+  // Mikrofon izni al
+  statusEl.textContent = '🎙️ Mikrofon izni...';
+  try{
+    voiceStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+  }catch(e){
+    statusEl.textContent = '🔴 Mikrofon izni reddedildi';
+    statusEl.style.color = '#F87171';
+    document.getElementById('ptt-label').textContent = 'Ayarlar → Gizlilik → Mikrofon izni ver';
+    toast('Mikrofon izni gerekli');
+    return;
+  }
+
+  // Odaya kayıt ol
+  const memberRef = doc(db, 'voiceRooms', voiceRoomId, 'members', cu.uid);
+  await setDoc(memberRef, {
+    uid: cu.uid, name: cu.name||'Sürücü',
+    avatarUrl: cu.avatarUrl||'', bike: cu.bike||'',
+    joinedAt: new Date().toISOString(), micOn: false
+  });
+  voiceRoom = memberRef;
+
+  statusEl.textContent = '🟢 Bağlandı';
+  statusEl.style.color = '#4ADE80';
+
+  // Odadaki üyeleri dinle → bağlan
+  const membersColl = collection(db, 'voiceRooms', voiceRoomId, 'members');
+  const unsub1 = onSnapshot(membersColl, snap => {
+    renderVoiceMembers(snap, connUsers);
+    snap.docChanges().forEach(async change => {
+      const uid = change.doc.id;
+      if(uid === cu.uid) return;
+      if(change.type === 'added'){
+        // Yeni üye geldi — biz initiator isek offer gönder
+        if(cu.uid < uid && !voicePeers[uid]){
+          await createPeerConnection(uid, true);
+        }
+      }
+      if(change.type === 'removed'){
+        closePeer(uid);
+      }
+    });
+  });
+  voiceUnsubs.push(unsub1);
+
+  // Signal dinleyici — bize gelen offer/answer/candidate
+  const signalsColl = collection(db, 'voiceRooms', voiceRoomId, 'signals');
+  const unsub2 = onSnapshot(
+    query(signalsColl, where('to','==', cu.uid)),
+    snap => {
+      snap.docChanges().forEach(async change => {
+        if(change.type !== 'added') return;
+        const sig = change.doc.data();
+        const from = sig.from;
+        // Sil — bir kere işle
+        deleteDoc(change.doc.ref).catch(()=>{});
+        if(sig.type === 'offer'){
+          await handleOffer(from, sig.sdp);
+        } else if(sig.type === 'answer'){
+          await handleAnswer(from, sig.sdp);
+        } else if(sig.type === 'candidate'){
+          await handleCandidate(from, sig.candidate);
+        }
+      });
+    }
+  );
+  voiceUnsubs.push(unsub2);
+
+  // Mikrofonu direkt aç
+  setMic(true);
+  toast('Sesli kanala bağlandın 🎙️');
+
+  // Bağlantılara bildirim
+  connUsers.forEach(u => pushNotif(u.uid,'voice',`🎙️ <strong>${cu.name||'Biri'}</strong> sesli kanalda — Turlar → Telsiz`));
+}
+
+// ── Üye listesini render et ──
+function renderVoiceMembers(snap, connUsers){
+  const membersEl = document.getElementById('voice-members');
+  const members = [];
+  snap.forEach(d => members.push({uid:d.id,...d.data()}));
+  if(!members.length){ membersEl.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:32px">Henüz kimse yok</div>'; return; }
+  membersEl.innerHTML = members.map(m => {
+    const u = allUsers.find(x=>x.uid===m.uid) || m;
+    const isMe = m.uid === window.CU?.uid;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)" id="vmember-${m.uid}">
+      ${makeAv(m.uid, m.name||u.name, m.avatarUrl||u.avatarUrl, 44)}
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:white">${m.name||u.name||'Sürücü'}${isMe?' (Sen)':''}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4)">${m.micOn?'🔴 Konuşuyor':'⚫ Dinliyor'}</div>
+      </div>
+      <div style="font-size:20px">${m.micOn?'🔊':'🔇'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── WebRTC: Peer bağlantısı kur ──
+async function createPeerConnection(remoteUid, isInitiator){
+  if(voicePeers[remoteUid]) return voicePeers[remoteUid];
+  const pc = new RTCPeerConnection(ICE_SERVERS);
+  voicePeers[remoteUid] = pc;
+  const cu = window.CU;
+  const {db, collection, addDoc} = window.FB;
+  const signalsColl = collection(db, 'voiceRooms', voiceRoomId, 'signals');
+
+  // Mikrofon track ekle
+  if(voiceStream){
+    voiceStream.getTracks().forEach(t => pc.addTrack(t, voiceStream));
+  }
+
+  // ICE candidate → Firebase'e gönder
+  pc.onicecandidate = e => {
+    if(e.candidate){
+      addDoc(signalsColl,{
+        from: cu.uid, to: remoteUid,
+        type:'candidate', candidate: e.candidate.toJSON(),
+        ts: Date.now()
+      }).catch(()=>{});
+    }
+  };
+
+  // Karşıdan gelen ses track → <audio>'ya bağla
+  pc.ontrack = e => {
+    let audio = voiceAudios[remoteUid];
+    if(!audio){
+      audio = document.createElement('audio');
+      audio.autoplay = true;
+      audio.style.display = 'none';
+      document.body.appendChild(audio);
+      voiceAudios[remoteUid] = audio;
+    }
+    audio.srcObject = e.streams[0];
+  };
+
+  pc.onconnectionstatechange = () => {
+    const st = pc.connectionState;
+    const el = document.querySelector(`#vmember-${remoteUid} div:nth-child(2) div:last-child`);
+    if(el){
+      if(st==='connected') el.textContent='🟢 Bağlı';
+      else if(st==='disconnected'||st==='failed') el.textContent='🔴 Bağlantı kesildi';
+    }
+  };
+
+  if(isInitiator){
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await addDoc(signalsColl,{
+      from: cu.uid, to: remoteUid,
+      type:'offer', sdp: offer.sdp,
+      ts: Date.now()
+    });
+  }
+  return pc;
+}
+
+async function handleOffer(fromUid, sdp){
+  const pc = await createPeerConnection(fromUid, false);
+  await pc.setRemoteDescription({type:'offer', sdp});
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  const {db, collection, addDoc} = window.FB;
+  await addDoc(collection(db,'voiceRooms',voiceRoomId,'signals'),{
+    from: window.CU.uid, to: fromUid,
+    type:'answer', sdp: answer.sdp,
+    ts: Date.now()
+  });
+}
+
+async function handleAnswer(fromUid, sdp){
+  const pc = voicePeers[fromUid];
+  if(pc && pc.signalingState !== 'stable'){
+    await pc.setRemoteDescription({type:'answer', sdp}).catch(()=>{});
+  }
+}
+
+async function handleCandidate(fromUid, candidateJson){
+  const pc = voicePeers[fromUid];
+  if(pc && candidateJson){
+    await pc.addIceCandidate(new RTCIceCandidate(candidateJson)).catch(()=>{});
+  }
+}
+
+function closePeer(uid){
+  if(voicePeers[uid]){ voicePeers[uid].close(); delete voicePeers[uid]; }
+  if(voiceAudios[uid]){ voiceAudios[uid].remove(); delete voiceAudios[uid]; }
+}
+
+// ── Mikrofon aç/kapat ──
+function toggleTalk(){
+  setMic(!isMicOn);
+}
+
+function setMic(on){
+  isMicOn = on;
+  if(voiceStream){
+    voiceStream.getAudioTracks().forEach(t => { t.enabled = on; });
+  }
+  const btn = document.getElementById('ptt-btn');
+  const lbl = document.getElementById('ptt-label');
+  if(btn){
+    btn.style.background = on ? '#DC2626' : 'var(--orange)';
+    btn.style.boxShadow  = on ? '0 0 0 16px rgba(220,38,38,.2)' : '0 0 0 0 rgba(255,85,0,.5)';
+    btn.style.transform  = on ? 'scale(1.05)' : 'scale(1)';
+    btn.textContent      = on ? '🔴' : '🎙️';
+  }
+  if(lbl){
+    lbl.textContent  = on ? '🔴 Konuşuluyor — kesmek için dokun' : '🎙️ Mikrofon kapalı — açmak için dokun';
+    lbl.style.color  = on ? '#F87171' : 'rgba(255,255,255,.5)';
+  }
+  // Firestore'da mic durumunu güncelle
+  if(voiceRoom && window.FB){
+    const {updateDoc} = window.FB;
+    updateDoc(voiceRoom, {micOn: on}).catch(()=>{});
+  }
+}
+
+// ── Kanaldan çık ──
+async function leaveVoice(){
+  setMic(false);
+  // Tüm peer bağlantılarını kapat
+  Object.keys(voicePeers).forEach(uid => closePeer(uid));
+  voicePeers = {};
+  // Stream'i durdur
+  if(voiceStream){ voiceStream.getTracks().forEach(t=>t.stop()); voiceStream=null; }
+  // Firestore listener'ları temizle
+  voiceUnsubs.forEach(u=>u()); voiceUnsubs=[];
+  // Odadan çık
+  if(voiceRoom && window.FB){
+    const {deleteDoc} = window.FB;
+    await deleteDoc(voiceRoom).catch(()=>{});
+    voiceRoom = null;
+  }
+  isMicOn = false;
+  closeOv('ov-voice');
+  toast('Sesli kanaldan çıkıldı');
+}
+
+// Eski fonksiyonlar — artık kullanılmıyor ama referans için bırakıldı
+function startTalk(){ setMic(true); }
+function stopTalk(){  setMic(false); }
 </script>
 </body>
 </html>
