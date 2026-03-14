@@ -2777,6 +2777,16 @@ let isMicOn     = false;
 let voiceRoomId = null;
 
 // ── Kanala gir ──
+function openLobbies(){
+  openOv('ov-lobbies');
+}
+
+function startLobby(){
+  closeOv('ov-lobbies');
+  openOv('ov-voice');
+  joinVoiceRoom();
+}
+
 function openVoiceChat(){
   openOv('ov-voice');
   joinVoiceRoom();
@@ -2825,6 +2835,8 @@ async function joinVoiceRoom(){
 
   statusEl.textContent = 'Bağlandı';
   statusEl.style.color = '#4ADE80';
+  const invBtn = document.getElementById('voice-invite-btn');
+  if(invBtn) invBtn.style.display = 'block';
 
   // Odadaki üyeleri dinle → bağlan
   const membersColl = collection(db, 'voiceRooms', voiceRoomId, 'members');
@@ -3059,6 +3071,8 @@ async function leaveVoice(){
     voiceRoom = null;
   }
   isMicOn = false;
+  const ib = document.getElementById('voice-invite-btn');
+  if(ib) ib.style.display = 'none';
   closeOv('ov-voice');
   toast('Sesli kanaldan çıkıldı');
 }
@@ -3066,6 +3080,110 @@ async function leaveVoice(){
 // Eski fonksiyonlar — artık kullanılmıyor ama referans için bırakıldı
 function startTalk(){ setMic(true); }
 function stopTalk(){  setMic(false); }
+
+// ── Davet sistemi ──────────────────────────────────────────────
+let pendingInviteId  = null;
+let pendingLobbyName = null;
+let callUnsub        = null;
+let inviteRingTimer  = null;
+
+// Bağlantıları davet et (overlay açıldığında)
+function openVoiceInvite(){
+  openOv('ov-voice-invite');
+  const listEl = document.getElementById('voice-invite-list');
+  if(!listEl) return;
+  const connUsers = allUsers.filter(u => myConns.has(u.uid));
+  if(!connUsers.length){
+    listEl.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Davet edilecek bağlantın yok</div>';
+    return;
+  }
+  listEl.innerHTML = connUsers.map(u =>
+    `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      ${makeAv(u.uid,u.name,u.avatarUrl,44)}
+      <div style="flex:1"><div style="font-size:14px;font-weight:600">${u.name||'Sürücü'}</div><div style="font-size:12px;color:var(--text3)">${u.bike||''}</div></div>
+      <button onclick="sendVoiceInvite('${u.uid}','${(u.name||'').replace(/'/g,"\\'")}',this)"
+        style="background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">
+        Ara
+      </button>
+    </div>`
+  ).join('');
+}
+
+async function sendVoiceInvite(toUid, toName, btn){
+  if(!window.FB || !window.CU) return;
+  const cu = window.CU;
+  if(btn){ btn.textContent='Çağrılıyor...'; btn.disabled=true; }
+  const lobbyName = cu.name + "'in Kanalı";
+  const {db, collection, addDoc} = window.FB;
+  // Ortak oda ID = iki UID sıralı
+  const lobbyId = [cu.uid, toUid].sort().join('_');
+  await addDoc(collection(db,'voiceInvites'),{
+    lobbyId, lobbyName,
+    fromUid:cu.uid, fromName:cu.name||'Sürücü', fromAvatar:cu.avatarUrl||'',
+    toUid, status:'pending',
+    createdAt: new Date().toISOString()
+  });
+  pushNotif(toUid,'voiceInvite',`<strong>${cu.name||'Biri'}</strong> seni intercom kanalına davet etti`);
+  playDing();
+  toast(toName + ' arandı');
+  setTimeout(()=>{ if(btn){ btn.textContent='Ara'; btn.disabled=false; } }, 15000);
+}
+
+// Gelen çağrıları izle
+function watchVoiceInvites(){
+  if(!window.FB || !window.CU) return;
+  const {db, collection, query, where, onSnapshot} = window.FB;
+  const myUid = window.CU.uid;
+  if(callUnsub){ callUnsub(); callUnsub=null; }
+  callUnsub = onSnapshot(
+    query(collection(db,'voiceInvites'), where('toUid','==',myUid), where('status','==','pending')),
+    snap => {
+      snap.docChanges().forEach(change => {
+        if(change.type==='added') showIncomingCall(change.doc.id, change.doc.data());
+        if(change.type==='removed') hideIncomingCall();
+      });
+    }
+  );
+}
+
+function showIncomingCall(inviteId, inv){
+  pendingInviteId  = inviteId;
+  pendingLobbyName = inv.lobbyName || 'Kanal';
+  document.getElementById('call-av').innerHTML = makeAv(inv.fromUid, inv.fromName, inv.fromAvatar, 40);
+  document.getElementById('call-name').textContent = inv.fromName || 'Sürücü';
+  const lobbyEl = document.getElementById('call-lobby');
+  if(lobbyEl) lobbyEl.textContent = pendingLobbyName;
+  document.getElementById('call-incoming').style.display = 'block';
+  clearInterval(inviteRingTimer);
+  inviteRingTimer = setInterval(()=>playDing(), 2000);
+  playDing();
+  setTimeout(()=>{ if(pendingInviteId===inviteId) declineCall(); }, 30000);
+}
+
+function hideIncomingCall(){
+  document.getElementById('call-incoming').style.display = 'none';
+  clearInterval(inviteRingTimer);
+  pendingInviteId = null;
+}
+
+async function acceptCall(){
+  if(!pendingInviteId) return;
+  const iid = pendingInviteId;
+  hideIncomingCall();
+  const {db, doc, updateDoc} = window.FB;
+  updateDoc(doc(db,'voiceInvites',iid),{status:'accepted'}).catch(()=>{});
+  closeOv('ov-lobbies');
+  openOv('ov-voice');
+  joinVoiceRoom();
+}
+
+async function declineCall(){
+  if(!pendingInviteId) return;
+  const {db, doc, updateDoc} = window.FB;
+  updateDoc(doc(db,'voiceInvites',pendingInviteId),{status:'declined'}).catch(()=>{});
+  hideIncomingCall();
+  toast('Arama reddedildi');
+}
 </script>
 </body>
 </html>
