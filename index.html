@@ -1756,23 +1756,6 @@ function previewPost(inp){
   const r=new FileReader();r.onload=e=>{const img=document.getElementById('post-img');img.src=e.target.result;img.style.display='block';document.getElementById('post-preview').style.border='none';};
   r.readAsDataURL(f);
 }
-async function publishPost(){
-  const cap=document.getElementById('post-caption').value.trim();
-  if(!cap&&!postFile){toast('Fotoğraf veya açıklama ekle');return;}
-  const btn=document.getElementById('post-pub-btn');btn.textContent='Yükleniyor...';btn.disabled=true;
-  let photoUrl='';
-  if(postFile)photoUrl=await uploadCloud(postFile);
-  const{db,collection,addDoc}=window.FB;
-  const cu=window.CU||{};
-  const postData={uid:cu.uid||'',name:cu.name||'Sürücü',bike:cu.bike||'',avatarUrl:cu.avatarUrl||'',caption:cap,photoUrl,createdAt:new Date().toISOString(),likes:0,commentCount:0};
-  const ref=await addDoc(collection(db,'posts'),postData);
-  btn.disabled=false;btn.textContent='Paylaş';
-  closeOv('ov-post');toast('Paylaşıldı! 🏍️');
-  // Anında profile grid'e ekle
-  _prependToMyGrid({id:ref.id,...postData});
-  // Feed'i yenile
-  loadFeed();
-}
 async function deletePost(postId){
   const{db,doc,deleteDoc}=window.FB;
   await deleteDoc(doc(db,'posts',postId));
@@ -1817,14 +1800,24 @@ async function publishPost(){
   _prependToMyGrid({id:ref.id,...postData});
   // Feed realtime onSnapshot ile otomatik güncellenir
 }
-  const grid=document.getElementById('my-posts-grid');if(!grid)return;
-  // "Henüz gönderi yok" metnini temizle
-  const empty=grid.querySelector('div[style*="grid-column"]');if(empty)empty.remove();
+
+// Yeni postu anında grid başına ekle
+function _prependToMyGrid(p){
+  const grid=document.getElementById('my-posts-grid');
+  if(!grid)return;
+  const empty=grid.querySelector('[style*="grid-column"]');
+  if(empty)empty.remove();
   const div=document.createElement('div');
   div.id='pg-'+p.id;
-  div.style.cssText='aspect-ratio:1;background:'+(p.photoUrl?'#eee':'var(--bg2)')+';overflow:hidden;position:relative';
-  div.innerHTML=(p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,30)||'📝'}</div>`)+
-    `<button onclick="confirmAction('Gönderiyi Sil','Bu gönderiyi silmek istiyor musun?',()=>deletePost('${p.id}'))" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer">✕</button>`;
+  div.style.cssText='aspect-ratio:1;overflow:hidden;position:relative;background:'+(p.photoUrl?'#eee':'var(--bg2)');
+  let inner='';
+  if(p.photoUrl){
+    inner='<img src="'+p.photoUrl+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">';
+  } else {
+    inner='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">'+(p.caption?p.caption.substring(0,30):'📝')+'</div>';
+  }
+  inner+='<button onclick="confirmAction('Gönderiyi Sil','Bu gönderiyi silmek istiyor musun?',()=>deletePost(''+p.id+''))" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer">✕</button>';
+  div.innerHTML=inner;
   grid.prepend(div);
 }
 
