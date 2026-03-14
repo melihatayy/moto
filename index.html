@@ -182,7 +182,8 @@ select.inp option{background:white}
 .chat-send{width:40px;height:40px;background:var(--orange);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 
 /* NOTIFS */
-.notif-item{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--border)}
+.route-tag{background:var(--bg2);color:var(--text3);border:1.5px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .15s}
+.route-tag.on{background:var(--orange);color:white;border-color:var(--orange)}
 .notif-icon{width:40px;height:40px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .notif-text{font-size:13px;color:var(--text2);line-height:1.5}
 .notif-time{font-size:11px;color:var(--text3);margin-top:3px}
@@ -849,15 +850,47 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 
 <!-- ROTA PAYLAŞ MODAL -->
 <div class="modal-bg" id="mod-route">
-  <div class="modal-sheet" style="text-align:center">
-    <div style="font-size:18px;font-weight:700;margin-bottom:16px">Rotayı Paylaş</div>
-    <div style="display:flex;gap:20px;justify-content:center;margin-bottom:20px">
-      <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:var(--orange)" id="sr-km">—</div><div style="font-size:11px;color:var(--text3)">Mesafe</div></div>
-      <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:var(--orange)" id="sr-min">—</div><div style="font-size:11px;color:var(--text3)">Süre</div></div>
+  <div class="modal-sheet">
+    <div style="font-size:18px;font-weight:700;margin-bottom:4px">Rotayı Paylaş</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Kaydedilen rotanı toplulukla paylaş</div>
+
+    <!-- İstatistikler -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="background:var(--bg2);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--orange)" id="sr-km">—</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Mesafe</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--orange)" id="sr-min">—</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Süre</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--orange)" id="sr-avg">—</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Ort. Hız</div>
+      </div>
     </div>
-    <input class="inp" id="sr-name" placeholder="Rota adı" style="margin-bottom:12px">
-    <button class="btn btn-or" style="margin-bottom:10px" onclick="saveRoute()">Paylaş</button>
-    <button class="btn btn-ghost" onclick="closeModal('mod-route')">Vazgeç</button>
+
+    <!-- Rota adı -->
+    <div class="lbl" style="margin-bottom:6px">Rota Adı</div>
+    <input class="inp" id="sr-name" placeholder="Örn: Boğaz Gün Batımı" style="margin-bottom:10px">
+
+    <!-- Açıklama -->
+    <div class="lbl" style="margin-bottom:6px">Açıklama <span style="color:var(--text3);font-size:10px">(opsiyonel)</span></div>
+    <textarea class="inp" id="sr-desc" rows="3" placeholder="Bu rotada neler gördün? Yol nasıldı?" style="resize:none;margin-bottom:10px"></textarea>
+
+    <!-- Yol tipi -->
+    <div class="lbl" style="margin-bottom:6px">Yol Tipi</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px" id="sr-tags">
+      <button onclick="toggleRouteTag(this,'Şehir İçi')" class="route-tag">Şehir İçi</button>
+      <button onclick="toggleRouteTag(this,'Kıvrımlı')" class="route-tag">Kıvrımlı</button>
+      <button onclick="toggleRouteTag(this,'Sahil')" class="route-tag">Sahil</button>
+      <button onclick="toggleRouteTag(this,'Dağ')" class="route-tag">Dağ</button>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('mod-route')">Vazgeç</button>
+      <button class="btn btn-or" style="flex:2" id="sr-save-btn" onclick="saveRoute()">Paylaş</button>
+    </div>
   </div>
 </div>
 
@@ -2933,7 +2966,7 @@ function startRec(){
   if(!navigator.geolocation){toast('GPS desteklenmiyor');return;}
   recOn=true;recPath=[];recDist=0;recLast=null;recStart=Date.now();recStartCoord=null;
   const btn=document.getElementById('rec-btn');
-  btn.textContent='⏹ Durdur';btn.style.background='var(--red)';
+  btn.textContent='⏹ Bitir';btn.style.background='var(--red)';btn.style.color='white';btn.style.border='none';
   document.getElementById('rec-banner').classList.add('show');
   toast('GPS bağlanıyor...');
   recWatch=navigator.geolocation.watchPosition(
@@ -2970,37 +3003,52 @@ function stopRec(){
   if(recWatch)navigator.geolocation.clearWatch(recWatch);
   recOn=false;
   const btn=document.getElementById('rec-btn');
-  btn.textContent='Kaydet';btn.style.background='var(--orange)';
+  btn.textContent='Kaydet';btn.style.background='var(--bg2)';btn.style.color='var(--text2)';btn.style.border='1.5px solid var(--border)';
   document.getElementById('rec-banner').classList.remove('show');
   clearLive();
   if(recPath.length<2){toast('Çok kısa rota kaydedilemedi');return;}
   const distKm=(recDist/1000).toFixed(2);
-  const mins=Math.floor((Date.now()-recStart)/60000);
+  const durationMs=Date.now()-recStart;
+  const mins=Math.floor(durationMs/60000);
+  const avgKmh=durationMs>0?Math.round((recDist/1000)/(durationMs/3600000)):0;
   document.getElementById('sr-km').textContent=distKm+' km';
-  document.getElementById('sr-min').textContent=mins+' dk';
+  document.getElementById('sr-min').textContent=mins<60?mins+' dk':Math.floor(mins/60)+'s '+(mins%60)+'dk';
+  document.getElementById('sr-avg').textContent=avgKmh+' km/h';
   document.getElementById('sr-name').value='';
+  document.getElementById('sr-desc').value='';
+  document.querySelectorAll('.route-tag').forEach(t=>t.classList.remove('on'));
   openModal('mod-route');
+}
+
+function toggleRouteTag(el,tag){
+  el.classList.toggle('on');
 }
 
 async function saveRoute(){
   const name=document.getElementById('sr-name').value.trim()||'Rotam';
+  const desc=document.getElementById('sr-desc').value.trim();
+  const tags=[...document.querySelectorAll('.route-tag.on')].map(t=>t.textContent);
   const cu=window.CU||{};
+  const btn=document.getElementById('sr-save-btn');
+  btn.textContent='Kaydediliyor...';btn.disabled=true;
   if(window.FB){
     const{db,collection,addDoc}=window.FB;
     await addDoc(collection(db,'routes'),{
-      uid:cu.uid||'',userName:cu.name||'Sürücü',userBike:cu.bike||'',
-      name,path:recPath,
+      uid:cu.uid||'',userName:cu.name||'Sürücü',userBike:cu.bike||'',userAvatar:cu.avatarUrl||'',
+      name,desc,tags,path:recPath,
       distKm:parseFloat((recDist/1000).toFixed(2)),
       durationMins:Math.floor((Date.now()-recStart)/60000),
+      avgSpeed:recDist>0&&(Date.now()-recStart)>0?Math.round((recDist/1000)/((Date.now()-recStart)/3600000)):0,
       startCoord:recStartCoord,
       createdAt:new Date().toISOString()
     });
   }
-  // Bitiş marker
   if(map&&recLast){
     L.marker(recLast,{icon:L.divIcon({html:'<div style="width:14px;height:14px;background:#DC2626;border:2px solid white;border-radius:50%;box-shadow:0 0 4px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]})}).bindPopup('Bitiş').addTo(map);
   }
-  closeModal('mod-route');toast('Rota paylaşıldı!');
+  btn.textContent='Paylaş';btn.disabled=false;
+  closeModal('mod-route');
+  toast('Rota paylaşıldı!');
   loadRoutesFeed();loadMyRoutes();
 }
 
@@ -3025,7 +3073,9 @@ async function loadRoutesFeed(){
       <div onclick="viewProfile('${r.uid}')" style="cursor:pointer">${makeAv(r.uid,r.userName,null,34)}</div>
       <div onclick="viewProfile('${r.uid}')" style="flex:1;cursor:pointer">
         <div style="font-size:13px;font-weight:600">${r.name}</div>
-        <div style="font-size:11px;color:var(--text3)">${r.userName} · ${r.distKm} km · ${r.durationMins||0} dk</div>
+        <div style="font-size:11px;color:var(--text3)">${r.userName} · ${r.distKm} km · ${r.durationMins||0} dk${r.avgSpeed?' · '+r.avgSpeed+' km/h ort.':''}</div>
+        ${r.desc?`<div style="font-size:12px;color:var(--text2);margin-top:3px">${r.desc}</div>`:''}
+        ${r.tags&&r.tags.length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${r.tags.map(t=>`<span style="font-size:10px;background:var(--odim);color:var(--orange);border-radius:20px;padding:2px 8px;font-weight:500">${t}</span>`).join('')}</div>`:''}
       </div>
       <button onclick="navFromRoute(${JSON.stringify(r.path||[])},'${(r.name||'Rota').replace(/'/g,"\\'")}')" style="background:var(--odim);color:var(--orange);border:1px solid rgba(255,85,0,.2);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;flex-shrink:0">
         <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:3px;vertical-align:middle"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Git
