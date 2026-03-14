@@ -1083,15 +1083,24 @@ async function enterApp() {
 
 async function loadFriendsList() {
   if (!window.FB || !window.CU) return;
-  const { db, collection, getDocs } = window.FB;
+  const { db, collection, getDocs, query, where } = window.FB;
+  const myUid = window.CU.uid;
   try {
-    const snap = await getDocs(collection(db, 'users', window.CU.uid, 'friends'));
+    // Kendi friends subcollection
+    const snap = await getDocs(collection(db, 'users', myUid, 'friends'));
     snap.forEach(d => friends.add(d.id));
+
+    // acceptedConnections — karşı taraf kabul ettiyse buradan da bak
+    const q1 = query(collection(db, 'acceptedConnections'), where('uid1', '==', myUid));
+    const q2 = query(collection(db, 'acceptedConnections'), where('uid2', '==', myUid));
+    const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    s1.forEach(d => { friends.add(d.data().uid2); });
+    s2.forEach(d => { friends.add(d.data().uid1); });
+
     // Bekleyen istekler
-    const { query, where } = window.FB;
-    const pSnap = await getDocs(query(collection(db, 'friendRequests'), where('fromUid','==',window.CU.uid), where('status','==','pending')));
+    const pSnap = await getDocs(query(collection(db, 'friendRequests'), where('fromUid','==',myUid), where('status','==','pending')));
     pSnap.forEach(d => pendingRequests.add(d.data().toUid));
-  } catch(e) {}
+  } catch(e) { console.warn('loadFriendsList:', e); }
 }
 
 // ── TAB SWITCH ──
@@ -1687,26 +1696,35 @@ async function loadNotifs() {
 
 async function acceptRequest(reqId, fromUid, fromName) {
   if (!window.FB || !window.CU) return;
-  const { db, doc, updateDoc, setDoc, deleteDoc } = window.FB;
+  const { db, doc, setDoc, deleteDoc } = window.FB;
 
   try {
-    // updateDoc yerine deleteDoc — kuralda sorun olabilir, sil daha güvenli
+    // İsteği sil
     await deleteDoc(doc(db, 'friendRequests', reqId));
-  } catch(e) {
-    console.warn('friendRequest delete failed, trying update:', e);
-    try { await updateDoc(doc(db, 'friendRequests', reqId), { status: 'accepted' }); } catch(e2) { console.error('update also failed:', e2); }
-  }
+  } catch(e) { console.warn('req delete:', e); }
 
   try {
-    await setDoc(doc(db, 'users', window.CU.uid, 'friends', fromUid), { uid: fromUid, name: fromName, addedAt: new Date().toISOString() });
-    await setDoc(doc(db, 'users', fromUid, 'friends', window.CU.uid), { uid: window.CU.uid, name: window.CU.name || 'Sürücü', addedAt: new Date().toISOString() });
-  } catch(e) { console.error('friends setDoc failed:', e); toast('Hata oluştu: ' + e.message); return; }
+    // Kendi friends listesine ekle
+    await setDoc(doc(db, 'users', window.CU.uid, 'friends', fromUid), {
+      uid: fromUid, name: fromName, addedAt: new Date().toISOString()
+    });
+  } catch(e) { console.error('my friends write failed:', e); toast('Hata: ' + e.message); return; }
+
+  // Karşı tarafın friends listesine doğrudan yazamıyoruz (kural engeli)
+  // Bunun yerine karşı tarafa bildirim gönderiyoruz, o da kendi listesine ekleyecek
+  // Ortak bir "acceptedConnections" koleksiyonu kullan
+  try {
+    await setDoc(doc(db, 'acceptedConnections', [window.CU.uid, fromUid].sort().join('_')), {
+      uid1: window.CU.uid, name1: window.CU.name || 'Sürücü',
+      uid2: fromUid, name2: fromName,
+      createdAt: new Date().toISOString()
+    });
+  } catch(e) { console.warn('accepted conn:', e); }
 
   sendNotif(fromUid, 'follow', `<strong>${window.CU.name || 'Biri'}</strong> bağlantı isteğini kabul etti ✓`);
   playDing();
   friends.add(fromUid);
 
-  // İstek kartını güncelle
   const el = document.getElementById('req-' + reqId);
   if (el) {
     el.style.background = 'var(--gdim)';
@@ -2135,10 +2153,10 @@ function confirmDisconnect() {
 async function disconnectFriend(uid) {
   if (!window.FB || !window.CU) return;
   const { db, doc, deleteDoc } = window.FB;
-  try {
-    await deleteDoc(doc(db, 'users', window.CU.uid, 'friends', uid));
-    await deleteDoc(doc(db, 'users', uid, 'friends', window.CU.uid));
-  } catch(e) {}
+  const myUid = window.CU.uid;
+  try { await deleteDoc(doc(db, 'users', myUid, 'friends', uid)); } catch(e) {}
+  try { await deleteDoc(doc(db, 'users', uid, 'friends', myUid)); } catch(e) {}
+  try { await deleteDoc(doc(db, 'acceptedConnections', [myUid, uid].sort().join('_'))); } catch(e) {}
   friends.delete(uid);
 
   // Butonu güncelle
