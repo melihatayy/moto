@@ -1564,8 +1564,26 @@ async function loadDMList() {
 let chatPartner=null, chatUnsub=null;
 function chatId(a,b){return[a,b].sort().join('_');}
 async function openChat(uid) {
-  // Gizlilik: sadece bağlantılar mesajlaşabilir
-  if (!friends.has(uid)) {
+  // Gizlilik: önce local Set'e bak, yoksa Firestore'dan kontrol et
+  let isFriend = friends.has(uid);
+  if (!isFriend && window.FB && window.CU) {
+    const { db, collection, getDocs, doc, getDoc } = window.FB;
+    const myUid = window.CU.uid;
+    // acceptedConnections'ta var mı?
+    try {
+      const connId = [myUid, uid].sort().join('_');
+      const connDoc = await getDoc(doc(db, 'acceptedConnections', connId));
+      if (connDoc.exists()) { isFriend = true; friends.add(uid); }
+    } catch(e) {}
+    // friends subcollection'da var mı?
+    if (!isFriend) {
+      try {
+        const fDoc = await getDoc(doc(db, 'users', myUid, 'friends', uid));
+        if (fDoc.exists()) { isFriend = true; friends.add(uid); }
+      } catch(e) {}
+    }
+  }
+  if (!isFriend) {
     toast('Mesajlaşmak için önce bağlantı kurman gerekiyor 🔒');
     return;
   }
@@ -1576,6 +1594,7 @@ async function openChat(uid) {
   document.getElementById('chat-sub').textContent = u.bike || '';
   document.getElementById('chat-msgs').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Yükleniyor...</div>';
   closeOv('ov-dm');
+  closeOv('ov-connections');
   openOv('ov-chat');
   listenChat(uid);
 }
@@ -2073,7 +2092,25 @@ async function quickAddFriend(uid, name, btn) {
 async function viewUserProfile(uid) {
   viewingUid = uid;
   const u = allUsers.find(x => x.uid === uid) || { uid };
-  const isFriend = friends.has(uid);
+
+  // Bağlantı kontrolü — local + Firestore
+  let isFriend = friends.has(uid);
+  if (!isFriend && window.FB && window.CU) {
+    const { db, doc, getDoc } = window.FB;
+    const myUid = window.CU.uid;
+    try {
+      const connId = [myUid, uid].sort().join('_');
+      const connDoc = await getDoc(doc(db, 'acceptedConnections', connId));
+      if (connDoc.exists()) { isFriend = true; friends.add(uid); }
+    } catch(e) {}
+    if (!isFriend) {
+      try {
+        const fDoc = await getDoc(doc(db, 'users', myUid, 'friends', uid));
+        if (fDoc.exists()) { isFriend = true; friends.add(uid); }
+      } catch(e) {}
+    }
+  }
+
   const isPending = pendingRequests.has(uid);
 
   // Avatar & Cover
