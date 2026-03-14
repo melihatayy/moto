@@ -384,7 +384,7 @@ select.inp option { background: white; }
 .story-row::-webkit-scrollbar{display:none;}
 .story-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
 .story-ring{width:58px;height:58px;border-radius:50%;padding:2.5px;background:linear-gradient(135deg,var(--orange),#FFAA00);display:flex;align-items:center;justify-content:center;}
-.story-ring.seen{background:var(--border2);}
+.story-ring.seen{background:var(--border2);opacity:.55;transition:opacity .3s;}
 .story-ring.add{background:var(--orange);}
 .story-inner{width:100%;height:100%;border-radius:50%;background:var(--bg2);border:2.5px solid var(--bg);overflow:hidden;}
 .story-inner img{width:100%;height:100%;object-fit:cover;}
@@ -677,14 +677,14 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
           <div class="prof-stats">
             <div class="pst"><div class="pstv" id="stat-tur">0</div><div class="pstl">Tur</div></div>
             <div class="pst"><div class="pstv" id="stat-km">0</div><div class="pstl">km</div></div>
-            <div class="pst"><div class="pstv" id="stat-takipci">0</div><div class="pstl">Takipçi</div></div>
-            <div class="pst"><div class="pstv" id="stat-takip">0</div><div class="pstl">Takip</div></div>
+            <div class="pst" style="cursor:pointer" onclick="openConnections()"><div class="pstv" id="stat-baglantilar">0</div><div class="pstl">Bağlantı</div></div>
+            <div class="pst"><div class="pstv" id="stat-rota">0</div><div class="pstl">Rota</div></div>
           </div>
           <button class="btn btn-ghost" style="color:var(--red)" onclick="window.fbSignOut()">Çıkış Yap</button>
         </div>
         <div class="conn-section" style="padding-top:14px">
-          <div class="conn-title">MOTO'daki Kullanıcılar</div>
-          <div id="user-list"><div style="padding:16px 0;color:var(--text3);font-size:13px">Yükleniyor...</div></div>
+          <div class="conn-title">Bağlantılarım <span id="conn-count"></span></div>
+          <div id="conn-list"><div style="padding:16px 0;color:var(--text3);font-size:13px">Yükleniyor...</div></div>
         </div>
         <div style="height:14px"></div>
         <div class="section-title">Gönderilerim</div>
@@ -970,9 +970,9 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <div style="padding:0 18px 16px;background:var(--bg)">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:-36px;margin-bottom:12px">
           <div id="vp-av" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--bg);overflow:hidden;box-shadow:var(--shadow2)"></div>
-          <div style="display:flex;gap:8px">
-            <button id="vp-add-btn" onclick="toggleFriend()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">+ Ekle</button>
-            <button onclick="msgFromProfile()" style="background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Mesaj</button>
+          <div style="display:flex;gap:8px" id="vp-actions">
+            <button id="vp-add-btn" onclick="toggleFriend()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">+ Bağlantı Kur</button>
+            <button id="vp-msg-btn" onclick="msgFromProfile()" style="display:none;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Mesaj</button>
           </div>
         </div>
         <div style="font-size:20px;font-weight:700" id="vp-name"></div>
@@ -984,17 +984,33 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
           <div class="ptag" id="vp-city"></div>
         </div>
       </div>
-      <div style="padding:0 16px">
-        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin-bottom:10px">Gönderiler</div>
-        <div id="vp-posts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px"></div>
+      <!-- Bağlantı yoksa gizli profil uyarısı -->
+      <div id="vp-locked" style="display:none;text-align:center;padding:32px 24px">
+        <div style="font-size:36px;margin-bottom:12px">🔒</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px">Gizli Profil</div>
+        <div style="font-size:13px;color:var(--text3);line-height:1.6">Gönderileri görmek için önce bağlantı kurman gerekiyor.</div>
+      </div>
+      <div id="vp-content">
+        <div style="padding:0 16px">
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin-bottom:10px">Gönderiler</div>
+          <div id="vp-posts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px"></div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- BAĞLANTILAR -->
+  <div class="overlay" id="ov-connections">
+    <div class="hdr">
+      <div class="hdr-btn" onclick="closeOv('ov-connections')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div style="font-size:16px;font-weight:600;margin-left:8px">Bağlantılarım</div>
+    </div>
+    <div class="scrl" style="padding:0 16px" id="connections-list">
+      <div style="padding:32px 0;text-align:center;color:var(--text3)">Yükleniyor...</div>
+    </div>
+  </div>
+
   <!-- TOAST -->
-
-
-
   <div class="toast" id="toast"></div>
 </div>
 
@@ -1053,9 +1069,11 @@ function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
 // ── APP ENTRY ──
-function enterApp() {
+async function enterApp() {
   show('s-app');
   applyProfile(window.CU);
+  // Önce arkadaş listesini yükle, sonra kullanıcıları
+  await loadFriendsList();
   loadFeed();
   loadStories();
   loadTours();
@@ -1065,6 +1083,19 @@ function enterApp() {
   loadProfilePosts();
   watchNotifBadge();
   switchTab('feed', document.getElementById('ni-feed'));
+}
+
+async function loadFriendsList() {
+  if (!window.FB || !window.CU) return;
+  const { db, collection, getDocs } = window.FB;
+  try {
+    const snap = await getDocs(collection(db, 'users', window.CU.uid, 'friends'));
+    snap.forEach(d => friends.add(d.id));
+    // Bekleyen istekler
+    const { query, where } = window.FB;
+    const pSnap = await getDocs(query(collection(db, 'friendRequests'), where('fromUid','==',window.CU.uid), where('status','==','pending')));
+    pSnap.forEach(d => pendingRequests.add(d.data().toUid));
+  } catch(e) {}
 }
 
 // ── TAB SWITCH ──
@@ -1279,7 +1310,12 @@ async function loadFeed() {
       <div class="comment-area" id="ca-${p.id}">
         <div class="comment-list" id="cl-${p.id}"></div>
         <div class="comment-row">
-          <input class="comment-inp" id="ci-${p.id}" placeholder="Yorum yaz..." onkeydown="if(event.key==='Enter')submitComment('${p.uid}','${p.id}')">
+          <div style="position:relative;flex:1">
+          <input class="comment-inp" id="ci-${p.id}" placeholder="Yorum yaz... (@isim ile etiketle)" 
+            onkeydown="if(event.key==='Enter')submitComment('${p.uid}','${p.id}')"
+            oninput="checkMention(this,'${p.id}')">
+          <div id="mention-box-${p.id}" style="display:none;position:absolute;bottom:100%;left:0;right:0;background:var(--card);border:1.5px solid var(--border);border-radius:12px;box-shadow:var(--shadow2);z-index:50;max-height:150px;overflow-y:auto"></div>
+        </div>
           <button class="comment-send" onclick="submitComment('${p.uid}','${p.id}')">Gönder</button>
         </div>
       </div>
@@ -1287,12 +1323,24 @@ async function loadFeed() {
   `).join('');
 }
 
-function toggleLike(btn,ownerUid,postId) {
-  btn.classList.toggle('liked');
-  const sp=btn.querySelector('span');
-  const liked=btn.classList.contains('liked');
-  sp.textContent=liked?parseInt(sp.textContent)+1:parseInt(sp.textContent)-1;
-  if(liked && window.CU) sendNotif(ownerUid,'like',`<strong>${window.CU.name||'Biri'}</strong> gönderini beğendi ❤️`);
+async function toggleLike(btn,ownerUid,postId) {
+  if(!window.FB||!window.CU) return;
+  const {db,doc,updateDoc,increment,collection,query,where,getDocs,addDoc,deleteDoc}=window.FB;
+  const likeRef=doc(db,'posts',postId,'likes',window.CU.uid);
+  const likeSnap=await getDocs(query(collection(db,'posts',postId,'likes'),where('uid','==',window.CU.uid)));
+  const alreadyLiked=!likeSnap.empty;
+  if(alreadyLiked){
+    btn.classList.remove('liked');
+    const sp=btn.querySelector('span');sp.textContent=Math.max(0,parseInt(sp.textContent)-1);
+    await deleteDoc(doc(db,'posts',postId,'likes',window.CU.uid));
+    await updateDoc(doc(db,'posts',postId),{likes:increment(-1)});
+  } else {
+    btn.classList.add('liked');
+    const sp=btn.querySelector('span');sp.textContent=parseInt(sp.textContent)+1;
+    await addDoc(collection(db,'posts',postId,'likes'),{uid:window.CU.uid,createdAt:new Date().toISOString()});
+    await updateDoc(doc(db,'posts',postId),{likes:increment(1)});
+    sendNotif(ownerUid,'like',`<strong>${window.CU.name||'Biri'}</strong> gönderini beğendi ❤️`,postId);
+  }
 }
 function toggleComment(postId) {
   const area=document.getElementById('ca-'+postId);
@@ -1301,24 +1349,51 @@ function toggleComment(postId) {
   if(!show) loadComments(postId);
 }
 async function loadComments(postId) {
-  if(!window.FB) return;
-  const {db,collection,query,orderBy,getDocs}=window.FB;
-  const q=query(collection(db,'posts',postId,'comments'),orderBy('createdAt','asc'));
-  const snap=await getDocs(q);
-  const list=document.getElementById('cl-'+postId);
-  if(!list) return;
-  list.innerHTML=snap.empty?'<div style="font-size:12px;color:var(--text3);padding:6px 0">Henüz yorum yok</div>':
-    [...snap.docs].map(d=>{const c=d.data();return`<div class="comment-item"><strong>${c.name}</strong> ${c.text} <span style="font-size:10px;color:var(--text3)">${timeAgo(c.createdAt)}</span></div>`;}).join('');
+  if (!window.FB) return;
+  const { db, collection, query, orderBy, getDocs } = window.FB;
+  const q = query(collection(db,'posts',postId,'comments'), orderBy('createdAt','asc'));
+  const snap = await getDocs(q);
+  const list = document.getElementById('cl-'+postId);
+  if (!list) return;
+  if (snap.empty) { list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:6px 0">Henüz yorum yok — ilk yorumu yaz!</div>'; return; }
+  list.innerHTML = [...snap.docs].map(d => {
+    const c = d.data();
+    // @ etiketlerini turuncu göster
+    const text = c.text.replace(/@(\w+)/g, '<span style="color:var(--orange);font-weight:600">@$1</span>');
+    return `<div class="comment-item" style="padding:6px 0;border-bottom:1px solid var(--border)">
+      <strong style="color:var(--text)">${c.name}</strong> <span style="color:var(--text2)">${text}</span>
+      <span style="font-size:10px;color:var(--text3);margin-left:6px">${timeAgo(c.createdAt)}</span>
+    </div>`;
+  }).join('');
 }
-async function submitComment(ownerUid,postId) {
-  const inp=document.getElementById('ci-'+postId);
-  const text=inp?.value?.trim();
-  if(!text||!window.CU||!window.FB) return;
-  inp.value='';
-  const {db,collection,addDoc,doc,updateDoc,increment}=window.FB;
-  await addDoc(collection(db,'posts',postId,'comments'),{uid:window.CU.uid,name:window.CU.name||'Sürücü',text,createdAt:new Date().toISOString()});
-  await updateDoc(doc(db,'posts',postId),{commentCount:increment(1)});
-  sendNotif(ownerUid,'comment',`<strong>${window.CU.name||'Biri'}</strong> yorum yaptı: "${text.substring(0,30)}"`);
+async function submitComment(ownerUid, postId) {
+  const inp = document.getElementById('ci-'+postId);
+  const text = inp?.value?.trim();
+  if (!text || !window.CU || !window.FB) return;
+  inp.value = '';
+  // @ mention autocomplete kapat
+  const suggest = document.getElementById('mention-box-'+postId);
+  if (suggest) suggest.style.display = 'none';
+
+  const { db, collection, addDoc, doc, updateDoc, increment } = window.FB;
+  await addDoc(collection(db,'posts',postId,'comments'), {
+    uid: window.CU.uid,
+    name: window.CU.name || 'Sürücü',
+    avatarUrl: window.CU.avatarUrl || '',
+    text, createdAt: new Date().toISOString()
+  });
+  await updateDoc(doc(db,'posts',postId), { commentCount: increment(1) });
+  // Post sahibine bildirim
+  sendNotif(ownerUid, 'comment', `<strong>${window.CU.name||'Biri'}</strong> yorum yaptı: "${text.substring(0,30)}"`, postId);
+  // @ etiketli kişilere bildirim
+  const mentions = text.match(/@([a-z0-9_.]+)/g) || [];
+  mentions.forEach(m => {
+    const username = m.slice(1);
+    const tagged = (window._users || []).find(u => u.username === username);
+    if (tagged && tagged.uid !== ownerUid) {
+      sendNotif(tagged.uid, 'tag', `<strong>${window.CU.name||'Biri'}</strong> seni bir yorumda etiketledi: "${text.substring(0,30)}"`, postId);
+    }
+  });
   loadComments(postId);
 }
 function shareUrl(){navigator.share?navigator.share({title:'MOTO',url:location.href}):navigator.clipboard?.writeText(location.href);toast('Link kopyalandı! 🔗');}
@@ -1381,22 +1456,44 @@ function joinTour(name){document.getElementById('pending-desc').textContent=`"${
 
 // ── USERS / DM ──
 async function loadUsers() {
-  if(!window.FB) return;
-  const {db,collection,getDocs}=window.FB;
-  const snap=await getDocs(collection(db,'users'));
-  const myUid=window.CU?.uid;
-  const users=[];snap.forEach(d=>{if(d.data().setupDone&&d.id!==myUid)users.push(d.data());});
-  window._users=users;
-  const list=document.getElementById('user-list');
-  if(!list) return;
-  if(users.length===0){list.innerHTML='<div style="padding:16px 0;color:var(--text3);font-size:13px">Henüz başka kullanıcı yok</div>';return;}
-  list.innerHTML=users.map(u=>`
-    <div class="conn-item" onclick="openChat('${u.uid}')">
-      ${makeAvatar(u.uid,u.name,u.avatarUrl,44)}
-      <div class="conn-info"><div class="conn-name">${u.name||'Sürücü'}</div><div class="conn-bike">${u.bike||''}</div></div>
-      <button class="conn-btn add" onclick="event.stopPropagation();toast('Bağlantı isteği gönderildi! 🤝')">Ekle</button>
+  if (!window.FB || !window.CU) return;
+  const { db, collection, getDocs } = window.FB;
+  const myUid = window.CU.uid;
+
+  // Tüm kullanıcıları cache'e al (arama için)
+  const snap = await getDocs(collection(db, 'users'));
+  const allU = [];
+  snap.forEach(d => { if (d.data().setupDone && d.id !== myUid) allU.push({ uid: d.id, ...d.data() }); });
+  window._users = allU;
+  allUsers = allU;
+
+  // Sadece arkadaşları göster profilde
+  const friendList = allU.filter(u => friends.has(u.uid));
+  const list = document.getElementById('conn-list');
+  if (!list) return;
+
+  // Bağlantı sayısını güncelle
+  const statEl = document.getElementById('stat-baglantilar');
+  if (statEl) statEl.textContent = friendList.length;
+
+  if (friendList.length === 0) {
+    list.innerHTML = '<div style="padding:16px 0;color:var(--text3);font-size:13px">Henüz bağlantın yok — 🔍 ile sürücü bul!</div>';
+    return;
+  }
+  list.innerHTML = friendList.map(u => `
+    <div class="conn-item" onclick="viewUserProfile('${u.uid}')">
+      ${makeAvatar(u.uid, u.name, u.avatarUrl, 44)}
+      <div class="conn-info">
+        <div class="conn-name">${u.name || 'Sürücü'}</div>
+        <div class="conn-bike">${u.bike || ''}</div>
+      </div>
+      <button class="conn-btn add" onclick="event.stopPropagation();openChatFromFriend('${u.uid}')">Mesaj</button>
     </div>
   `).join('');
+}
+
+function openChatFromFriend(uid) {
+  openChat(uid);
 }
 
 function openDM() {
@@ -1405,15 +1502,21 @@ function openDM() {
 }
 async function loadDMList() {
   if (!window.FB) return;
-  const { db, collection, getDocs, query, where, orderBy, limit } = window.FB;
+  const { db, collection, getDocs, query, where } = window.FB;
   const myUid = window.CU?.uid;
-
-  // Kullanıcıları yükle
-  const snap = await getDocs(collection(db, 'users'));
-  const users = []; snap.forEach(d => { if (d.data().setupDone && d.id !== myUid) users.push(d.data()); });
   const list = document.getElementById('dm-list');
   if (!list) return;
-  if (users.length === 0) { list.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz başka kullanıcı yok</div>'; return; }
+
+  // Sadece bağlantıları göster
+  if (friends.size === 0) {
+    list.innerHTML = '<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">🔒</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div><div style="font-size:13px">Sürücüleri bulmak için 🔍 kullan, bağlantı kur, sonra mesajlaş.</div></div>';
+    return;
+  }
+
+  // Bağlantıların user objesini bul
+  const friendUsers = allUsers.filter(u => friends.has(u.uid));
+
+  if (friendUsers.length === 0) { list.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Bağlantın yok</div>'; return; }
 
   // Her konuşmanın son mesajını ve okunmamış sayısını çek
   const chatPreviews = {};
@@ -1440,7 +1543,7 @@ async function loadDMList() {
   if (badge) { badge.textContent = totalUnread > 0 ? totalUnread : ''; badge.style.display = totalUnread > 0 ? 'block' : 'none'; }
 
   // Son mesaja göre sırala
-  const sorted = [...users].sort((a, b) => {
+  const sorted = [...friendUsers].sort((a, b) => {
     const tA = chatPreviews[a.uid]?.updatedAt || '';
     const tB = chatPreviews[b.uid]?.updatedAt || '';
     return tB.localeCompare(tA);
@@ -1469,12 +1572,17 @@ async function loadDMList() {
 let chatPartner=null, chatUnsub=null;
 function chatId(a,b){return[a,b].sort().join('_');}
 async function openChat(uid) {
-  const u=(window._users||[]).find(x=>x.uid===uid)||{uid,name:'Sürücü'};
-  chatPartner=u;
-  document.getElementById('chat-av').innerHTML=makeAvatar(u.uid,u.name,u.avatarUrl,36);
-  document.getElementById('chat-name').textContent=u.name||'Sürücü';
-  document.getElementById('chat-sub').textContent=u.bike||'';
-  document.getElementById('chat-msgs').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Yükleniyor...</div>';
+  // Gizlilik: sadece bağlantılar mesajlaşabilir
+  if (!friends.has(uid)) {
+    toast('Mesajlaşmak için önce bağlantı kurman gerekiyor 🔒');
+    return;
+  }
+  const u = allUsers.find(x => x.uid === uid) || { uid, name: 'Sürücü' };
+  chatPartner = u;
+  document.getElementById('chat-av').innerHTML = makeAvatar(u.uid, u.name, u.avatarUrl, 36);
+  document.getElementById('chat-name').textContent = u.name || 'Sürücü';
+  document.getElementById('chat-sub').textContent = u.bike || '';
+  document.getElementById('chat-msgs').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Yükleniyor...</div>';
   closeOv('ov-dm');
   openOv('ov-chat');
   listenChat(uid);
@@ -1570,17 +1678,26 @@ async function loadNotifs() {
     return;
   }
 
-  const icons = { like: '❤️', comment: '💬', friendRequest: '🤝', follow: '👤', route: '🗺️' };
+  const icons = { like: '❤️', comment: '💬', friendRequest: '🤝', follow: '👤', route: '🗺️', tag: '🏷️' };
   snap.forEach(d => {
     const n = d.data();
-    html += `<div class="notif-item${n.read ? '' : ' notif-unread'}">
-      <div class="notif-icon">${icons[n.type] || '🔔'}</div>
-      <div><div class="notif-text">${n.text}</div><div class="notif-time">${timeAgo(n.createdAt)}</div></div>
+    const isRead = n.read;
+    html += `
+    <div class="notif-item" style="opacity:${isRead ? '0.6' : '1'};background:${isRead ? 'transparent' : 'rgba(255,85,0,0.04)'};border-radius:12px;padding:10px;margin-bottom:2px;transition:opacity .3s">
+      <div style="display:flex;align-items:center;gap:10px">
+        ${n.fromAvatar ? `<div style="width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="${n.fromAvatar}" style="width:100%;height:100%;object-fit:cover"></div>` : `<div class="notif-icon">${icons[n.type] || '🔔'}</div>`}
+        <div style="flex:1">
+          <div class="notif-text">${n.text}</div>
+          <div class="notif-time">${timeAgo(n.createdAt)}${isRead ? ' · Görüldü' : ''}</div>
+        </div>
+        ${!isRead ? '<div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>' : ''}
+      </div>
     </div>`;
   });
 
   list.innerHTML = html || '<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bildirim yok 🏍️</div>';
-  markRead();
+  // Görüldü olarak işaretle
+  setTimeout(() => markRead(), 1500);
 }
 
 async function acceptRequest(reqId, fromUid, fromName) {
@@ -1595,7 +1712,7 @@ async function acceptRequest(reqId, fromUid, fromName) {
   const el = document.getElementById('req-' + reqId);
   if (el) el.remove();
   toast(`${fromName} ile bağlantı kuruldu! 🤝`);
-  const s = document.getElementById('stat-takipci');
+  const s = document.getElementById('stat-baglantilar');
   if (s) s.textContent = parseInt(s.textContent || 0) + 1;
 }
 
@@ -1608,17 +1725,41 @@ async function declineRequest(reqId) {
   toast('İstek reddedildi');
 }
 async function markRead() {
-  document.querySelectorAll('.notif-unread').forEach(n=>n.classList.remove('notif-unread'));
-  if(!window.FB||!window.CU) return;
-  const {db,collection,query,where,getDocs,doc,updateDoc}=window.FB;
-  const q=query(collection(db,'notifications'),where('toUid','==',window.CU.uid),where('read','==',false));
-  const snap=await getDocs(q);
-  snap.forEach(d=>updateDoc(doc(db,'notifications',d.id),{read:true}));
+  if (!window.FB || !window.CU) return;
+  const { db, collection, query, where, getDocs, doc, updateDoc } = window.FB;
+  const q = query(collection(db,'notifications'), where('toUid','==',window.CU.uid), where('read','==',false));
+  const snap = await getDocs(q);
+  const batch = [];
+  snap.forEach(d => batch.push(updateDoc(doc(db,'notifications',d.id), {read:true})));
+  await Promise.all(batch);
+  // UI'da görüldü stili uygula (silmeden)
+  document.querySelectorAll('.notif-unread').forEach(n => n.classList.remove('notif-unread'));
 }
-async function sendNotif(toUid,type,text) {
-  if(!window.FB||!window.CU||!toUid||toUid===window.CU.uid) return;
-  const {db,collection,addDoc}=window.FB;
-  await addDoc(collection(db,'notifications'),{toUid,type,text,fromUid:window.CU.uid,read:false,createdAt:new Date().toISOString()});
+async function sendNotif(toUid, type, text, refId='') {
+  if (!window.FB || !window.CU || !toUid || toUid === window.CU.uid) return;
+  const { db, collection, addDoc, query, where, getDocs } = window.FB;
+  // Duplicate önle - aynı kişiden aynı post için aynı tip bildirim varsa ekleme
+  if (refId) {
+    try {
+      const existing = await getDocs(query(
+        collection(db, 'notifications'),
+        where('toUid','==',toUid),
+        where('fromUid','==',window.CU.uid),
+        where('type','==',type),
+        where('refId','==',refId)
+      ));
+      if (!existing.empty) return;
+    } catch(e) {}
+  }
+  await addDoc(collection(db, 'notifications'), {
+    toUid, type, text,
+    fromUid: window.CU.uid,
+    fromName: window.CU.name || 'Biri',
+    fromAvatar: window.CU.avatarUrl || '',
+    refId: refId || '',
+    read: false,
+    createdAt: new Date().toISOString()
+  });
 }
 async function watchNotifBadge() {
   if (!window.FB || !window.CU) return;
@@ -1892,38 +2033,57 @@ async function quickAddFriend(uid, name, btn) {
 
 async function viewUserProfile(uid) {
   viewingUid = uid;
-  const u = allUsers.find(x => x.uid === uid);
-  if (!u) return;
+  const u = allUsers.find(x => x.uid === uid) || { uid };
+  const isFriend = friends.has(uid);
+  const isPending = pendingRequests.has(uid);
 
-  // Avatar
+  // Avatar & Cover
   document.getElementById('vp-av').innerHTML = makeAvatar(u.uid, u.name, u.avatarUrl, 72);
-  // Cover
   if (u.coverUrl) document.getElementById('vp-cover').style.background = `url('${u.coverUrl}') center/cover no-repeat`;
   else document.getElementById('vp-cover').style.background = 'linear-gradient(135deg,#FF5500,#FF8800)';
-  // Info
+
+  // Temel bilgiler (herkese açık)
   document.getElementById('vp-name').textContent = u.name || 'Sürücü';
   document.getElementById('vp-username').textContent = u.username ? '@' + u.username : '';
   document.getElementById('vp-bike').textContent = u.bike || '';
-  document.getElementById('vp-bio').textContent = u.bio || '';
   document.getElementById('vp-cat').textContent = u.cat || '';
   document.getElementById('vp-city').textContent = u.city || '';
-  // Add button state
+
+  // Bio ve içerik sadece bağlantılara açık
+  const bioEl = document.getElementById('vp-bio');
+  bioEl.textContent = isFriend ? (u.bio || '') : '';
+
+  // Bağlantı butonu
   const addBtn = document.getElementById('vp-add-btn');
-  if (friends.has(uid)) {
-    addBtn.textContent = 'Eklendi ✓';
+  if (isFriend) {
+    addBtn.textContent = 'Bağlantı ✓';
+    addBtn.style.background = 'var(--bg2)';
+    addBtn.style.color = 'var(--text3)';
+    addBtn.style.border = '1.5px solid var(--border)';
+  } else if (isPending) {
+    addBtn.textContent = 'İstek Gönderildi ⏳';
     addBtn.style.background = 'var(--bg2)';
     addBtn.style.color = 'var(--text3)';
     addBtn.style.border = '1.5px solid var(--border)';
   } else {
-    addBtn.textContent = '+ Ekle';
+    addBtn.textContent = '+ Bağlantı Kur';
     addBtn.style.background = 'var(--orange)';
     addBtn.style.color = 'white';
     addBtn.style.border = 'none';
   }
-  // Posts
-  document.getElementById('vp-posts').innerHTML = '<div style="padding:16px;color:var(--text3);font-size:13px">Yükleniyor...</div>';
+
+  // Mesaj butonu sadece bağlantılara
+  const msgBtn = document.getElementById('vp-msg-btn');
+  if (msgBtn) msgBtn.style.display = isFriend ? 'block' : 'none';
+
+  // İçerik gizliliği
+  const locked = document.getElementById('vp-locked');
+  const content = document.getElementById('vp-content');
+  locked.style.display = isFriend ? 'none' : 'block';
+  content.style.display = isFriend ? 'block' : 'none';
+
   openOv('ov-view-profile');
-  loadUserPosts(uid);
+  if (isFriend) loadUserPosts(uid);
 }
 
 async function loadUserPosts(uid) {
@@ -1949,9 +2109,89 @@ function toggleFriend() {
 }
 
 function msgFromProfile() {
+  if (!friends.has(viewingUid)) { toast('Mesajlaşmak için önce bağlantı kurman gerekiyor'); return; }
   closeOv('ov-view-profile');
   closeOv('ov-search');
   if (viewingUid) openChat(viewingUid);
+}
+
+// ── BAĞLANTILAR ──
+async function openConnections() {
+  openOv('ov-connections');
+  loadConnectionsList();
+}
+
+async function loadConnectionsList() {
+  if (!window.FB || !window.CU) return;
+  const { db, collection, getDocs } = window.FB;
+  const list = document.getElementById('connections-list');
+  try {
+    const snap = await getDocs(collection(db, 'users', window.CU.uid, 'friends'));
+    if (snap.empty) {
+      list.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bağlantın yok<br><span style="font-size:13px">Sürücüleri bulmak için 🔍 kullan</span></div>';
+      return;
+    }
+    const friendUids = [];
+    snap.forEach(d => friendUids.push(d.data().uid));
+    // Detayları allUsers'tan al
+    const connUsers = allUsers.filter(u => friendUids.includes(u.uid));
+    // allUsers'ta olmayan uidler için fallback
+    const missing = friendUids.filter(uid => !allUsers.find(u => u.uid === uid));
+
+    const countEl = document.getElementById('conn-count');
+    if (countEl) countEl.textContent = '· ' + friendUids.length;
+    const statEl = document.getElementById('stat-baglantilar');
+    if (statEl) statEl.textContent = friendUids.length;
+
+    list.innerHTML = connUsers.map(u => `
+      <div class="conn-item" onclick="closeOv('ov-connections');viewUserProfile('${u.uid}')">
+        ${makeAvatar(u.uid, u.name, u.avatarUrl, 44)}
+        <div class="conn-info">
+          <div class="conn-name">${u.name || 'Sürücü'}</div>
+          <div class="conn-bike">${u.bike || ''}</div>
+        </div>
+        <button onclick="event.stopPropagation();closeOv('ov-connections');openChat('${u.uid}')" class="conn-btn add">Mesaj</button>
+      </div>
+    `).join('') + (missing.length ? `<div style="padding:8px 0;font-size:12px;color:var(--text3)">${missing.length} bağlantı yüklenmedi</div>` : '');
+  } catch(e) {
+    list.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Yüklenemedi</div>';
+  }
+}
+
+// ── @ ETİKETLEME ──
+function checkMention(inp, postId) {
+  const val = inp.value;
+  const lastAt = val.lastIndexOf('@');
+  if (lastAt === -1) { hideMention(postId); return; }
+  const query = val.slice(lastAt + 1).toLowerCase();
+  if (query.includes(' ')) { hideMention(postId); return; }
+  const users = (window._users || []).filter(u =>
+    u.username?.includes(query) || u.name?.toLowerCase().includes(query)
+  ).slice(0, 5);
+  const box = document.getElementById('mention-box-' + postId);
+  if (!box) return;
+  if (users.length === 0) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = users.map(u => `
+    <div onclick="insertMention('${postId}','${u.username||u.name}')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border)">
+      ${makeAvatar(u.uid, u.name, u.avatarUrl, 30)}
+      <div><div style="font-size:13px;font-weight:600">${u.name}</div><div style="font-size:11px;color:var(--text3)">@${u.username||''}</div></div>
+    </div>`).join('');
+}
+
+function insertMention(postId, username) {
+  const inp = document.getElementById('ci-' + postId);
+  if (!inp) return;
+  const val = inp.value;
+  const lastAt = val.lastIndexOf('@');
+  inp.value = val.slice(0, lastAt) + '@' + username + ' ';
+  hideMention(postId);
+  inp.focus();
+}
+
+function hideMention(postId) {
+  const box = document.getElementById('mention-box-' + postId);
+  if (box) box.style.display = 'none';
 }
 
 // ── SES ──
@@ -2263,9 +2503,14 @@ function closeStory(){
 function renderStory(){
   clearTimeout(svTimer);
   const s=allStories[svIdx];if(!s)return;
-  // Mark seen
+  // Mark seen - localStorage + story-row güncelle
   const seen=JSON.parse(localStorage.getItem('seenStories')||'[]');
-  if(!seen.includes(s.id)){seen.push(s.id);localStorage.setItem('seenStories',JSON.stringify(seen));}
+  if(!seen.includes(s.id)){
+    seen.push(s.id);
+    localStorage.setItem('seenStories',JSON.stringify(seen));
+    // Story ringini soluklaştır
+    setTimeout(renderStoryRow, 300);
+  }
   // Header
   document.getElementById('sv-av').innerHTML=s.avatarUrl?`<img src="${s.avatarUrl}" style="width:100%;height:100%;object-fit:cover">`:`<div style="width:100%;height:100%;background:${avColor(s.uid)};display:flex;align-items:center;justify-content:center;color:white;font-weight:700">${avLetter(s.name)}</div>`;
   document.getElementById('sv-name').textContent=s.name||'Sürücü';
