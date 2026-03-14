@@ -2727,367 +2727,301 @@ function stopLiveShare(){
 }
 
 // ════════════════════════════════════════════
-// SESLİ İLETİŞİM (TELSIZ) — WebRTC
-// ════════════════════════════════════════════
-// ════════════════════════════════════════════
-// SESLİ İLETİŞİM — WebRTC P2P via Firebase Signaling
-// ════════════════════════════════════════════
-// Mimari:
-//   voiceRooms/{roomId}/members/{uid}  — odadaki üyeler
-//   voiceRooms/{roomId}/signals/{id}   — WebRTC offer/answer/candidate
-//   Oda ID = bağlantı UID'leri sıralanmış join (herkese açık kanal)
+// ══════════════════════════════════════════════════════
+// INTERCOM — WebRTC mesh, Firebase signaling
+// Koleksiyon: voiceLobbies/{lobbyId}/members/{uid}
+//             voiceLobbies/{lobbyId}/signals/{sigId}
+//             voiceInvites/{inviteId}
+// ══════════════════════════════════════════════════════
 
-const ICE_SERVERS = {
+const ICE_CFG = {
   iceServers:[
-    // STUN — ücretsiz
     {urls:'stun:stun.l.google.com:19302'},
     {urls:'stun:stun1.l.google.com:19302'},
-    {urls:'stun:global.stun.twilio.com:3478'},
-    // TURN — ücretsiz (metered.ca)
-    {
-      urls:'turn:a.relay.metered.ca:80',
-      username:'openrelayproject',
-      credential:'openrelayproject'
-    },
-    {
-      urls:'turn:a.relay.metered.ca:443',
-      username:'openrelayproject',
-      credential:'openrelayproject'
-    },
-    {
-      urls:'turn:a.relay.metered.ca:443?transport=tcp',
-      username:'openrelayproject',
-      credential:'openrelayproject'
-    },
-    {
-      urls:'turns:a.relay.metered.ca:443?transport=tcp',
-      username:'openrelayproject',
-      credential:'openrelayproject'
-    }
+    {urls:'turn:a.relay.metered.ca:80',      username:'openrelayproject',credential:'openrelayproject'},
+    {urls:'turn:a.relay.metered.ca:443',     username:'openrelayproject',credential:'openrelayproject'},
+    {urls:'turn:a.relay.metered.ca:443?transport=tcp',  username:'openrelayproject',credential:'openrelayproject'},
+    {urls:'turns:a.relay.metered.ca:443?transport=tcp', username:'openrelayproject',credential:'openrelayproject'}
   ],
-  iceCandidatePoolSize: 10
+  iceCandidatePoolSize:10
 };
 
-let voiceStream = null;
-let voicePeers  = {};   // uid → RTCPeerConnection
-let voiceAudios = {};   // uid → <audio>
-let voiceRoom   = null; // Firestore room ref
-let voiceUnsubs = [];   // Firestore listeners to clean up
-let isMicOn     = false;
-let voiceRoomId = null;
+// ── State ──
+let lobbyStream    = null;
+let lobbyPeers     = {};        // uid → {pc, audio}
+let lobbyUnsubs    = [];
+let lobbyMemberRef = null;
+let lobbyId        = null;
+let lobbyOwnerId   = null;
+let lobbyMicOn     = false;
+let processedSigs  = new Set();
+let pendingInviteId  = null;
+let pendingLobbyId   = null;
+let pendingLobbyName = null;
+let inviteRingTimer  = null;
+let callUnsub        = null;
 
-// ── Kanala gir ──
+// ── Intercom butonuna basılınca ──
 function openLobbies(){
+  const inp = document.getElementById('lobby-name-inp');
+  if(inp) inp.value = '';
   openOv('ov-lobbies');
 }
 
-function startLobby(){
-  closeOv('ov-lobbies');
-  openOv('ov-voice');
-  joinVoiceRoom();
-}
-
-function openVoiceChat(){
-  openOv('ov-voice');
-  joinVoiceRoom();
-}
-
-async function joinVoiceRoom(){
-  if(!window.FB || !window.CU){ toast('Giriş yapman gerekiyor'); return; }
+// ── Kanal Başlat ──
+async function startLobby(){
+  if(!window.FB || !window.CU) return;
+  const name = (document.getElementById('lobby-name-inp')?.value||'').trim()
+               || (window.CU.name||'Sürücü') + "'in Kanalı";
+  const {db, collection, addDoc} = window.FB;
   const cu = window.CU;
+  const ref = await addDoc(collection(db,'voiceLobbies'),{
+    name, ownerUid:cu.uid, ownerName:cu.name||'Sürücü',
+    active:true, memberCount:0, createdAt:new Date().toISOString()
+  });
+  closeOv('ov-lobbies');
+  await joinLobby(ref.id, name, cu.uid);
+}
+
+// ── Kanala katıl (hem başlatan hem davet kabul eden) ──
+async function joinLobby(id, name, ownerUid){
+  lobbyId      = id;
+  lobbyOwnerId = ownerUid || window.CU?.uid;
+
+  const nameEl = document.getElementById('voice-lobby-name');
+  if(nameEl) nameEl.textContent = name || 'Kanal';
+
   const statusEl  = document.getElementById('voice-status');
   const membersEl = document.getElementById('voice-members');
+  const invBtn    = document.getElementById('voice-invite-btn');
 
-  // Bağlantı listesini çek
-  const connUsers = allUsers.filter(u => myConns.has(u.uid));
-  if(!connUsers.length){
-    membersEl.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:32px 0;font-size:13px">Bağlantın olmadan intercom kullanamazsın</div>';
-    statusEl.textContent = 'Bağlantı yok';
-    return;
+  openOv('ov-voice');
+
+  const {db,collection,doc,setDoc,onSnapshot,addDoc,deleteDoc,increment,updateDoc} = window.FB;
+  const cu = window.CU;
+
+  // Kanal bilgisini çek (owner bilmiyorsak)
+  if(!lobbyOwnerId){
+    try{
+      const {getDoc} = window.FB;
+      const snap = await getDoc(doc(db,'voiceLobbies',id));
+      if(snap.exists()) lobbyOwnerId = snap.data().ownerUid;
+    }catch(e){}
   }
 
-  // Oda ID: kullanıcı + bağlantılarının UID'leri sıralı → ortak oda
-  const allUids = [cu.uid, ...connUsers.map(u=>u.uid)].sort();
-  voiceRoomId = 'room_' + allUids.join('_').substring(0,60);
+  // Sadece kanal sahibi davet butonunu görsün
+  if(invBtn) invBtn.style.display = (lobbyOwnerId === cu.uid) ? 'block' : 'none';
 
-  const {db, collection, doc, setDoc, onSnapshot, addDoc, getDocs, deleteDoc, where, query} = window.FB;
-
-  // Mikrofon izni al
-  statusEl.textContent = 'Mikrofon izni...';
+  // Mikrofon izni
+  if(statusEl) statusEl.textContent = 'Mikrofon izni...';
   try{
-    voiceStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+    lobbyStream = await navigator.mediaDevices.getUserMedia({audio:true,video:false});
   }catch(e){
-    statusEl.textContent = 'Mikrofon izni reddedildi';
-    statusEl.style.color = '#F87171';
-    document.getElementById('ptt-label').textContent = 'Ayarlar → Gizlilik → Mikrofon izni ver';
+    if(statusEl){ statusEl.textContent = 'Mikrofon izni reddedildi'; statusEl.style.color='#F87171'; }
     toast('Mikrofon izni gerekli');
     return;
   }
 
-  // Odaya kayıt ol
-  const memberRef = doc(db, 'voiceRooms', voiceRoomId, 'members', cu.uid);
-  await setDoc(memberRef, {
-    uid: cu.uid, name: cu.name||'Sürücü',
-    avatarUrl: cu.avatarUrl||'', bike: cu.bike||'',
-    joinedAt: new Date().toISOString(), micOn: false
+  // Üye olarak kaydol
+  lobbyMemberRef = doc(db,'voiceLobbies',lobbyId,'members',cu.uid);
+  await setDoc(lobbyMemberRef,{
+    uid:cu.uid, name:cu.name||'Sürücü', avatarUrl:cu.avatarUrl||'',
+    micOn:false, joinedAt:new Date().toISOString()
   });
-  voiceRoom = memberRef;
+  updateDoc(doc(db,'voiceLobbies',lobbyId),{memberCount:increment(1)}).catch(()=>{});
 
-  statusEl.textContent = 'Bağlandı';
-  statusEl.style.color = '#4ADE80';
-  const invBtn = document.getElementById('voice-invite-btn');
-  if(invBtn) invBtn.style.display = 'block';
+  if(statusEl){ statusEl.textContent = 'Bağlandı'; statusEl.style.color='#4ADE80'; }
 
-  // Odadaki üyeleri dinle → bağlan
-  const membersColl = collection(db, 'voiceRooms', voiceRoomId, 'members');
-  let firstSnapshot = true;
-  const unsub1 = onSnapshot(membersColl, snap => {
-    renderVoiceMembers(snap, connUsers);
-
-    if(firstSnapshot){
-      // İlk snapshot: odada zaten olan herkesle bağlan
-      firstSnapshot = false;
-      snap.forEach(async d => {
+  // Üyeleri dinle → P2P bağlantı kur
+  const membersColl = collection(db,'voiceLobbies',lobbyId,'members');
+  let firstSnap = true;
+  const u1 = onSnapshot(membersColl, snap=>{
+    renderLobbyMembers(snap);
+    if(firstSnap){
+      firstSnap = false;
+      snap.forEach(d=>{
         const uid = d.id;
-        if(uid === cu.uid) return;
-        if(cu.uid < uid && !voicePeers[uid]){
-          await createPeerConnection(uid, true);
-        }
+        if(uid !== cu.uid && cu.uid < uid && !lobbyPeers[uid])
+          connectPeer(uid, true);
       });
       return;
     }
-
-    snap.docChanges().forEach(async change => {
+    snap.docChanges().forEach(change=>{
       const uid = change.doc.id;
       if(uid === cu.uid) return;
-      if(change.type === 'added'){
-        // Yeni üye geldi — alfabetik olarak küçük olan offer gönderir
-        if(cu.uid < uid && !voicePeers[uid]){
-          await createPeerConnection(uid, true);
-        }
-        // Büyük olan bekler — offer gelince handleOffer devreye girer
-      }
-      if(change.type === 'removed'){
-        closePeer(uid);
-      }
+      if(change.type==='added' && cu.uid < uid && !lobbyPeers[uid])
+        connectPeer(uid, true);
+      if(change.type==='removed')
+        closeLobbyPeer(uid);
     });
   });
-  voiceUnsubs.push(unsub1);
+  lobbyUnsubs.push(u1);
 
-  // Signal dinleyici — tüm sinyalleri al, client-side filtrele
-  // (where query Firestore index gerektiriyor, bunu atlıyoruz)
-  const signalsColl = collection(db, 'voiceRooms', voiceRoomId, 'signals');
-  const processedSigs = new Set();
-  const unsub2 = onSnapshot(signalsColl, snap => {
-    snap.docChanges().forEach(async change => {
+  // Sinyal dinleyici
+  const sigColl = collection(db,'voiceLobbies',lobbyId,'signals');
+  const u2 = onSnapshot(sigColl, snap=>{
+    snap.docChanges().forEach(async change=>{
       if(change.type !== 'added') return;
-      const docId = change.doc.id;
-      if(processedSigs.has(docId)) return;
+      const sigId = change.doc.id;
+      if(processedSigs.has(sigId)) return;
       const sig = change.doc.data();
-      // Sadece bize gelen sinyalleri işle
       if(sig.to !== cu.uid) return;
-      processedSigs.add(docId);
-      // Sil — bir kere işle
+      processedSigs.add(sigId);
       deleteDoc(change.doc.ref).catch(()=>{});
-      const from = sig.from;
-      if(sig.type === 'offer'){
-        await handleOffer(from, sig.sdp);
-      } else if(sig.type === 'answer'){
-        await handleAnswer(from, sig.sdp);
-      } else if(sig.type === 'candidate'){
-        await handleCandidate(from, sig.candidate);
-      }
+      if(sig.type==='offer')     await onOffer(sig.from, sig.sdp);
+      else if(sig.type==='answer')    await onAnswer(sig.from, sig.sdp);
+      else if(sig.type==='candidate') await onCandidate(sig.from, sig.candidate);
     });
   });
-  voiceUnsubs.push(unsub2);
+  lobbyUnsubs.push(u2);
 
-  // Mikrofonu direkt aç
-  setMic(true);
-  toast('Sesli kanala bağlandın');
-
-  // Bağlantılara bildirim
-  connUsers.forEach(u => pushNotif(u.uid,'voice',`<strong>${cu.name||'Biri'}</strong> intercomdaTurlar → Telsiz`));
+  setLobbyMic(true);
+  toast('Intercom kanalına bağlandın');
 }
 
-// ── Üye listesini render et ──
-function renderVoiceMembers(snap, connUsers){
-  const membersEl = document.getElementById('voice-members');
-  const members = [];
-  snap.forEach(d => members.push({uid:d.id,...d.data()}));
-  if(!members.length){ membersEl.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:32px">Henüz kimse yok</div>'; return; }
-  membersEl.innerHTML = members.map(m => {
-    const u = allUsers.find(x=>x.uid===m.uid) || m;
-    const isMe = m.uid === window.CU?.uid;
-    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)" id="vmember-${m.uid}">
-      ${makeAv(m.uid, m.name||u.name, m.avatarUrl||u.avatarUrl, 44)}
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;color:white">${m.name||u.name||'Sürücü'}${isMe?' (Sen)':''}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.4)">${m.micOn?'● Konuşuyor':'⚫ Dinliyor'}</div>
-      </div>
-      <div style="font-size:20px">${m.micOn?'◉':'○'}</div>
-    </div>`;
-  }).join('');
-}
-
-// ── WebRTC: Peer bağlantısı kur ──
-async function createPeerConnection(remoteUid, isInitiator){
-  if(voicePeers[remoteUid]) return voicePeers[remoteUid];
-  const pc = new RTCPeerConnection(ICE_SERVERS);
-  voicePeers[remoteUid] = pc;
+// ── P2P bağlantı kur ──
+async function connectPeer(remoteUid, isInitiator){
+  if(lobbyPeers[remoteUid]) return;
   const cu = window.CU;
-  const {db, collection, addDoc} = window.FB;
-  const signalsColl = collection(db, 'voiceRooms', voiceRoomId, 'signals');
+  const {db,collection,addDoc} = window.FB;
+  const pc = new RTCPeerConnection(ICE_CFG);
+  const audio = document.createElement('audio');
+  audio.autoplay = true;
+  audio.style.display = 'none';
+  document.body.appendChild(audio);
+  lobbyPeers[remoteUid] = {pc, audio};
 
-  // Mikrofon track ekle
-  if(voiceStream){
-    voiceStream.getTracks().forEach(t => pc.addTrack(t, voiceStream));
-  }
+  if(lobbyStream)
+    lobbyStream.getTracks().forEach(t => pc.addTrack(t, lobbyStream));
 
-  // ICE candidate → Firebase'e gönder
-  pc.onicecandidate = e => {
-    if(e.candidate){
-      addDoc(signalsColl,{
-        from: cu.uid, to: remoteUid,
-        type:'candidate', candidate: e.candidate.toJSON(),
-        ts: Date.now()
+  pc.onicecandidate = e=>{
+    if(e.candidate)
+      addDoc(collection(db,'voiceLobbies',lobbyId,'signals'),{
+        from:cu.uid, to:remoteUid,
+        type:'candidate', candidate:e.candidate.toJSON(),
+        ts:Date.now()
       }).catch(()=>{});
-    }
   };
 
-  // Karşıdan gelen ses track → <audio>'ya bağla
-  pc.ontrack = e => {
-    let audio = voiceAudios[remoteUid];
-    if(!audio){
-      audio = document.createElement('audio');
-      audio.autoplay = true;
-      audio.style.display = 'none';
-      document.body.appendChild(audio);
-      voiceAudios[remoteUid] = audio;
-    }
-    audio.srcObject = e.streams[0];
-  };
+  pc.ontrack = e=>{ audio.srcObject = e.streams[0]; };
 
-  pc.onconnectionstatechange = () => {
-    const st = pc.connectionState;
-    const el = document.querySelector(`#vmember-${remoteUid} div:nth-child(2) div:last-child`);
-    if(el){
-      if(st==='connected') el.textContent='Bağlı';
-      else if(st==='disconnected'||st==='failed') el.textContent='Bağlantı kesildi';
+  pc.onconnectionstatechange = ()=>{
+    if(pc.connectionState==='failed'){
+      closeLobbyPeer(remoteUid);
+      setTimeout(()=>{ if(lobbyId) connectPeer(remoteUid, cu.uid < remoteUid); }, 2000);
     }
   };
 
   if(isInitiator){
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
-    await addDoc(signalsColl,{
-      from: cu.uid, to: remoteUid,
-      type:'offer', sdp: offer.sdp,
-      ts: Date.now()
-    });
+    addDoc(collection(db,'voiceLobbies',lobbyId,'signals'),{
+      from:cu.uid, to:remoteUid,
+      type:'offer', sdp:offer.sdp,
+      ts:Date.now()
+    }).catch(()=>{});
   }
-  return pc;
 }
 
-async function handleOffer(fromUid, sdp){
-  // Peer yoksa oluştur (initiator değiliz)
-  if(!voicePeers[fromUid]) await createPeerConnection(fromUid, false);
-  const pc = voicePeers[fromUid];
-  if(!pc) return;
+async function onOffer(fromUid, sdp){
+  if(!lobbyPeers[fromUid]) await connectPeer(fromUid, false);
+  const peer = lobbyPeers[fromUid];
+  if(!peer) return;
+  const {db,collection,addDoc} = window.FB;
+  const cu = window.CU;
   try{
-    await pc.setRemoteDescription({type:'offer', sdp});
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    const {db, collection, addDoc} = window.FB;
-    await addDoc(collection(db,'voiceRooms',voiceRoomId,'signals'),{
-      from: window.CU.uid, to: fromUid,
-      type:'answer', sdp: answer.sdp,
-      ts: Date.now()
-    });
-  }catch(e){ console.error('handleOffer error:', e); }
+    await peer.pc.setRemoteDescription({type:'offer', sdp});
+    const answer = await peer.pc.createAnswer();
+    await peer.pc.setLocalDescription(answer);
+    addDoc(collection(db,'voiceLobbies',lobbyId,'signals'),{
+      from:cu.uid, to:fromUid,
+      type:'answer', sdp:answer.sdp,
+      ts:Date.now()
+    }).catch(()=>{});
+  }catch(e){ console.error('onOffer:', e); }
 }
 
-async function handleAnswer(fromUid, sdp){
-  const pc = voicePeers[fromUid];
-  if(pc && pc.signalingState === 'have-local-offer'){
-    await pc.setRemoteDescription({type:'answer', sdp}).catch(e=>console.error('handleAnswer:', e));
-  }
+async function onAnswer(fromUid, sdp){
+  const peer = lobbyPeers[fromUid];
+  if(peer && peer.pc.signalingState==='have-local-offer')
+    await peer.pc.setRemoteDescription({type:'answer', sdp}).catch(()=>{});
 }
 
-async function handleCandidate(fromUid, candidateJson){
-  const pc = voicePeers[fromUid];
-  if(pc && candidateJson && pc.remoteDescription){
-    await pc.addIceCandidate(new RTCIceCandidate(candidateJson)).catch(()=>{});
-  }
+async function onCandidate(fromUid, cj){
+  const peer = lobbyPeers[fromUid];
+  if(peer && cj && peer.pc.remoteDescription)
+    await peer.pc.addIceCandidate(new RTCIceCandidate(cj)).catch(()=>{});
 }
 
-function closePeer(uid){
-  if(voicePeers[uid]){ voicePeers[uid].close(); delete voicePeers[uid]; }
-  if(voiceAudios[uid]){ voiceAudios[uid].remove(); delete voiceAudios[uid]; }
+function closeLobbyPeer(uid){
+  const peer = lobbyPeers[uid];
+  if(!peer) return;
+  peer.pc.close();
+  peer.audio.remove();
+  delete lobbyPeers[uid];
 }
 
-// ── Mikrofon aç/kapat ──
-function toggleTalk(){
-  setMic(!isMicOn);
+// ── Üye listesini render et ──
+function renderLobbyMembers(snap){
+  const el = document.getElementById('voice-members');
+  if(!el) return;
+  const members = [];
+  snap.forEach(d => members.push({uid:d.id, ...d.data()}));
+  el.innerHTML = members.map(m=>{
+    const isMe = m.uid === window.CU?.uid;
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;background:rgba(255,255,255,.04);border-radius:14px;border:1.5px solid ${m.micOn?'rgba(255,85,0,.4)':'rgba(255,255,255,.06)'}">
+      ${makeAv(m.uid, m.name, m.avatarUrl, 48)}
+      <div style="font-size:12px;font-weight:600;color:white;text-align:center;max-width:72px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${m.name||'Sürücü'}${isMe?' ✦':''}</div>
+      <div style="font-size:11px;color:${m.micOn?'#FF5500':'rgba(255,255,255,.3)'}">${m.micOn?'Konuşuyor':'Dinliyor'}</div>
+    </div>`;
+  }).join('');
 }
 
-function setMic(on){
-  isMicOn = on;
-  if(voiceStream){
-    voiceStream.getAudioTracks().forEach(t => { t.enabled = on; });
-  }
+// ── Mikrofon toggle ──
+function toggleMic(){ setLobbyMic(!lobbyMicOn); }
+
+function setLobbyMic(on){
+  lobbyMicOn = on;
+  if(lobbyStream) lobbyStream.getAudioTracks().forEach(t=>{ t.enabled = on; });
   const btn = document.getElementById('ptt-btn');
   const lbl = document.getElementById('ptt-label');
   if(btn){
     btn.style.background = on ? '#DC2626' : 'var(--orange)';
-    btn.style.boxShadow  = on ? '0 0 0 16px rgba(220,38,38,.2)' : '0 0 0 0 rgba(255,85,0,.5)';
-    btn.style.transform  = on ? 'scale(1.05)' : 'scale(1)';
+    btn.style.boxShadow  = on ? '0 4px 24px rgba(220,38,38,.5)' : '0 4px 20px rgba(255,85,0,.4)';
+    btn.style.transform  = on ? 'scale(1.08)' : 'scale(1)';
     btn.textContent      = on ? '●' : '○';
   }
   if(lbl){
-    lbl.textContent  = on ? 'Konuşuluyor — kesmek için dokun' : 'Mikrofon kapalı — açmak için dokun';
+    lbl.textContent  = on ? 'Mikrofon açık — kapatmak için dokun' : 'Mikrofon kapalı — açmak için dokun';
     lbl.style.color  = on ? '#F87171' : 'rgba(255,255,255,.5)';
   }
-  // Firestore'da mic durumunu güncelle
-  if(voiceRoom && window.FB){
-    const {updateDoc} = window.FB;
-    updateDoc(voiceRoom, {micOn: on}).catch(()=>{});
-  }
+  if(lobbyMemberRef && window.FB)
+    window.FB.updateDoc(lobbyMemberRef, {micOn:on}).catch(()=>{});
 }
 
 // ── Kanaldan çık ──
 async function leaveVoice(){
-  setMic(false);
-  // Tüm peer bağlantılarını kapat
-  Object.keys(voicePeers).forEach(uid => closePeer(uid));
-  voicePeers = {};
-  // Stream'i durdur
-  if(voiceStream){ voiceStream.getTracks().forEach(t=>t.stop()); voiceStream=null; }
-  // Firestore listener'ları temizle
-  voiceUnsubs.forEach(u=>u()); voiceUnsubs=[];
-  // Odadan çık
-  if(voiceRoom && window.FB){
-    const {deleteDoc} = window.FB;
-    await deleteDoc(voiceRoom).catch(()=>{});
-    voiceRoom = null;
+  setLobbyMic(false);
+  Object.keys(lobbyPeers).forEach(uid => closeLobbyPeer(uid));
+  lobbyPeers = {};
+  if(lobbyStream){ lobbyStream.getTracks().forEach(t=>t.stop()); lobbyStream=null; }
+  lobbyUnsubs.forEach(u=>u()); lobbyUnsubs=[];
+  processedSigs.clear();
+  if(lobbyMemberRef && window.FB){
+    const {deleteDoc,doc,updateDoc,increment} = window.FB;
+    await deleteDoc(lobbyMemberRef).catch(()=>{});
+    if(lobbyId) updateDoc(doc(window.FB.db,'voiceLobbies',lobbyId),{memberCount:increment(-1)}).catch(()=>{});
+    lobbyMemberRef = null;
   }
-  isMicOn = false;
-  const ib = document.getElementById('voice-invite-btn');
-  if(ib) ib.style.display = 'none';
+  lobbyId = null; lobbyOwnerId = null; lobbyMicOn = false;
+  const invBtn = document.getElementById('voice-invite-btn');
+  if(invBtn) invBtn.style.display = 'none';
   closeOv('ov-voice');
-  toast('Sesli kanaldan çıkıldı');
+  closeOv('ov-voice-invite');
+  toast('Kanaldan çıkıldı');
 }
 
-// Eski fonksiyonlar — artık kullanılmıyor ama referans için bırakıldı
-function startTalk(){ setMic(true); }
-function stopTalk(){  setMic(false); }
-
-// ── Davet sistemi ──────────────────────────────────────────────
-let pendingInviteId  = null;
-let pendingLobbyName = null;
-let callUnsub        = null;
-let inviteRingTimer  = null;
-
-// Bağlantıları davet et (overlay açıldığında)
+// ── Davet sistemi ──
 function openVoiceInvite(){
   openOv('ov-voice-invite');
   const listEl = document.getElementById('voice-invite-list');
@@ -3097,10 +3031,13 @@ function openVoiceInvite(){
     listEl.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--text3)">Davet edilecek bağlantın yok</div>';
     return;
   }
-  listEl.innerHTML = connUsers.map(u =>
+  listEl.innerHTML = connUsers.map(u=>
     `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
       ${makeAv(u.uid,u.name,u.avatarUrl,44)}
-      <div style="flex:1"><div style="font-size:14px;font-weight:600">${u.name||'Sürücü'}</div><div style="font-size:12px;color:var(--text3)">${u.bike||''}</div></div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600">${u.name||'Sürücü'}</div>
+        <div style="font-size:12px;color:var(--text3)">${u.bike||''}</div>
+      </div>
       <button onclick="sendVoiceInvite('${u.uid}','${(u.name||'').replace(/'/g,"\\'")}',this)"
         style="background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">
         Ara
@@ -3110,36 +3047,33 @@ function openVoiceInvite(){
 }
 
 async function sendVoiceInvite(toUid, toName, btn){
-  if(!window.FB || !window.CU) return;
-  const cu = window.CU;
+  if(!window.FB || !window.CU || !lobbyId) return;
   if(btn){ btn.textContent='Çağrılıyor...'; btn.disabled=true; }
-  const lobbyName = cu.name + "'in Kanalı";
-  const {db, collection, addDoc} = window.FB;
-  // Ortak oda ID = iki UID sıralı
-  const lobbyId = [cu.uid, toUid].sort().join('_');
+  const cu = window.CU;
+  const lobbyName = document.getElementById('voice-lobby-name')?.textContent || cu.name+"'in Kanalı";
+  const {db,collection,addDoc} = window.FB;
   await addDoc(collection(db,'voiceInvites'),{
     lobbyId, lobbyName,
     fromUid:cu.uid, fromName:cu.name||'Sürücü', fromAvatar:cu.avatarUrl||'',
     toUid, status:'pending',
-    createdAt: new Date().toISOString()
+    createdAt:new Date().toISOString()
   });
-  pushNotif(toUid,'voiceInvite',`<strong>${cu.name||'Biri'}</strong> seni intercom kanalına davet etti`);
+  pushNotif(toUid,'voiceInvite','<strong>'+(cu.name||'Biri')+'</strong> seni intercom kanalına davet etti');
   playDing();
-  toast(toName + ' arandı');
+  toast(toName+' arandı');
   setTimeout(()=>{ if(btn){ btn.textContent='Ara'; btn.disabled=false; } }, 15000);
 }
 
-// Gelen çağrıları izle
 function watchVoiceInvites(){
   if(!window.FB || !window.CU) return;
-  const {db, collection, query, where, onSnapshot} = window.FB;
+  const {db,collection,query,where,onSnapshot} = window.FB;
   const myUid = window.CU.uid;
   if(callUnsub){ callUnsub(); callUnsub=null; }
   callUnsub = onSnapshot(
     query(collection(db,'voiceInvites'), where('toUid','==',myUid), where('status','==','pending')),
-    snap => {
-      snap.docChanges().forEach(change => {
-        if(change.type==='added') showIncomingCall(change.doc.id, change.doc.data());
+    snap=>{
+      snap.docChanges().forEach(change=>{
+        if(change.type==='added')   showIncomingCall(change.doc.id, change.doc.data());
         if(change.type==='removed') hideIncomingCall();
       });
     }
@@ -3148,9 +3082,10 @@ function watchVoiceInvites(){
 
 function showIncomingCall(inviteId, inv){
   pendingInviteId  = inviteId;
-  pendingLobbyName = inv.lobbyName || 'Kanal';
-  document.getElementById('call-av').innerHTML = makeAv(inv.fromUid, inv.fromName, inv.fromAvatar, 40);
-  document.getElementById('call-name').textContent = inv.fromName || 'Sürücü';
+  pendingLobbyId   = inv.lobbyId;
+  pendingLobbyName = inv.lobbyName||'Kanal';
+  document.getElementById('call-av').innerHTML   = makeAv(inv.fromUid,inv.fromName,inv.fromAvatar,40);
+  document.getElementById('call-name').textContent = inv.fromName||'Sürücü';
   const lobbyEl = document.getElementById('call-lobby');
   if(lobbyEl) lobbyEl.textContent = pendingLobbyName;
   document.getElementById('call-incoming').style.display = 'block';
@@ -3163,27 +3098,30 @@ function showIncomingCall(inviteId, inv){
 function hideIncomingCall(){
   document.getElementById('call-incoming').style.display = 'none';
   clearInterval(inviteRingTimer);
-  pendingInviteId = null;
+  pendingInviteId=null; pendingLobbyId=null; pendingLobbyName=null;
 }
 
 async function acceptCall(){
-  if(!pendingInviteId) return;
-  const iid = pendingInviteId;
+  if(!pendingInviteId || !pendingLobbyId) return;
+  const lid   = pendingLobbyId;
+  const lname = pendingLobbyName;
+  const iid   = pendingInviteId;
   hideIncomingCall();
-  const {db, doc, updateDoc} = window.FB;
+  const {db,doc,updateDoc} = window.FB;
   updateDoc(doc(db,'voiceInvites',iid),{status:'accepted'}).catch(()=>{});
-  closeOv('ov-lobbies');
-  openOv('ov-voice');
-  joinVoiceRoom();
+  await joinLobby(lid, lname, null);
 }
 
 async function declineCall(){
   if(!pendingInviteId) return;
-  const {db, doc, updateDoc} = window.FB;
+  const {db,doc,updateDoc} = window.FB;
   updateDoc(doc(db,'voiceInvites',pendingInviteId),{status:'declined'}).catch(()=>{});
   hideIncomingCall();
   toast('Arama reddedildi');
 }
+
+// Alias
+function openVoiceChat(){ openLobbies(); }
 </script>
 </body>
 </html>
