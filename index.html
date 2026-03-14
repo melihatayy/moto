@@ -2241,38 +2241,47 @@ async function loadNotifs(){
   let html='';
   // Bağlantı istekleri önce
   requests.forEach(r=>{
+    const u=allUsers.find(u=>u.uid===r.fromUid)||{};
+    const av=u.avatarUrl||r.fromAvatar||'';
+    const nm=u.name||r.fromName||'Sürücü';
     html+=`<div style="background:var(--odim);border:1px solid rgba(255,85,0,.15);border-radius:14px;padding:14px;margin-bottom:10px" id="req-${r.id}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div onclick="closeOv('ov-notif');viewProfile('${r.fromUid}')" style="cursor:pointer">${makeAv(r.fromUid,r.fromName,r.fromAvatar,42)}</div>
-        <div style="flex:1"><div style="font-size:13px;font-weight:600"><strong>${r.fromName}</strong> seninle bağlantı kurmak istiyor</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">${r.fromBike||''} · ${timeAgo(r.createdAt)}</div></div>
+        <div onclick="closeOv('ov-notif');viewProfile('${r.fromUid}')" style="cursor:pointer">${makeAv(r.fromUid,nm,av,42)}</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600"><strong>${nm}</strong> seninle bağlantı kurmak istiyor</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${u.bike||r.fromBike||''} · ${timeAgo(r.createdAt)}</div></div>
       </div>
       <div style="display:flex;gap:8px">
-        <button onclick="acceptConnRequest('${r.id}','${r.fromUid}','${r.fromName}')" style="flex:1;background:var(--orange);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Kabul Et</button>
+        <button onclick="acceptConnRequest('${r.id}','${r.fromUid}','${nm}')" style="flex:1;background:var(--orange);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Kabul Et</button>
         <button onclick="declineConnRequest('${r.id}')" style="flex:1;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Reddet</button>
       </div></div>`;
   });
   // Tur katılım istekleri
   tourRequests.forEach(r=>{
+    const u=allUsers.find(u=>u.uid===r.fromUid)||{};
+    const av=u.avatarUrl||r.fromAvatar||'';
+    const nm=u.name||r.fromName||'Sürücü';
     html+=`<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:14px;padding:14px;margin-bottom:10px" id="treq-${r.id}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div onclick="closeOv('ov-notif');viewProfile('${r.fromUid}')" style="cursor:pointer">${makeAv(r.fromUid,r.fromName,r.fromAvatar,42)}</div>
+        <div onclick="closeOv('ov-notif');viewProfile('${r.fromUid}')" style="cursor:pointer">${makeAv(r.fromUid,nm,av,42)}</div>
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:600"><strong>${r.fromName}</strong> "${r.tourName}" turuna katılmak istiyor</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:2px">${r.fromBike||''} · ${timeAgo(r.createdAt)}</div>
+          <div style="font-size:13px;font-weight:600"><strong>${nm}</strong> "${r.tourName}" turuna katılmak istiyor</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${u.bike||r.fromBike||''} · ${timeAgo(r.createdAt)}</div>
         </div>
       </div>
       <div style="display:flex;gap:8px">
-        <button onclick="acceptTourRequest('${r.id}','${r.tourId}','${r.fromUid}','${r.fromName}')" style="flex:1;background:var(--orange);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Kabul Et</button>
+        <button onclick="acceptTourRequest('${r.id}','${r.tourId}','${r.fromUid}','${nm}')" style="flex:1;background:var(--orange);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Kabul Et</button>
         <button onclick="declineTourRequest('${r.id}','${r.fromUid}','${r.tourName}')" style="flex:1;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Reddet</button>
       </div></div>`;
   });
   // Diğer bildirimler
   const notifs=[];notifSnap.forEach(d=>notifs.push({id:d.id,...d.data()}));
   notifs.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
-  const icons={like:'♥',comment:'●',follow:'+',route:'→',request:'+',accepted:'✅',tourRequest:'+',tourAccepted:'✓',tourDeclined:'❌'};
   notifs.forEach(n=>{
+    const u=n.fromUid?allUsers.find(u=>u.uid===n.fromUid)||{}:{};
+    const av=u.avatarUrl||'';
+    const nm=u.name||'';
     html+=`<div class="notif-item${n.read?'':' notif-unread'}" onclick="${n.fromUid?`closeOv('ov-notif');viewProfile('${n.fromUid}')`:''}" style="${n.fromUid?'cursor:pointer':''}">
+      ${n.fromUid?`<div style="flex-shrink:0" onclick="event.stopPropagation();closeOv('ov-notif');viewProfile('${n.fromUid}')">${makeAv(n.fromUid,nm,av,38)}</div>`:''}
       <div style="flex:1"><div class="notif-text">${n.text}</div><div class="notif-time">${timeAgo(n.createdAt)}</div></div>
       ${!n.read?'<div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>':''}
     </div>`;
