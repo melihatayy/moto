@@ -2267,7 +2267,6 @@ async function loadNotifs(){
   const icons={like:'♥',comment:'●',follow:'+',route:'→',request:'+',accepted:'✅',tourRequest:'+',tourAccepted:'✓',tourDeclined:'❌'};
   notifs.forEach(n=>{
     html+=`<div class="notif-item${n.read?'':' notif-unread'}" onclick="${n.fromUid?`closeOv('ov-notif');viewProfile('${n.fromUid}')`:''}" style="${n.fromUid?'cursor:pointer':''}">
-      <div class="notif-icon">${icons[n.type]||'·'}</div>
       <div style="flex:1"><div class="notif-text">${n.text}</div><div class="notif-time">${timeAgo(n.createdAt)}</div></div>
       ${!n.read?'<div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>':''}
     </div>`;
