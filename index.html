@@ -2632,39 +2632,28 @@ async function calcRoute(){
   btn.textContent = 'Hesaplanıyor...'; btn.disabled = true;
 
   try{
-    const body = {
-      coordinates: [navFromCoord, navToCoord],
-      profile: 'driving-car',  // ORS ücretsiz planında motorcycling mevcut değil, car kullanıyoruz
-      format: 'json',
-      instructions: true,
-      instructions_format: 'text',
-      language: 'tr',
-      units: 'km',
-      extra_info: ['surface','waytype']
-    };
+    // OSRM — açık kaynak, CORS yok, ücretsiz
+    const [fromLng,fromLat] = navFromCoord;
+    const [toLng,toLat]     = navToCoord;
+    const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=polyline&steps=true&annotations=false`;
 
-    const r = await fetch('https://api.openrouteservice.org/v2/directions/driving-car',{
-      method:'POST',
-      headers:{'Authorization':ORS_KEY,'Content-Type':'application/json'},
-      body: JSON.stringify(body)
-    });
+    const r = await fetch(url);
     const data = await r.json();
 
-    if(data.error){ toast('Rota bulunamadı: '+data.error.message); btn.textContent='Rota Hesapla'; btn.disabled=false; return; }
+    if(data.code !== 'Ok'){ toast('Rota bulunamadı'); btn.textContent='Rota Hesapla'; btn.disabled=false; return; }
 
     const route = data.routes[0];
-    const summary = route.summary;
-    const distKm = (summary.distance).toFixed(1);
-    const durMin = Math.round(summary.duration/60);
-    const durText = durMin >= 60 ? Math.floor(durMin/60)+'s '+( durMin%60)+'dk' : durMin+'dk';
+    const distKm = (route.distance/1000).toFixed(1);
+    const durMin = Math.round(route.duration/60);
+    const durText = durMin >= 60 ? Math.floor(durMin/60)+'s '+(durMin%60)+'dk' : durMin+'dk';
 
     document.getElementById('nav-dist').textContent = distKm+' km';
     document.getElementById('nav-dur').textContent = durText;
     document.getElementById('nav-via').textContent = document.getElementById('nav-to').value.split(',')[0];
     document.getElementById('nav-info').style.display = 'block';
 
-    // Adım adım talimatlar
-    navSteps = route.segments[0].steps;
+    // Adım adım talimatlar — OSRM steps formatı
+    navSteps = route.legs[0].steps;
     renderNavSteps(navSteps);
 
     // Haritaya çiz
@@ -2673,35 +2662,64 @@ async function calcRoute(){
     btn.textContent = 'Rota Hesapla'; btn.disabled = false;
 
   }catch(e){
-    toast('Bağlantı hatası, tekrar dene');
+    console.error(e);
+    toast('Bağlantı hatası: '+e.message);
     btn.textContent = 'Rota Hesapla'; btn.disabled = false;
   }
 }
 
 function renderNavSteps(steps){
   const el = document.getElementById('nav-steps');
+  // OSRM maneuver types
   const icons = {
-    0:  '⬆', // straight
-    1:  '↗', // slight right
-    2:  '→', // right
-    3:  '↪', // sharp right
-    4:  '↩', // sharp left
-    5:  '←', // left
-    6:  '↖', // slight left
-    7:  '↕', // u-turn
-    10: '↗', // depart
-    11: '★', // arrive
+    'turn-right':       '→',
+    'turn-left':        '←',
+    'turn-sharp right': '↪',
+    'turn-sharp left':  '↩',
+    'turn-slight right':'↗',
+    'turn-slight left': '↖',
+    'continue':         '⬆',
+    'straight':         '⬆',
+    'depart':           '⬆',
+    'arrive':           '★',
+    'roundabout':       '↻',
+    'rotary':           '↻',
+    'merge':            '⬆',
+    'fork':             '↗',
+    'end of road':      '→',
+    'use lane':         '⬆',
+    'new name':         '⬆',
+    'notification':     '⬆',
   };
-  el.innerHTML = steps.map((s,i)=>`
-    <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);${i===0?'background:var(--odim)':''}" id="nav-step-${i}">
+  function getIcon(step){
+    const m = step.maneuver;
+    if(m.type==='arrive') return '★';
+    if(m.type==='depart') return '⬆';
+    if(m.type==='roundabout'||m.type==='rotary') return '↻';
+    const key = m.type+(m.modifier?' '+m.modifier:'');
+    return icons[key]||icons[m.type]||'⬆';
+  }
+  function stepName(step){
+    if(step.maneuver.type==='arrive') return 'Hedefe ulaştınız';
+    if(step.maneuver.type==='depart') return 'Başlayın';
+    const mod = step.maneuver.modifier||'';
+    const road = step.name||step.ref||'';
+    const modText = {right:'Sağa dön',left:'Sola dön','sharp right':'Keskin sağa dön','sharp left':'Keskin sola dön','slight right':'Hafif sağa',  'slight left':'Hafif sola',straight:'Düz devam et',uturn:'Geri dön'}[mod]||'Devam et';
+    return road?modText+' — '+road:modText;
+  }
+  el.innerHTML = steps.map((s,i)=>{
+    const dist = s.distance;
+    const distText = dist<1000?Math.round(dist)+' m':(dist/1000).toFixed(1)+' km';
+    return `<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);${i===0?'background:var(--odim)':''}" id="nav-step-${i}">
       <div style="width:36px;height:36px;border-radius:50%;background:${i===0?'var(--orange)':'var(--bg2)'};color:${i===0?'white':'var(--text2)'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">
-        ${icons[s.type]||'⬆'}
+        ${getIcon(s)}
       </div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:${i===0?'600':'400'};color:${i===0?'var(--text)':'var(--text2)'}">${s.instruction}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">${s.distance>0?(s.distance<1000?Math.round(s.distance)+' m':(s.distance/1000).toFixed(1)+' km'):'Varış'}</div>
+        <div style="font-size:13px;font-weight:${i===0?'600':'400'};color:${i===0?'var(--text)':'var(--text2)'}">${stepName(s)}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${dist>0?distText:'Varış'}</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function drawNavRoute(geometry, from, to){
@@ -2770,12 +2788,15 @@ function startNavigation(){
 function updateNavBanner(){
   if(navStepIdx >= navSteps.length){ arriveDestination(); return; }
   const step = navSteps[navStepIdx];
-  const icons = {0:'→',1:'↗',2:'→',3:'↪',4:'↩',5:'←',6:'↖',10:'⬆',11:'★'};
-  document.getElementById('nav-next-step').textContent = step.instruction;
-  document.getElementById('nav-step-dist').textContent = step.distance>0?(step.distance<1000?Math.round(step.distance)+' m':(step.distance/1000).toFixed(1)+' km'):'';
-  // Kalan toplam
+  const mod = step.maneuver?.modifier||'';
+  const road = step.name||step.ref||'';
+  const modText = {right:'Sağa dön',left:'Sola dön','sharp right':'Keskin sağa dön','sharp left':'Keskin sola dön','slight right':'Hafif sağa','slight left':'Hafif sola',straight:'Düz devam et',uturn:'Geri dön'}[mod]||'Devam et';
+  const instruction = step.maneuver?.type==='arrive'?'Hedefe ulaştınız':step.maneuver?.type==='depart'?'Başlayın':(road?modText+' — '+road:modText);
+  document.getElementById('nav-next-step').textContent = instruction;
+  const dist = step.distance;
+  document.getElementById('nav-step-dist').textContent = dist>0?(dist<1000?Math.round(dist)+' m':(dist/1000).toFixed(1)+' km'):'';
   const remaining = navSteps.slice(navStepIdx).reduce((s,x)=>s+x.distance,0);
-  const remTime   = Math.round(navSteps.slice(navStepIdx).reduce((s,x)=>s+x.duration,0)/60);
+  const remTime   = Math.round(navSteps.slice(navStepIdx).reduce((s,x)=>s+(x.duration||0),0)/60);
   document.getElementById('nav-rem-dist').textContent = remaining<1000?Math.round(remaining)+' m':(remaining/1000).toFixed(1)+' km';
   document.getElementById('nav-rem-time').textContent = remTime+'dk kaldı';
 }
