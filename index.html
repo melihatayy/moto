@@ -2618,9 +2618,32 @@ function initNavMap(){
       'route-line');
 
     // Kullanıcı marker source
+    // Kullanıcı ok ikonu — SVG'yi base64 image olarak yükle
+    const arrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="22" fill="white" opacity="0.9"/>
+      <circle cx="24" cy="24" r="20" fill="#FF5500" opacity="0.15"/>
+      <polygon points="24,6 33,38 24,32 15,38" fill="#FF5500"/>
+      <circle cx="24" cy="24" r="5" fill="#FF5500"/>
+    </svg>`;
+    const arrowUrl = 'data:image/svg+xml;base64,' + btoa(arrowSvg);
+    const arrowImg = new Image(48,48);
+    arrowImg.onload = ()=>{
+      if(!navMap.hasImage('nav-arrow')) navMap.addImage('nav-arrow', arrowImg);
+    };
+    arrowImg.src = arrowUrl;
+
     navMap.addSource('user',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-    navMap.addLayer({id:'user-dot-shadow',type:'circle',source:'user',paint:{'circle-radius':14,'circle-color':'#000','circle-opacity':0.2,'circle-blur':1,'circle-translate':[0,4]}});
-    navMap.addLayer({id:'user-dot',type:'circle',source:'user',paint:{'circle-radius':10,'circle-color':'#FF5500','circle-stroke-color':'#fff','circle-stroke-width':3}});
+    // Gölge (circle)
+    navMap.addLayer({id:'user-shadow',type:'circle',source:'user',paint:{'circle-radius':18,'circle-color':'#FF5500','circle-opacity':0.2,'circle-blur':1,'circle-translate':[0,3]}});
+    // Ok ikonu — bearing özelliğini rotation olarak kullan
+    navMap.addLayer({id:'user-arrow',type:'symbol',source:'user',layout:{
+      'icon-image':'nav-arrow',
+      'icon-size':0.8,
+      'icon-allow-overlap':true,
+      'icon-ignore-placement':true,
+      'icon-rotate':['get','bearing'],
+      'icon-rotation-alignment':'map'
+    }});
 
     // Varış marker source
     navMap.addSource('dest',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
@@ -2787,7 +2810,7 @@ function startNavigation(){
     const heading=pos.coords.heading; // derece, null olabilir
 
     // Kullanıcı noktasını güncelle
-    navMap.getSource('user')?.setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Point',coordinates:[lng,lat]}}]});
+    navMap.getSource('user')?.setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Point',coordinates:[lng,lat]},properties:{bearing:(heading!=null&&!isNaN(heading))?heading:0}}]});
 
     // 3D perspektif: pitch 60°, harita yönü heading'e döner
     const bearing = (heading!=null&&!isNaN(heading)) ? heading : navMap.getBearing();
