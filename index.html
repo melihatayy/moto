@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <style>
 /* ── VARIABLES ── */
 :root {
@@ -396,7 +395,6 @@ select.inp option { background: white; }
 .sv-bar-fill.done{transform:scaleX(1);}
 .sv-bar-fill.active{animation:sv-fill var(--dur,5s) linear forwards;}
 </style>
-
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -456,7 +454,6 @@ window.fbSaveProfile = async (data) => {
 window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-lang'); };
 </script>
 </head>
-
 <body>
 <div id="app">
 
@@ -1086,6 +1083,7 @@ function makeAvatar(uid, name, avatarUrl, size=42) {
   return `<div class="avatar" style="width:${size}px;height:${size}px"><div class="avatar-placeholder" style="background:${avColor(uid)};font-size:${Math.round(size*.4)}px">${avLetter(name)}</div></div>`;
 }
 
+
 // ── SCREEN NAV ──
 function show(id) {
   document.querySelectorAll('#app > .screen').forEach(s => s.classList.remove('show'));
@@ -1097,53 +1095,30 @@ function closeOv(id) { document.getElementById(id).classList.remove('show'); }
 function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
+
 // ── APP ENTRY ──
-async function enterApp() {
+async function enterApp(){
   show('s-app');
   applyProfile(window.CU);
-  // Önce arkadaş listesini yükle, sonra kullanıcıları
-  await loadFriendsList();
+  await loadMyConnections();
+  loadUsers();
   loadFeed();
   loadStories();
   loadTours();
   loadListings();
-  loadUsers();
   loadMyRoutes();
   loadProfilePosts();
   watchNotifBadge();
-  switchTab('feed', document.getElementById('ni-feed'));
+  switchTab('feed',document.getElementById('ni-feed'));
 }
-
-async function loadFriendsList() {
-  if (!window.FB || !window.CU) return;
-  const { db, collection, getDocs } = window.FB;
-  const myUid = window.CU.uid;
-  try {
-    // connections koleksiyonundan tüm bağlantıları çek
-    const snap = await getDocs(collection(db, 'connections'));
-    snap.forEach(d => {
-      const data = d.data();
-      if (data.uid1 === myUid) friends.add(data.uid2);
-      else if (data.uid2 === myUid) friends.add(data.uid1);
-    });
-    // Bekleyen istekler
-    const pSnap = await getDocs(collection(db, 'friendRequests'));
-    pSnap.forEach(d => {
-      const data = d.data();
-      if (data.fromUid === myUid && data.status === 'pending') pendingRequests.add(data.toUid);
-    });
-  } catch(e) { console.warn('loadFriendsList:', e); }
-}
-
 // ── TAB SWITCH ──
-function switchTab(name, el) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('show'));
+function switchTab(name,el){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('show'));
   document.getElementById('tab-'+name).classList.add('show');
-  document.querySelectorAll('.nav .ni').forEach(n => n.classList.remove('on'));
+  document.querySelectorAll('.nav .ni').forEach(n=>n.classList.remove('on'));
   el.classList.add('on');
-  if (name === 'rota') setTimeout(initMap, 80);
+  if(name==='rota')setTimeout(initMap,80);
 }
-
 // ── LANG ──
 let lang = 'tr';
 function selLang(l) {
@@ -1151,6 +1126,7 @@ function selLang(l) {
   document.getElementById('btn-tr').classList.toggle('sel', l==='tr');
   document.getElementById('btn-en').classList.toggle('sel', l==='en');
 }
+
 
 // ── WELCOME SLIDES ──
 const SLIDES = {
@@ -1177,6 +1153,7 @@ function showSlide() {
   document.getElementById('ws').textContent=s.s;
   [0,1,2].forEach(i=>document.getElementById('wd'+i).classList.toggle('on',i===slideIdx));
 }
+
 
 // ── AUTH ──
 let isLogin=false;
@@ -1209,6 +1186,7 @@ async function doAuth() {
   btn.disabled=false; btn.textContent=isLogin?'Giriş Yap':'Kayıt Ol';
   if(!r.ok) toast(r.msg);
 }
+
 
 // ── SETUP ──
 let uName='',uUser='',uCity='İstanbul',uBike='',uCat='',uUserOk=false;
@@ -1275,6 +1253,7 @@ function fillCat() {
   [...cs.options].forEach(o=>{o.selected=o.text===cat;});
 }
 
+
 // ── PROFILE ──
 function applyProfile(d) {
   if(!d) return;
@@ -1303,6 +1282,7 @@ async function uploadAvatar(inp) {
   toast('Profil fotoğrafı güncellendi ✓');
 }
 
+
 // ── CLOUDINARY ──
 const CL='dxvlccsd7', CP='moto_uploads';
 async function uploadCloud(file) {
@@ -1310,6 +1290,7 @@ async function uploadCloud(file) {
   const r=await fetch(`https://api.cloudinary.com/v1_1/${CL}/image/upload`,{method:'POST',body:fd});
   return (await r.json()).secure_url;
 }
+
 
 // ── FEED ──
 async function loadFeed() {
@@ -1435,6 +1416,7 @@ async function submitComment(ownerUid, postId) {
 }
 function shareUrl(){navigator.share?navigator.share({title:'MOTO',url:location.href}):navigator.clipboard?.writeText(location.href);toast('Link kopyalandı! 🔗');}
 
+
 // ── POST OLUŞTUR ──
 let postFile=null;
 function openPost(){postFile=null;document.getElementById('post-img').style.display='none';document.getElementById('post-caption').value='';openOv('ov-post');}
@@ -1453,6 +1435,7 @@ async function publishPost() {
   btn.disabled=false;btn.textContent='Paylaş';st.style.display='none';
   closeOv('ov-post');toast('Paylaşıldı! 🏍️');loadFeed();
 }
+
 
 // ── TURLAR ──
 async function loadTours() {
@@ -1491,531 +1474,578 @@ async function saveTour() {
 }
 function joinTour(name){document.getElementById('pending-desc').textContent=`"${name}" için tur liderinden onay bekleniyor.`;openModal('mod-pending');}
 
-// ── USERS / DM ──
+
+
+// ── BAĞLANTI & MESAJ & BİLDİRİM SİSTEMİ ──
+// Mantık: connections/{sorted_uid1_uid2} koleksiyonu
+// Herkes herkesi görebilir. Bağlantı kur → mesajlaş.
+// Mesaj gönder → notifications koleksiyonuna yaz → karşı taraf görür + ses.
+
+let allUsers = [], myConnections = new Set(), myPending = new Set();
+let viewingUid = null, chatPartner = null, chatUnsub = null, searchTimer;
+let notifUnsub = null;
+
+function connId(a, b) { return [a,b].sort().join('_'); }
+function cId(a, b) { return [a,b].sort().join('_'); }
+
+// ── BAĞLANTILARI YÜKLE (app açılışında) ──
+async function loadMyConnections() {
+  if (!window.FB || !window.CU) return;
+  const {db, collection, getDocs} = window.FB;
+  const myUid = window.CU.uid;
+  myConnections.clear();
+  myPending.clear();
+  try {
+    const snap = await getDocs(collection(db, 'connections'));
+    snap.forEach(d => {
+      const v = d.data();
+      if (v.uid1 === myUid) myConnections.add(v.uid2);
+      else if (v.uid2 === myUid) myConnections.add(v.uid1);
+    });
+  } catch(e) { console.error('loadMyConnections:', e); }
+  try {
+    const snap = await getDocs(collection(db, 'friendRequests'));
+    snap.forEach(d => {
+      const v = d.data();
+      if (v.fromUid === myUid && v.status === 'pending') myPending.add(v.toUid);
+    });
+  } catch(e) {}
+}
+
+// ── KULLANICI LİSTESİ ──
 async function loadUsers() {
   if (!window.FB || !window.CU) return;
-  const { db, collection, getDocs } = window.FB;
+  const {db, collection, getDocs} = window.FB;
   const myUid = window.CU.uid;
-
-  // Tüm kullanıcıları cache'e al (arama için)
   const snap = await getDocs(collection(db, 'users'));
-  const allU = [];
-  snap.forEach(d => { if (d.data().setupDone && d.id !== myUid) allU.push({ uid: d.id, ...d.data() }); });
-  window._users = allU;
-  allUsers = allU;
-}
-
-function openChatFromFriend(uid) {
-  openChat(uid);
-}
-
-function openDM() {
-  openOv('ov-dm');
-  loadDMList();
-}
-async function loadDMList() {
-  if (!window.FB || !window.CU) return;
-  const { db, collection, getDocs, query, where } = window.FB;
-  const myUid = window.CU.uid;
-  const list = document.getElementById('dm-list');
-  if (!list) return;
-
-  try {
-    // Tüm bağlantıları çek
-    const cSnap = await getDocs(collection(db, 'connections'));
-    const connUids = [];
-    cSnap.forEach(d => {
-      const data = d.data();
-      if (data.uid1 === myUid) connUids.push(data.uid2);
-      else if (data.uid2 === myUid) connUids.push(data.uid1);
-    });
-
-    if (connUids.length === 0) {
-      list.innerHTML = '<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">💬</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div><div style="font-size:13px">🔍 ile sürücü bul, bağlantı kur, mesajlaş</div></div>';
-      return;
-    }
-
-    const connUsers = allUsers.filter(u => connUids.includes(u.uid));
-
-    // Chat önizlemelerini çek
-    const previews = {};
-    try {
-      const chatsSnap = await getDocs(collection(db, 'chats'));
-      chatsSnap.forEach(cd => {
-        const data = cd.data();
-        if (!data.participants?.includes(myUid)) return;
-        const other = data.participants.find(p => p !== myUid);
-        if (other) previews[other] = { lastMsg: data.lastMsg || '', updatedAt: data.updatedAt || '', unread: data.unreadFor === myUid };
-      });
-    } catch(e) {}
-
-    const totalUnread = Object.values(previews).filter(p => p.unread).length;
-    const badge = document.getElementById('dm-total-badge');
-    if (badge) { badge.textContent = totalUnread > 0 ? totalUnread : ''; badge.style.display = totalUnread > 0 ? 'block' : 'none'; }
-
-    const sorted = [...connUsers].sort((a, b) => (previews[b.uid]?.updatedAt||'').localeCompare(previews[a.uid]?.updatedAt||''));
-
-    list.innerHTML = sorted.map(u => {
-      const p = previews[u.uid];
-      const unread = p?.unread || false;
-      return `
-      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="openChat('${u.uid}')">
-        <div onclick="event.stopPropagation();viewUserProfile('${u.uid}')" style="flex-shrink:0">${makeAvatar(u.uid, u.name, u.avatarUrl, 46)}</div>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div style="font-size:14px;font-weight:${unread?'700':'600'};color:var(--text)">${u.name||'Sürücü'}</div>
-            ${p?.updatedAt ? `<div style="font-size:10px;color:${unread?'#CA8A04':'var(--text3)'};">${timeAgo(p.updatedAt)}</div>` : ''}
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
-            <div style="font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:220px;${unread?'color:#92400E;font-weight:600;background:#FEF9C3;padding:1px 6px;border-radius:6px;':'color:var(--text3);'}">${p?.lastMsg||u.bike||''}</div>
-            ${unread ? '<div style="width:10px;height:10px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>' : ''}
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-  } catch(e) { console.error('loadDMList error:', e); }
-}
-
-let chatPartner = null, chatUnsub = null;
-function chatId(a, b) { return [a, b].sort().join('_'); }
-
-async function openChat(uid) {
-  if (!window.FB || !window.CU) return;
-  const { db, doc, getDoc } = window.FB;
-  const myUid = window.CU.uid;
-
-  // Bağlantı var mı?
-  const connId = [myUid, uid].sort().join('_');
-  try {
-    const connDoc = await getDoc(doc(db, 'connections', connId));
-    if (!connDoc.exists()) { toast('Mesajlaşmak için önce bağlantı kurman gerekiyor 🔒'); return; }
-    friends.add(uid);
-  } catch(e) { toast('Bağlantı kontrolü hatası'); return; }
-
-  const u = allUsers.find(x => x.uid === uid) || { uid, name: 'Sürücü' };
-  chatPartner = u;
-  document.getElementById('chat-av').innerHTML = makeAvatar(u.uid, u.name, u.avatarUrl, 36);
-  document.getElementById('chat-name').textContent = u.name || 'Sürücü';
-  document.getElementById('chat-sub').textContent = u.bike || '';
-  document.getElementById('chat-msgs').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Yükleniyor...</div>';
-  closeOv('ov-dm');
-  closeOv('ov-connections');
-  openOv('ov-chat');
-  listenChat(uid);
-}
-
-async function listenChat(partnerUid) {
-  if (chatUnsub) chatUnsub();
-  if (!window.FB || !window.CU) return;
-  const cid = chatId(window.CU.uid, partnerUid);
-  const { db, collection, query, orderBy, onSnapshot, doc, updateDoc } = window.FB;
-  const q = query(collection(db, 'chats', cid, 'messages'), orderBy('createdAt', 'asc'));
-  let prevCount = 0;
-  chatUnsub = onSnapshot(q, async snap => {
-    const msgs = document.getElementById('chat-msgs');
-    if (snap.empty) { msgs.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">İlk mesajı sen yaz!</div>'; prevCount = 0; return; }
-    msgs.innerHTML = '';
-    const myUid = window.CU?.uid;
-    const toRead = [];
-    snap.forEach(d => {
-      const m = d.data();
-      const isMe = m.senderUid === myUid;
-      const el = document.createElement('div');
-      el.className = `msg ${isMe?'me':'them'}`;
-      const time = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}) : '';
-      const tick = isMe ? `<div style="display:flex;justify-content:flex-end;align-items:center;gap:2px;margin-top:2px">
-        <svg width="14" height="9" viewBox="0 0 16 10" fill="none">
-          <path d="M1 5l3 3 5-7" stroke="${m.read?'#3B82F6':'rgba(255,255,255,0.5)'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          ${m.read?'<path d="M5 5l3 3 5-7" stroke="#3B82F6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>':''}
-        </svg>
-        <span style="font-size:10px;color:${m.read?'#3B82F6':'rgba(255,255,255,0.5)'}">${time}</span>
-      </div>` : `<div style="font-size:10px;color:rgba(0,0,0,0.4);margin-top:2px">${time}</div>`;
-      el.innerHTML = m.photoUrl ? `<img src="${m.photoUrl}" style="width:100%;max-width:200px;border-radius:10px;display:block">${tick}` : `${m.text}${tick}`;
-      msgs.appendChild(el);
-      if (!isMe && !m.read) toRead.push(d.id);
-    });
-    msgs.scrollTop = msgs.scrollHeight;
-    if (toRead.length > 0) {
-      toRead.forEach(id => updateDoc(doc(db,'chats',cid,'messages',id),{read:true}).catch(()=>{}));
-      updateDoc(doc(db,'chats',cid),{unreadFor:null}).catch(()=>{});
-      // DM badge sıfırla
-      const dmb = document.getElementById('dm-badge');
-      if (dmb) dmb.style.display = 'none';
-    }
-    if (snap.size > prevCount && prevCount > 0) {
-      const last = snap.docs[snap.size-1].data();
-      if (last.senderUid !== myUid) playDing();
-    }
-    prevCount = snap.size;
-  });
-}
-
-async function sendMsg() {
-  const inp = document.getElementById('chat-inp');
-  const text = inp.value.trim();
-  if (!text || !chatPartner || !window.CU) return;
-  inp.value = '';
-  await _sendMsg({text, photoUrl:''});
-}
-
-async function sendPhoto(inp) {
-  const f = inp.files[0];
-  if (!f || !chatPartner) return;
-  toast('Fotoğraf gönderiliyor...');
-  const url = await uploadCloud(f);
-  await _sendMsg({text:'', photoUrl:url});
-}
-
-async function _sendMsg(content) {
-  const myUid = window.CU.uid;
-  const cid = chatId(myUid, chatPartner.uid);
-  const { db, collection, addDoc, doc, setDoc } = window.FB;
-  const preview = content.text ? content.text.substring(0,60) : '📷 Fotoğraf';
-  await addDoc(collection(db,'chats',cid,'messages'), {
-    senderUid: myUid,
-    senderName: window.CU.name||'Sürücü',
-    text: content.text,
-    photoUrl: content.photoUrl,
-    read: false,
-    createdAt: new Date().toISOString()
-  });
-  await setDoc(doc(db,'chats',cid), {
-    participants: [myUid, chatPartner.uid],
-    lastMsg: preview,
-    updatedAt: new Date().toISOString(),
-    unreadFor: chatPartner.uid
-  }, {merge:true});
-  // Bildirim gönder — mesaj kutusuna düşsün
-  await addNotif(chatPartner.uid, 'message', `💬 <strong>${window.CU.name||'Biri'}</strong>: ${preview}`, myUid);
-}
-
-// ── BİLDİRİMLER ──
-async function openNotifs() {
-  openOv('ov-notif');
-  document.getElementById('notif-badge').style.display = 'none';
-  loadNotifs();
-}
-
-async function loadNotifs() {
-  if (!window.FB || !window.CU) return;
-  const { db, collection, query, where, getDocs, limit } = window.FB;
-  let snap;
-  try { snap = await getDocs(query(collection(db,'notifications'), where('toUid','==',window.CU.uid), limit(40))); }
-  catch(e) { snap = {empty:true,forEach:()=>{}}; }
-
-  let requests = [];
-  try {
-    const rSnap = await getDocs(query(collection(db,'friendRequests'), where('toUid','==',window.CU.uid), where('status','==','pending')));
-    rSnap.forEach(d => requests.push({id:d.id,...d.data()}));
-  } catch(e) {}
-
-  const list = document.getElementById('notif-list');
-  let html = '';
-
-  requests.forEach(r => {
-    html += `<div style="background:var(--odim);border:1px solid rgba(255,85,0,.15);border-radius:14px;padding:14px;margin-bottom:10px" id="req-${r.id}">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div onclick="closeOv('ov-notif');viewUserProfile('${r.fromUid}')" style="cursor:pointer">${makeAvatar(r.fromUid,r.fromName,r.fromAvatar,42)}</div>
-        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)"><strong>${r.fromName}</strong> seninle bağlantı kurmak istiyor 🤝</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">${r.fromBike||''} · ${timeAgo(r.createdAt)}</div></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="acceptRequest('${r.id}','${r.fromUid}','${r.fromName}')" style="flex:1;background:var(--orange);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Kabul Et</button>
-        <button onclick="declineRequest('${r.id}')" style="flex:1;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Reddet</button>
-      </div></div>`;
-  });
-
-  const notifs = [];
-  snap.forEach(d => notifs.push({id:d.id,...d.data()}));
-  notifs.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
-  const icons = {like:'❤️',comment:'💬',follow:'👤',route:'🗺️',message:'💬'};
-  notifs.forEach(n => {
-    html += `<div class="notif-item${n.read?'':' notif-unread'}" onclick="notifClick('${n.type}','${n.fromUid||''}')">
-      <div class="notif-icon">${icons[n.type]||'🔔'}</div>
-      <div style="flex:1"><div class="notif-text">${n.text}</div><div class="notif-time">${timeAgo(n.createdAt)}</div></div>
-      ${!n.read?'<div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>':''}
-    </div>`;
-  });
-
-  list.innerHTML = html || '<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bildirim yok 🏍️</div>';
-  setTimeout(() => markRead(), 1500);
-}
-
-function notifClick(type, fromUid) {
-  if (type === 'message' && fromUid) { closeOv('ov-notif'); openChat(fromUid); }
-  else if (fromUid) { closeOv('ov-notif'); viewUserProfile(fromUid); }
-}
-
-async function acceptRequest(reqId, fromUid, fromName) {
-  if (!window.FB || !window.CU) return;
-  const { db, doc, setDoc, deleteDoc } = window.FB;
-  const myUid = window.CU.uid;
-  const connId = [myUid, fromUid].sort().join('_');
-  try { await deleteDoc(doc(db,'friendRequests',reqId)); } catch(e) {}
-  try {
-    await setDoc(doc(db,'connections',connId), {
-      uid1: connId.split('_')[0], uid2: connId.split('_')[1],
-      createdAt: new Date().toISOString()
-    });
-  } catch(e) { toast('Hata: '+e.message); return; }
-  await addNotif(fromUid, 'follow', `<strong>${window.CU.name||'Biri'}</strong> bağlantı isteğini kabul etti ✓`, myUid);
-  playDing();
-  friends.add(fromUid);
-  const el = document.getElementById('req-'+reqId);
-  if (el) {
-    el.style.background='var(--gdim)'; el.style.border='1px solid rgba(22,163,74,.2)';
-    el.innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:4px 0"><div style="font-size:28px">🤝</div><div><div style="font-size:14px;font-weight:600;color:var(--green)">${fromName} ile artık bağlantılısınız!</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Artık mesajlaşabilirsiniz.</div></div></div>`;
-    setTimeout(() => { if(el.parentNode) el.remove(); }, 3000);
-  }
+  allUsers = [];
+  snap.forEach(d => { if (d.data().setupDone && d.id !== myUid) allUsers.push({uid: d.id, ...d.data()}); });
+  window._users = allUsers;
+  // stat güncelle
   const s = document.getElementById('stat-baglantilar');
-  if (s) s.textContent = parseInt(s.textContent||0)+1;
-  toast(`${fromName} ile bağlantı kuruldu! 🤝`);
+  if (s) s.textContent = myConnections.size;
 }
 
-async function declineRequest(reqId) {
-  if (!window.FB) return;
-  const { db, doc, deleteDoc } = window.FB;
-  try { await deleteDoc(doc(db,'friendRequests',reqId)); } catch(e) {}
-  const el = document.getElementById('req-'+reqId);
-  if (el) el.remove();
-  toast('İstek reddedildi');
-}
-
-async function markRead() {
-  document.querySelectorAll('.notif-unread').forEach(n => n.classList.remove('notif-unread'));
-  if (!window.FB||!window.CU) return;
-  const {db,collection,query,where,getDocs,doc,updateDoc} = window.FB;
-  try {
-    const snap = await getDocs(query(collection(db,'notifications'), where('toUid','==',window.CU.uid), where('read','==',false)));
-    snap.forEach(d => updateDoc(doc(db,'notifications',d.id),{read:true}));
-  } catch(e) {}
-}
-
-async function addNotif(toUid, type, text, fromUid) {
-  if (!window.FB||!toUid||toUid===window.CU?.uid) return;
-  const {db,collection,addDoc} = window.FB;
-  try {
-    await addDoc(collection(db,'notifications'), {
-      toUid, type, text, fromUid: fromUid||window.CU?.uid||'',
-      read: false, createdAt: new Date().toISOString()
-    });
-  } catch(e) {}
-}
-
-async function sendNotif(toUid, type, text) { await addNotif(toUid, type, text, window.CU?.uid); }
-
-async function watchNotifBadge() {
-  if (!window.FB||!window.CU) return;
-  const {db,collection,query,where,onSnapshot} = window.FB;
-  const myUid = window.CU.uid;
-  let prevN = -1, prevM = -1;
-
-  // Bildirim badge
-  onSnapshot(query(collection(db,'notifications'), where('toUid','==',myUid), where('read','==',false)), snap => {
-    const b = document.getElementById('notif-badge');
-    if (b) b.style.display = snap.size>0 ? 'block' : 'none';
-    if (prevN >= 0 && snap.size > prevN) playDing();
-    prevN = snap.size;
-  });
-
-  // Arkadaş isteği badge
-  onSnapshot(query(collection(db,'friendRequests'), where('toUid','==',myUid), where('status','==','pending')), snap => {
-    const b = document.getElementById('notif-badge');
-    if (b && snap.size > 0) b.style.display = 'block';
-  });
-
-  // DM badge — unreadFor izle
-  onSnapshot(query(collection(db,'chats'), where('unreadFor','==',myUid)), snap => {
-    const dmb = document.getElementById('dm-badge');
-    if (dmb) dmb.style.display = snap.size>0 ? 'block' : 'none';
-    if (prevM >= 0 && snap.size > prevM) playDing();
-    prevM = snap.size;
-  });
-}
-
-// ── KULLANICI ARA & BAĞLANTI ──
-let allUsers = [], friends = new Set(), pendingRequests = new Set(), viewingUid = null, searchTimer;
-
+// ── ARAMA ──
 function openSearch() {
   openOv('ov-search');
   document.getElementById('search-inp').value = '';
   document.getElementById('search-clear').style.display = 'none';
   document.getElementById('search-suggested').style.display = 'flex';
   document.getElementById('search-results').style.display = 'none';
-  loadSuggested();
+  renderSuggested();
 }
-
 function clearSearch() {
   document.getElementById('search-inp').value = '';
   document.getElementById('search-clear').style.display = 'none';
   document.getElementById('search-suggested').style.display = 'flex';
   document.getElementById('search-results').style.display = 'none';
 }
-
-async function loadSuggested() {
-  if (!window.FB||!window.CU) return;
-  const {db,collection,getDocs} = window.FB;
-  const myUid = window.CU.uid;
-  const snap = await getDocs(collection(db,'users'));
-  allUsers = []; snap.forEach(d => { if(d.data().setupDone&&d.id!==myUid) allUsers.push({uid:d.id,...d.data()}); });
-  window._users = allUsers;
-  friends.clear(); pendingRequests.clear();
-  try {
-    const cSnap = await getDocs(collection(db,'connections'));
-    cSnap.forEach(d => { const data=d.data(); if(data.uid1===myUid) friends.add(data.uid2); else if(data.uid2===myUid) friends.add(data.uid1); });
-    const pSnap = await getDocs(collection(db,'friendRequests'));
-    pSnap.forEach(d => { const data=d.data(); if(data.fromUid===myUid&&data.status==='pending') pendingRequests.add(data.toUid); });
-  } catch(e) {}
-  const myCat=window.CU?.cat||'', myCity=window.CU?.city||'';
-  const scored = [...allUsers].map(u=>({...u,score:(u.cat===myCat?2:0)+(u.city===myCity?1:0)})).sort((a,b)=>b.score-a.score);
+function renderSuggested() {
+  const myCat = window.CU?.cat||'', myCity = window.CU?.city||'';
+  const scored = [...allUsers]
+    .map(u => ({...u, score: (u.cat===myCat?2:0)+(u.city===myCity?1:0)}))
+    .sort((a,b) => b.score - a.score);
   renderUserCards(scored, document.getElementById('suggested-list'));
 }
-
 function searchUsers(val) {
-  document.getElementById('search-clear').style.display = val?'block':'none';
-  if (!val.trim()) { document.getElementById('search-suggested').style.display='flex'; document.getElementById('search-results').style.display='none'; return; }
-  document.getElementById('search-suggested').style.display='none';
-  document.getElementById('search-results').style.display='flex';
+  document.getElementById('search-clear').style.display = val ? 'block' : 'none';
+  if (!val.trim()) {
+    document.getElementById('search-suggested').style.display = 'flex';
+    document.getElementById('search-results').style.display = 'none';
+    return;
+  }
+  document.getElementById('search-suggested').style.display = 'none';
+  document.getElementById('search-results').style.display = 'flex';
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
-    const q = val.toLowerCase().trim();
-    const filtered = allUsers.filter(u => u.name?.toLowerCase().includes(q)||u.username?.toLowerCase().includes(q)||u.bike?.toLowerCase().includes(q)||u.city?.toLowerCase().includes(q));
-    document.getElementById('search-results-label').textContent = filtered.length ? `${filtered.length} sonuç` : 'Sonuç bulunamadı';
-    renderUserCards(filtered, document.getElementById('results-list'));
+    const q = val.toLowerCase();
+    const r = allUsers.filter(u =>
+      u.name?.toLowerCase().includes(q) ||
+      u.username?.toLowerCase().includes(q) ||
+      u.bike?.toLowerCase().includes(q) ||
+      u.city?.toLowerCase().includes(q)
+    );
+    document.getElementById('search-results-label').textContent = r.length ? `${r.length} sonuç` : 'Bulunamadı';
+    renderUserCards(r, document.getElementById('results-list'));
   }, 300);
 }
-
 function renderUserCards(users, container) {
   if (!container) return;
-  if (users.length === 0) { container.innerHTML='<div style="padding:24px 0;text-align:center;color:var(--text3);font-size:13px">Kullanıcı bulunamadı</div>'; return; }
+  if (!users.length) { container.innerHTML = '<div style="padding:24px 0;text-align:center;color:var(--text3)">Kullanıcı bulunamadı</div>'; return; }
   container.innerHTML = users.map(u => {
-    const isF=friends.has(u.uid), isP=pendingRequests.has(u.uid);
-    const btnTxt=isF?'Bağlantı ✓':isP?'İstek Gönderildi ⏳':'+ Ekle';
-    const btnStyle=isF?'background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2)':isP?'background:var(--bg2);color:var(--text3);border:1px solid var(--border)':'background:var(--odim);color:var(--orange);border:1px solid rgba(255,85,0,.2)';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
-      <div onclick="viewUserProfile('${u.uid}')" style="cursor:pointer">${makeAvatar(u.uid,u.name,u.avatarUrl,48)}</div>
-      <div style="flex:1;min-width:0;cursor:pointer" onclick="viewUserProfile('${u.uid}')">
-        <div style="font-size:14px;font-weight:600;color:var(--text)">${u.name||'Sürücü'}</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:1px">${u.username?'@'+u.username+' · ':''}${u.bike||''}</div>
+    const isCon = myConnections.has(u.uid);
+    const isPend = myPending.has(u.uid);
+    const btnTxt = isCon ? '✓ Bağlantı' : isPend ? '⏳ İstek Gönderildi' : '+ Ekle';
+    const btnCls = isCon ? 'background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2)' :
+                   isPend ? 'background:var(--bg2);color:var(--text3);border:1px solid var(--border)' :
+                            'background:var(--odim);color:var(--orange);border:1px solid rgba(255,85,0,.2)';
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div onclick="viewUserProfile('${u.uid}')" style="cursor:pointer;flex-shrink:0">${makeAvatar(u.uid,u.name,u.avatarUrl,48)}</div>
+      <div onclick="viewUserProfile('${u.uid}')" style="flex:1;min-width:0;cursor:pointer">
+        <div style="font-size:14px;font-weight:600">${u.name||'Sürücü'}</div>
+        <div style="font-size:12px;color:var(--text3)">${u.username?'@'+u.username+' · ':''}${u.bike||''}</div>
         <div style="font-size:11px;color:var(--text3)">${u.city||''} ${u.cat?'· '+u.cat:''}</div>
       </div>
-      <button onclick="quickAddFriend('${u.uid}','${u.name}',this)" style="flex-shrink:0;${btnStyle};border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">${btnTxt}</button>
+      <button onclick="sendConnRequest('${u.uid}','${(u.name||'').replace(/'/g,"\'")}',this)"
+        style="flex-shrink:0;${btnCls};border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">
+        ${btnTxt}
+      </button>
     </div>`;
   }).join('');
 }
 
-async function quickAddFriend(uid, name, btn) {
-  if (friends.has(uid)||pendingRequests.has(uid)) return;
-  pendingRequests.add(uid);
-  btn.textContent='İstek Gönderildi ⏳'; btn.style.cssText='background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer';
-  if (window.FB&&window.CU) {
-    const {db,collection,addDoc} = window.FB;
+// ── BAĞLANTI İSTEĞİ GÖNDER ──
+async function sendConnRequest(toUid, toName, btn) {
+  if (myConnections.has(toUid) || myPending.has(toUid)) return;
+  if (!window.FB || !window.CU) return;
+  const {db, collection, addDoc} = window.FB;
+  const cu = window.CU;
+  myPending.add(toUid);
+  if (btn) { btn.textContent = '⏳ İstek Gönderildi'; btn.style.cssText = 'background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;flex-shrink:0'; }
+  try {
     await addDoc(collection(db,'friendRequests'), {
-      fromUid:window.CU.uid, fromName:window.CU.name||'Sürücü',
-      fromAvatar:window.CU.avatarUrl||'', fromBike:window.CU.bike||'',
-      toUid:uid, status:'pending', createdAt:new Date().toISOString()
+      fromUid: cu.uid, fromName: cu.name||'Sürücü',
+      fromAvatar: cu.avatarUrl||'', fromBike: cu.bike||'',
+      toUid, status: 'pending', createdAt: new Date().toISOString()
     });
-    await addNotif(uid, 'friendRequest', `<strong>${window.CU.name||'Biri'}</strong> seninle bağlantı kurmak istiyor 🤝`, window.CU.uid);
+    await pushNotif(toUid, 'request', `<strong>${cu.name||'Biri'}</strong> seninle bağlantı kurmak istiyor 🤝`, cu.uid);
     playDing();
-  }
-  toast(`${name} kişisine bağlantı isteği gönderildi!`);
+    toast(`${toName} kişisine bağlantı isteği gönderildi!`);
+  } catch(e) { toast('Hata: '+e.message); }
 }
 
+// ── BAĞLANTI İSTEĞİ KABUL/RED ──
+async function acceptRequest(reqId, fromUid, fromName) {
+  if (!window.FB || !window.CU) return;
+  const {db, doc, setDoc, deleteDoc} = window.FB;
+  const myUid = window.CU.uid;
+  const cid = connId(myUid, fromUid);
+  try { await deleteDoc(doc(db,'friendRequests',reqId)); } catch(e) {}
+  try {
+    await setDoc(doc(db,'connections',cid), {
+      uid1: cid.split('_')[0], uid2: cid.split('_')[1],
+      createdAt: new Date().toISOString()
+    });
+  } catch(e) { toast('Hata: '+e.message); return; }
+  myConnections.add(fromUid);
+  await pushNotif(fromUid, 'accepted', `<strong>${window.CU.name||'Biri'}</strong> bağlantı isteğini kabul etti ✓`, myUid);
+  playDing();
+  const el = document.getElementById('req-'+reqId);
+  if (el) {
+    el.style.cssText = 'background:var(--gdim);border:1px solid rgba(22,163,74,.2);border-radius:14px;padding:14px;margin-bottom:10px';
+    el.innerHTML = `<div style="display:flex;align-items:center;gap:12px"><div style="font-size:28px">🤝</div><div><div style="font-size:14px;font-weight:600;color:var(--green)">${fromName} ile artık bağlantılısınız!</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Artık mesajlaşabilirsiniz.</div></div></div>`;
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 3000);
+  }
+  const s = document.getElementById('stat-baglantilar');
+  if (s) s.textContent = myConnections.size;
+  toast(`${fromName} ile bağlantı kuruldu! 🤝`);
+}
+async function declineRequest(reqId) {
+  if (!window.FB) return;
+  const {db, doc, deleteDoc} = window.FB;
+  try { await deleteDoc(doc(db,'friendRequests',reqId)); } catch(e) {}
+  const el = document.getElementById('req-'+reqId);
+  if (el) el.remove();
+  toast('İstek reddedildi');
+}
+
+// ── BAĞLANTI KES ──
+async function disconnectFriend(uid) {
+  if (!window.FB || !window.CU) return;
+  const {db, doc, deleteDoc} = window.FB;
+  try { await deleteDoc(doc(db,'connections',connId(window.CU.uid,uid))); }
+  catch(e) { toast('Hata: '+e.message); return; }
+  myConnections.delete(uid);
+  const s = document.getElementById('stat-baglantilar');
+  if (s) s.textContent = myConnections.size;
+  // Profil görünümü güncelle
+  const addBtn = document.getElementById('vp-add-btn');
+  if (addBtn) { addBtn.textContent='+ Bağlantı Kur'; addBtn.style.cssText='background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer'; addBtn.onclick=()=>viewProfile_requestConn(); }
+  document.getElementById('vp-locked')?.style && (document.getElementById('vp-locked').style.display='block');
+  document.getElementById('vp-content')?.style && (document.getElementById('vp-content').style.display='none');
+  document.getElementById('vp-msg-btn')?.style && (document.getElementById('vp-msg-btn').style.display='none');
+  document.getElementById('vp-stats')?.style && (document.getElementById('vp-stats').style.display='none');
+  toast('Bağlantı koparıldı');
+  loadConnectionsList();
+}
+
+// ── KULLANICI PROFİLİ GÖRÜNTÜLE ──
 async function viewUserProfile(uid) {
   viewingUid = uid;
-  const u = allUsers.find(x=>x.uid===uid)||{uid};
-  let isF = friends.has(uid);
-  if (!isF&&window.FB&&window.CU) {
-    try { const {db,doc,getDoc}=window.FB; const cd=await getDoc(doc(db,'connections',[window.CU.uid,uid].sort().join('_'))); if(cd.exists()){isF=true;friends.add(uid);} } catch(e) {}
+  const u = allUsers.find(x=>x.uid===uid) || {uid, name:'Sürücü'};
+  // Bağlantı durumunu kontrol et — önce lokal, yoksa Firestore
+  let isCon = myConnections.has(uid);
+  if (!isCon && window.FB && window.CU) {
+    try {
+      const {db, doc, getDoc} = window.FB;
+      const snap = await getDoc(doc(db,'connections',connId(window.CU.uid,uid)));
+      if (snap.exists()) { isCon = true; myConnections.add(uid); }
+    } catch(e) {}
   }
-  const isP = pendingRequests.has(uid);
+  const isPend = myPending.has(uid);
+  // Doldur
   document.getElementById('vp-av').innerHTML = makeAvatar(u.uid,u.name,u.avatarUrl,72);
-  if(u.coverUrl) document.getElementById('vp-cover').style.background=`url('${u.coverUrl}') center/cover no-repeat`;
-  else document.getElementById('vp-cover').style.background='linear-gradient(135deg,#FF5500,#FF8800)';
-  document.getElementById('vp-name').textContent=u.name||'Sürücü';
-  document.getElementById('vp-username').textContent=u.username?'@'+u.username:'';
-  document.getElementById('vp-bike').textContent=u.bike||'';
-  document.getElementById('vp-bio').textContent=isF?(u.bio||''):'';
-  document.getElementById('vp-cat').textContent=u.cat||'';
-  document.getElementById('vp-city').textContent=u.city||'';
-  const addBtn=document.getElementById('vp-add-btn');
-  if(isF){addBtn.textContent='Bağlantı ✓';addBtn.style.cssText='background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer';addBtn.onclick=()=>confirmDisconnect();}
-  else if(isP){addBtn.textContent='İstek Gönderildi ⏳';addBtn.style.cssText='background:var(--bg2);color:var(--text3);border:1.5px solid var(--border);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer';addBtn.onclick=()=>{};}
-  else{addBtn.textContent='+ Bağlantı Kur';addBtn.style.cssText='background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer';addBtn.onclick=()=>toggleFriend();}
-  const msgBtn=document.getElementById('vp-msg-btn');if(msgBtn)msgBtn.style.display=isF?'block':'none';
-  const statsEl=document.getElementById('vp-stats');if(statsEl)statsEl.style.display=isF?'block':'none';
-  const locked=document.getElementById('vp-locked');if(locked)locked.style.display=isF?'none':'block';
-  const cont=document.getElementById('vp-content');if(cont)cont.style.display=isF?'block':'none';
+  const cover = document.getElementById('vp-cover');
+  if (cover) cover.style.background = u.coverUrl ? `url('${u.coverUrl}') center/cover no-repeat` : 'linear-gradient(135deg,#FF5500,#FF8800)';
+  document.getElementById('vp-name').textContent = u.name||'Sürücü';
+  document.getElementById('vp-username').textContent = u.username?'@'+u.username:'';
+  document.getElementById('vp-bike').textContent = u.bike||'';
+  document.getElementById('document.getElementById('vp-bio').textContent=isCon?(u.bio||''):''
+  document.getElementById('vp-cat').textContent = u.cat||'';
+  document.getElementById('vp-city').textContent = u.city||'';
+  // Butonlar
+  const addBtn = document.getElementById('vp-add-btn');
+  if (addBtn) {
+    if (isCon) {
+      addBtn.textContent='✓ Bağlantı'; addBtn.style.cssText='background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer';
+      addBtn.onclick=()=>confirmAction(`${u.name||'Bu kişi'} ile bağlantıyı koparmak istiyor musun?`,()=>disconnectFriend(uid));
+    } else if (isPend) {
+      addBtn.textContent='⏳ İstek Gönderildi'; addBtn.style.cssText='background:var(--bg2);color:var(--text3);border:1.5px solid var(--border);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer';
+      addBtn.onclick=()=>{};
+    } else {
+      addBtn.textContent='+ Bağlantı Kur'; addBtn.style.cssText='background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer';
+      addBtn.onclick=()=>sendConnRequest(uid,u.name||'',addBtn);
+    }
+  }
+  const msgBtn = document.getElementById('vp-msg-btn');
+  if (msgBtn) msgBtn.style.display = isCon?'block':'none';
+  document.getElementById('vp-stats').style.display = isCon?'block':'none';
+  document.getElementById('vp-locked').style.display = isCon?'none':'block';
+  document.getElementById('vp-content').style.display = isCon?'block':'none';
   openOv('ov-view-profile');
-  if(isF){loadUserPosts(uid);loadUserStats(uid);loadUserRoutes(uid);}
+  if (isCon) { loadUserPosts(uid); loadUserStats(uid); loadUserRoutes(uid); }
 }
+function viewProfile_requestConn() {
+  if (viewingUid) {
+    const u = allUsers.find(x=>x.uid===viewingUid);
+    sendConnRequest(viewingUid,u?.name||'',document.getElementById('vp-add-btn'));
+  }
+}
+function msgFromProfile() { if(viewingUid){closeOv('ov-view-profile');openChat(viewingUid);} }
 
 async function loadUserPosts(uid) {
-  if(!window.FB)return;const{db,collection,query,where,orderBy,getDocs}=window.FB;const el=document.getElementById('vp-posts');
-  try{const snap=await getDocs(query(collection(db,'posts'),where('uid','==',uid),orderBy('createdAt','desc')));if(snap.empty){el.innerHTML='<div style="padding:16px;color:var(--text3);font-size:13px;grid-column:span 3">Henüz gönderi yok</div>';return;}const posts=[];snap.forEach(d=>posts.push(d.data()));el.innerHTML=posts.map(p=>`<div style="aspect-ratio:1;background:${p.photoUrl?'#eee':'var(--bg2)'};overflow:hidden">${p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,20)||'📝'}</div>`}</div>`).join('');}catch(e){el.innerHTML='<div style="padding:16px;color:var(--text3)">Yüklenemedi</div>';}
+  if(!window.FB)return;
+  const {db,collection,query,where,orderBy,getDocs}=window.FB;
+  const el=document.getElementById('vp-posts'); if(!el)return;
+  try {
+    const snap=await getDocs(query(collection(db,'posts'),where('uid','==',uid),orderBy('createdAt','desc')));
+    if(snap.empty){el.innerHTML='<div style="padding:16px;color:var(--text3);font-size:13px;grid-column:span 3">Henüz gönderi yok</div>';return;}
+    const posts=[];snap.forEach(d=>posts.push(d.data()));
+    el.innerHTML=posts.map(p=>`<div style="aspect-ratio:1;background:${p.photoUrl?'#eee':'var(--bg2)'};overflow:hidden">${p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,20)||'📝'}</div>`}</div>`).join('');
+  } catch(e) {}
 }
-
 async function loadUserStats(uid) {
-  if(!window.FB)return;const{db,collection,query,where,getDocs}=window.FB;
-  try{const[tSnap,rSnap,cSnap]=await Promise.all([getDocs(query(collection(db,'tours'),where('uid','==',uid))),getDocs(query(collection(db,'routes'),where('uid','==',uid))),getDocs(collection(db,'connections'))]);
-  const t=document.getElementById('vp-stat-tur');if(t)t.textContent=tSnap.size;
-  const r=document.getElementById('vp-stat-rota');if(r)r.textContent=rSnap.size;
-  let km=0;rSnap.forEach(d=>km+=d.data().distKm||0);const k=document.getElementById('vp-stat-km');if(k)k.textContent=km>=1000?(km/1000).toFixed(1)+'K':Math.round(km);
-  let cc=0;cSnap.forEach(d=>{const data=d.data();if(data.uid1===uid||data.uid2===uid)cc++;});const c=document.getElementById('vp-stat-conn');if(c)c.textContent=cc;}catch(e){}
+  if(!window.FB)return;
+  const {db,collection,query,where,getDocs}=window.FB;
+  try {
+    const [tSnap,rSnap,cSnap]=await Promise.all([
+      getDocs(query(collection(db,'tours'),where('uid','==',uid))),
+      getDocs(query(collection(db,'routes'),where('uid','==',uid))),
+      getDocs(collection(db,'connections'))
+    ]);
+    const t=document.getElementById('vp-stat-tur');if(t)t.textContent=tSnap.size;
+    const r=document.getElementById('vp-stat-rota');if(r)r.textContent=rSnap.size;
+    let km=0;rSnap.forEach(d=>km+=d.data().distKm||0);
+    const k=document.getElementById('vp-stat-km');if(k)k.textContent=km>=1000?(km/1000).toFixed(1)+'K':Math.round(km);
+    let cc=0;cSnap.forEach(d=>{const v=d.data();if(v.uid1===uid||v.uid2===uid)cc++;});
+    const c=document.getElementById('vp-stat-conn');if(c)c.textContent=cc;
+  } catch(e) {}
 }
-
 async function loadUserRoutes(uid) {
-  if(!window.FB)return;const{db,collection,query,where,orderBy,getDocs}=window.FB;const el=document.getElementById('vp-routes');if(!el)return;
-  try{const snap=await getDocs(query(collection(db,'routes'),where('uid','==',uid),orderBy('createdAt','desc')));if(snap.empty){el.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0">Henüz rota yok</div>';return;}const routes=[];snap.forEach(d=>routes.push(d.data()));el.innerHTML=routes.slice(0,4).map(r=>`<div class="rcard"><div class="rthumb"><svg width="24" height="24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><div class="rkm">${r.distKm} km</div></div><div class="rinfo"><div class="rname">${r.name||'Rota'}</div><div class="rdate">${timeAgo(r.createdAt)}</div></div></div>`).join('');}catch(e){}
+  if(!window.FB)return;
+  const {db,collection,query,where,orderBy,getDocs}=window.FB;
+  const el=document.getElementById('vp-routes');if(!el)return;
+  try {
+    const snap=await getDocs(query(collection(db,'routes'),where('uid','==',uid),orderBy('createdAt','desc')));
+    if(snap.empty){el.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0">Henüz rota yok</div>';return;}
+    const routes=[];snap.forEach(d=>routes.push(d.data()));
+    el.innerHTML=routes.slice(0,4).map(r=>`<div class="rcard"><div class="rthumb"><svg width="24" height="24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><div class="rkm">${r.distKm} km</div></div><div class="rinfo"><div class="rname">${r.name||'Rota'}</div><div class="rdate">${timeAgo(r.createdAt)}</div></div></div>`).join('');
+  } catch(e) {}
 }
 
-function toggleFriend(){if(!viewingUid)return;const u=allUsers.find(x=>x.uid===viewingUid);if(!u)return;quickAddFriend(viewingUid,u.name,document.getElementById('vp-add-btn'));}
-function confirmDisconnect(){if(!viewingUid)return;const u=allUsers.find(x=>x.uid===viewingUid);confirmAction(`${u?.name||'Bu kişi'} ile bağlantıyı koparmak istiyor musun?`,()=>disconnectFriend(viewingUid));}
-
-async function disconnectFriend(uid) {
-  if(!window.FB||!window.CU)return;
-  const{db,doc,deleteDoc}=window.FB;
-  const connId=[window.CU.uid,uid].sort().join('_');
-  try{await deleteDoc(doc(db,'connections',connId));}catch(e){toast('Hata: '+e.message);return;}
-  friends.delete(uid);
-  const addBtn=document.getElementById('vp-add-btn');
-  if(addBtn){addBtn.textContent='+ Bağlantı Kur';addBtn.style.cssText='background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer';addBtn.onclick=()=>toggleFriend();}
-  const locked=document.getElementById('vp-locked');if(locked)locked.style.display='block';
-  const cont=document.getElementById('vp-content');if(cont)cont.style.display='none';
-  const msgBtn=document.getElementById('vp-msg-btn');if(msgBtn)msgBtn.style.display='none';
-  const statsEl=document.getElementById('vp-stats');if(statsEl)statsEl.style.display='none';
-  const s=document.getElementById('stat-baglantilar');if(s)s.textContent=Math.max(0,parseInt(s.textContent||0)-1);
-  toast('Bağlantı koparıldı');loadUsers();
-}
-
-function msgFromProfile(){if(viewingUid){closeOv('ov-view-profile');openChat(viewingUid);}}
-
-// ── BAĞLANTILAR ──
-async function openConnections(){openOv('ov-connections');loadConnectionsList();}
-
+// ── BAĞLANTILAR EKRANI ──
+async function openConnections() { openOv('ov-connections'); loadConnectionsList(); }
 async function loadConnectionsList() {
   if(!window.FB||!window.CU)return;
-  const{db,collection,getDocs}=window.FB;const myUid=window.CU.uid;const list=document.getElementById('connections-list');
-  try{
+  const {db,collection,getDocs}=window.FB;
+  const myUid=window.CU.uid;
+  const list=document.getElementById('connections-list');
+  if(!list)return;
+  try {
     const snap=await getDocs(collection(db,'connections'));
-    const uids=[];snap.forEach(d=>{const data=d.data();if(data.uid1===myUid)uids.push(data.uid2);else if(data.uid2===myUid)uids.push(data.uid1);});
-    const statEl=document.getElementById('stat-baglantilar');if(statEl)statEl.textContent=uids.length;
-    if(uids.length===0){list.innerHTML='<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">🔍</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div></div>';return;}
+    const uids=[];
+    snap.forEach(d=>{const v=d.data();if(v.uid1===myUid)uids.push(v.uid2);else if(v.uid2===myUid)uids.push(v.uid1);});
+    const s=document.getElementById('stat-baglantilar');if(s)s.textContent=uids.length;
+    myConnections.clear();uids.forEach(u=>myConnections.add(u));
+    if(!uids.length){list.innerHTML='<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">🔍</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div><div style="font-size:13px">Sürücüleri bulmak için büyüteç ikonunu kullan</div></div>';return;}
     const connUsers=allUsers.filter(u=>uids.includes(u.uid));
-    list.innerHTML=connUsers.map(u=>`<div class="conn-item" id="conn-item-${u.uid}" onclick="closeOv('ov-connections');viewUserProfile('${u.uid}')">${makeAvatar(u.uid,u.name,u.avatarUrl,44)}<div class="conn-info"><div class="conn-name">${u.name||'Sürücü'}</div><div class="conn-bike">${u.bike||''} ${u.city?'· '+u.city:''}</div></div><div style="display:flex;gap:6px;align-items:center"><button onclick="event.stopPropagation();closeOv('ov-connections');openChat('${u.uid}')" class="conn-btn add">Mesaj</button><button onclick="event.stopPropagation();confirmAction('Bu bağlantıyı çıkartmak istiyor musun?',()=>disconnectFromList('${u.uid}'))" style="width:32px;height:32px;background:var(--bg2);color:var(--text3);border:1.5px solid var(--border);border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button></div></div>`).join('');
+    list.innerHTML=connUsers.map(u=>`<div class="conn-item" id="ci-${u.uid}" onclick="closeOv('ov-connections');viewUserProfile('${u.uid}')">
+      ${makeAvatar(u.uid,u.name,u.avatarUrl,44)}
+      <div class="conn-info"><div class="conn-name">${u.name||'Sürücü'}</div><div class="conn-bike">${u.bike||''} ${u.city?'· '+u.city:''}</div></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button onclick="event.stopPropagation();closeOv('ov-connections');openChat('${u.uid}')" class="conn-btn add">Mesaj</button>
+        <button onclick="event.stopPropagation();confirmAction('Bu bağlantıyı çıkartmak istiyor musun?',()=>disconnectFromList('${u.uid}'))" style="width:32px;height:32px;background:var(--bg2);color:var(--text3);border:1.5px solid var(--border);border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+    </div>`).join('');
   }catch(e){list.innerHTML='<div style="padding:32px 0;text-align:center;color:var(--text3)">Yüklenemedi</div>';}
 }
-
 async function disconnectFromList(uid) {
   await disconnectFriend(uid);
-  const el=document.getElementById('conn-item-'+uid);if(el)el.remove();
+  document.getElementById('ci-'+uid)?.remove();
   const list=document.getElementById('connections-list');
   if(list&&!list.querySelector('.conn-item'))list.innerHTML='<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">🔍</div><div style="font-weight:600;color:var(--text)">Henüz bağlantın yok</div></div>';
 }
 
+// ── DM LİSTESİ ──
+function openDM(){openOv('ov-dm');loadDMList();}
+async function loadDMList() {
+  if(!window.FB||!window.CU)return;
+  const {db,collection,getDocs}=window.FB;
+  const myUid=window.CU.uid;
+  const list=document.getElementById('dm-list');if(!list)return;
+  const connUsers=allUsers.filter(u=>myConnections.has(u.uid));
+  if(!connUsers.length){list.innerHTML='<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">💬</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div><div style="font-size:13px">🔍 ile sürücü bul, bağlantı kur, mesajlaş</div></div>';return;}
+  // Chat önizlemesi
+  const previews={};
+  try {
+    const snap=await getDocs(collection(db,'chats'));
+    snap.forEach(d=>{const v=d.data();if(!v.participants?.includes(myUid))return;const other=v.participants.find(p=>p!==myUid);if(other)previews[other]={msg:v.lastMsg||'',time:v.updatedAt||'',unread:v.unreadFor===myUid};});
+  } catch(e){}
+  const sorted=[...connUsers].sort((a,b)=>(previews[b.uid]?.time||'').localeCompare(previews[a.uid]?.time||''));
+  const totalUnread=Object.values(previews).filter(p=>p.unread).length;
+  const tb=document.getElementById('dm-total-badge');if(tb){tb.textContent=totalUnread||'';tb.style.display=totalUnread?'block':'none';}
+  list.innerHTML=sorted.map(u=>{
+    const pv=previews[u.uid];const unread=pv?.unread;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="openChat('${u.uid}')">
+      <div onclick="event.stopPropagation();viewUserProfile('${u.uid}')" style="flex-shrink:0">${makeAvatar(u.uid,u.name,u.avatarUrl,46)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:14px;font-weight:${unread?'700':'600'}">${u.name||'Sürücü'}</div>
+          ${pv?.time?`<div style="font-size:10px;color:${unread?'#CA8A04':'var(--text3)'}">${timeAgo(pv.time)}</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
+          <div style="font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:220px;${unread?'color:#92400E;font-weight:600;background:#FEF9C3;padding:1px 6px;border-radius:6px':'color:var(--text3)'}">${pv?.msg||u.bike||''}</div>
+          ${unread?'<div style="width:10px;height:10px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>':''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
+// ── SOHBET ──
+function chatDocId(a,b){return[a,b].sort().join('_');}
+async function openChat(uid) {
+  if(!window.FB||!window.CU)return;
+  // Bağlantı kontrolü
+  if(!myConnections.has(uid)){
+    const {db,doc,getDoc}=window.FB;
+    try{const snap=await getDoc(doc(db,'connections',connId(window.CU.uid,uid)));if(snap.exists())myConnections.add(uid);else{toast('Mesajlaşmak için bağlantı kurman gerekiyor 🔒');return;}}catch(e){toast('Bağlantı kontrolü hatası');return;}
+  }
+  const u=allUsers.find(x=>x.uid===uid)||{uid,name:'Sürücü'};
+  chatPartner=u;
+  document.getElementById('chat-av').innerHTML=makeAvatar(u.uid,u.name,u.avatarUrl,36);
+  document.getElementById('chat-name').textContent=u.name||'Sürücü';
+  document.getElementById('chat-sub').textContent=u.bike||'';
+  document.getElementById('chat-msgs').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Yükleniyor...</div>';
+  closeOv('ov-dm');closeOv('ov-connections');
+  openOv('ov-chat');
+  listenChat(uid);
+}
+async function listenChat(partnerUid) {
+  if(chatUnsub)chatUnsub();
+  if(!window.FB||!window.CU)return;
+  const cid=chatDocId(window.CU.uid,partnerUid);
+  const {db,collection,query,orderBy,onSnapshot,doc,updateDoc}=window.FB;
+  let prevCount=0;
+  chatUnsub=onSnapshot(query(collection(db,'chats',cid,'messages'),orderBy('createdAt','asc')),async snap=>{
+    const msgs=document.getElementById('chat-msgs');
+    if(snap.empty){msgs.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">İlk mesajı sen yaz!</div>';prevCount=0;return;}
+    msgs.innerHTML='';
+    const myUid=window.CU?.uid;const toRead=[];
+    snap.forEach(d=>{
+      const m=d.data();const isMe=m.senderUid===myUid;
+      const el=document.createElement('div');el.className=`msg ${isMe?'me':'them'}`;
+      const time=m.createdAt?new Date(m.createdAt).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):'';
+      const tick=isMe?`<div style="display:flex;justify-content:flex-end;align-items:center;gap:2px;margin-top:2px"><svg width="14" height="9" viewBox="0 0 16 10" fill="none"><path d="M1 5l3 3 5-7" stroke="${m.read?'#3B82F6':'rgba(255,255,255,0.5)'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>${m.read?'<path d="M5 5l3 3 5-7" stroke="#3B82F6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>';''}</svg><span style="font-size:10px;color:${m.read?'#3B82F6':'rgba(255,255,255,0.5)'}">${time}</span></div>`:`<div style="font-size:10px;color:rgba(0,0,0,0.4);margin-top:2px">${time}</div>`;
+      el.innerHTML=m.photoUrl?`<img src="${m.photoUrl}" style="width:100%;max-width:200px;border-radius:10px;display:block">${tick}`:`${m.text}${tick}`;
+      msgs.appendChild(el);
+      if(!isMe&&!m.read)toRead.push(d.id);
+    });
+    msgs.scrollTop=msgs.scrollHeight;
+    if(toRead.length){toRead.forEach(id=>updateDoc(doc(db,'chats',cid,'messages',id),{read:true}).catch(()=>{}));updateDoc(doc(db,'chats',cid),{unreadFor:null}).catch(()=>{});document.getElementById('dm-badge').style.display='none';}
+    if(snap.size>prevCount&&prevCount>0){const last=snap.docs[snap.size-1].data();if(last.senderUid!==myUid)playDing();}
+    prevCount=snap.size;
+  });
+}
+async function sendMsg(){const inp=document.getElementById('chat-inp');const text=inp.value.trim();if(!text||!chatPartner||!window.CU)return;inp.value='';await _sendMsg({text,photoUrl:''});}
+async function sendPhoto(inp){const f=inp.files[0];if(!f||!chatPartner)return;toast('Fotoğraf gönderiliyor...');const url=await uploadCloud(f);await _sendMsg({text:'',photoUrl:url});}
+async function _sendMsg(content) {
+  const myUid=window.CU.uid;
+  const cid=chatDocId(myUid,chatPartner.uid);
+  const {db,collection,addDoc,doc,setDoc}=window.FB;
+  const preview=content.text?content.text.substring(0,60):'📷 Fotoğraf';
+  await addDoc(collection(db,'chats',cid,'messages'),{senderUid:myUid,senderName:window.CU.name||'Sürücü',text:content.text,photoUrl:content.photoUrl,read:false,createdAt:new Date().toISOString()});
+  await setDoc(doc(db,'chats',cid),{participants:[myUid,chatPartner.uid],lastMsg:preview,updatedAt:new Date().toISOString(),unreadFor:chatPartner.uid},{merge:true});
+  // BİLDİRİM: mesaj kutusuna düşsün
+  await pushNotif(chatPartner.uid,'message',`💬 <strong>${window.CU.name||'Biri'}</strong>: ${preview}`,myUid);
+}
 
+// ── BİLDİRİMLER ──
+async function pushNotif(toUid,type,text,fromUid) {
+  if(!window.FB||!toUid||toUid===window.CU?.uid)return;
+  const {db,collection,addDoc}=window.FB;
+  try{await addDoc(collection(db,'notifications'),{toUid,type,text,fromUid:fromUid||window.CU?.uid||'',read:false,createdAt:new Date().toISOString()});}catch(e){}
+}
+async function sendNotif(toUid,type,text){await pushNotif(toUid,type,text,window.CU?.uid);}
 
+function openDM_notif(){closeOv('ov-notif');openOv('ov-dm');loadDMList();}
+
+async function openNotifs(){openOv('ov-notif');document.getElementById('notif-badge').style.display='none';loadNotifs();}
+async function loadNotifs() {
+  if(!window.FB||!window.CU)return;
+  const {db,collection,query,where,getDocs,limit}=window.FB;
+  let snap;try{snap=await getDocs(query(collection(db,'notifications'),where('toUid','==',window.CU.uid),limit(40)));}catch(e){snap={empty:true,forEach:()=>{}};}
+  let requests=[];try{const r=await getDocs(query(collection(db,'friendRequests'),where('toUid','==',window.CU.uid),where('status','==','pending')));r.forEach(d=>requests.push({id:d.id,...d.data()}));}catch(e){}
+  const list=document.getElementById('notif-list');let html='';
+  requests.forEach(r=>{
+    html+=`<div style="background:var(--odim);border:1px solid rgba(255,85,0,.15);border-radius:14px;padding:14px;margin-bottom:10px" id="req-${r.id}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div onclick="closeOv('ov-notif');viewUserProfile('${r.fromUid}')" style="cursor:pointer">${makeAvatar(r.fromUid,r.fromName,r.fromAvatar,42)}</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600"><strong>${r.fromName}</strong> seninle bağlantı kurmak istiyor 🤝</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${r.fromBike||''} · ${timeAgo(r.createdAt)}</div></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="acceptRequest('${r.id}','${r.fromUid}','${r.fromName}')" style="flex:1;background:var(--orange);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Kabul Et</button>
+        <button onclick="declineRequest('${r.id}')" style="flex:1;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Reddet</button>
+      </div></div>`;
+  });
+  const notifs=[];snap.forEach(d=>notifs.push({id:d.id,...d.data()}));
+  notifs.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  notifs.forEach(n=>{
+    const icon={like:'❤️',comment:'💬',follow:'👤',route:'🗺️',message:'💬',request:'🤝',accepted:'✅'}[n.type]||'🔔';
+    const click=n.type==='message'?`openDM_notif()`:(n.fromUid?`closeOv('ov-notif');viewUserProfile('${n.fromUid}')`:'');
+    html+=`<div class="notif-item${n.read?'':' notif-unread'}" onclick="${click}" style="${click?'cursor:pointer':''}">
+      <div class="notif-icon">${icon}</div>
+      <div style="flex:1"><div class="notif-text">${n.text}</div><div class="notif-time">${timeAgo(n.createdAt)}</div></div>
+      ${!n.read?'<div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>':''}
+    </div>`;
+  });
+  list.innerHTML=html||'<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bildirim yok 🏍️</div>';
+  setTimeout(()=>markRead(),1500);
+}
+async function markRead() {
+  document.querySelectorAll('.notif-unread').forEach(n=>n.classList.remove('notif-unread'));
+  if(!window.FB||!window.CU)return;
+  const {db,collection,query,where,getDocs,doc,updateDoc}=window.FB;
+  try{const snap=await getDocs(query(collection(db,'notifications'),where('toUid','==',window.CU.uid),where('read','==',false)));snap.forEach(d=>updateDoc(doc(db,'notifications',d.id),{read:true}));}catch(e){}
+}
+async function watchNotifBadge() {
+  if(!window.FB||!window.CU)return;
+  const {db,collection,query,where,onSnapshot}=window.FB;
+  const myUid=window.CU.uid;
+  let pN=-1,pM=-1;
+  // Bildirim badge
+  onSnapshot(query(collection(db,'notifications'),where('toUid','==',myUid),where('read','==',false)),snap=>{
+    const b=document.getElementById('notif-badge');if(b)b.style.display=snap.size>0?'block':'none';
+    if(pN>=0&&snap.size>pN)playDing();pN=snap.size;
+  });
+  // Arkadaş isteği badge
+  onSnapshot(query(collection(db,'friendRequests'),where('toUid','==',myUid),where('status','==','pending')),snap=>{
+    if(snap.size>0){const b=document.getElementById('notif-badge');if(b)b.style.display='block';}
+  });
+  // DM badge
+  onSnapshot(query(collection(db,'chats'),where('unreadFor','==',myUid)),snap=>{
+    const b=document.getElementById('dm-badge');if(b)b.style.display=snap.size>0?'block':'none';
+    if(pM>=0&&snap.size>pM)playDing();pM=snap.size;
+  });
+}
+
+// ── HARITA & GPS ──
+let map=null,mapInited=false;
+let recOn=false,recPath=[],recPoly=null,recMarker=null,recWatch=null,recStart=null,recDist=0,recLast=null;
+let liveMarkers={},liveInterval=null;
+function initMap(){
+  if(mapInited){setTimeout(()=>map&&map.invalidateSize(),100);return;}
+  const el=document.getElementById('map-el');if(!el)return;
+  map=L.map('map-el',{zoomControl:true,attributionControl:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+  map.setView([41.015,28.979],12);
+  mapInited=true;loadRoutesFeed();startLive();
+}
+function toggleRec(){recOn?stopRec():startRec();}
+function startRec(){
+  if(!navigator.geolocation){toast('GPS desteklenmiyor');return;}
+  recOn=true;recPath=[];recDist=0;recLast=null;recStart=Date.now();
+  document.getElementById('rec-btn').textContent='⏹ Durdur';document.getElementById('rec-btn').style.background='var(--red)';
+  document.getElementById('rec-banner').classList.add('show');
+  recWatch=navigator.geolocation.watchPosition(pos=>{
+    const{latitude:lat,longitude:lng,speed}=pos.coords;
+    recPath.push([lat,lng]);
+    if(recLast)recDist+=calcDist(recLast[0],recLast[1],lat,lng);
+    recLast=[lat,lng];
+    if(!recPoly){recPoly=L.polyline([[lat,lng]],{color:'#FF5500',weight:5}).addTo(map);}else recPoly.addLatLng([lat,lng]);
+    if(!recMarker){recMarker=L.circleMarker([lat,lng],{radius:10,color:'white',fillColor:'#FF5500',fillOpacity:1,weight:3}).addTo(map);}else recMarker.setLatLng([lat,lng]);
+    map.panTo([lat,lng]);
+    const secs=Math.floor((Date.now()-recStart)/1000),mins=Math.floor(secs/60);
+    document.getElementById('rec-stats').textContent=`${(recDist/1000).toFixed(1)} km · ${mins} dk · ${Math.round((speed||0)*3.6)} km/h`;
+    saveLive(lat,lng,(speed||0)*3.6);
+  },err=>{if(err.code===1)toast('GPS izni gerekli!');},{enableHighAccuracy:true,maximumAge:2000});
+}
+function stopRec(){
+  if(recWatch)navigator.geolocation.clearWatch(recWatch);
+  recOn=false;document.getElementById('rec-btn').textContent='🔴 Kaydet';document.getElementById('rec-btn').style.background='var(--orange)';
+  document.getElementById('rec-banner').classList.remove('show');clearLive();
+  if(recPath.length<2){toast('Çok kısa rota');return;}
+  document.getElementById('sr-km').textContent=(recDist/1000).toFixed(1)+' km';
+  document.getElementById('sr-min').textContent=Math.floor((Date.now()-recStart)/60000)+' dk';
+  document.getElementById('sr-name').value='';openModal('mod-route');
+}
+async function saveRoute(){
+  const name=document.getElementById('sr-name').value.trim()||'Rotam';
+  const cu=window.CU||{};
+  if(window.FB){const {db,collection,addDoc}=window.FB;await addDoc(collection(db,'routes'),{uid:cu.uid||'',userName:cu.name||'Sürücü',userBike:cu.bike||'',name,path:recPath,distKm:parseFloat((recDist/1000).toFixed(1)),durationMins:Math.floor((Date.now()-recStart)/60000),createdAt:new Date().toISOString()});}
+  closeModal('mod-route');toast('Rota paylaşıldı! 🗺️');loadRoutesFeed();loadMyRoutes();
+}
+async function loadRoutesFeed(){
+  if(!window.FB||!map)return;
+  const {db,collection,query,orderBy,getDocs,limit}=window.FB;
+  const snap=await getDocs(query(collection(db,'routes'),orderBy('createdAt','desc'),limit(30)));
+  const el=document.getElementById('routes-feed');
+  if(snap.empty){el.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:13px">Henüz rota yok — ilk rotayı sen paylaş!</div>';return;}
+  const routes=[];snap.forEach(d=>routes.push({id:d.id,...d.data()}));
+  const colors=['#2563EB','#16A34A','#8B5CF6','#F59E0B','#EC4899'];
+  routes.forEach(r=>{if(r.path&&r.path.length>1){const c=colors[r.uid?.charCodeAt(0)%colors.length]||'#2563EB';L.polyline(r.path,{color:c,weight:3,opacity:.7}).bindPopup(`<strong>${r.userName}</strong><br>${r.name}<br>${r.distKm} km`).addTo(map);}});
+  el.innerHTML=routes.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+    <div onclick="viewUserProfile('${r.uid}')" style="cursor:pointer">${makeAvatar(r.uid,r.userName,null,34)}</div>
+    <div style="flex:1;cursor:pointer" onclick="viewUserProfile('${r.uid}')"><div style="font-size:13px;font-weight:600">${r.name}</div><div style="font-size:11px;color:var(--text3)">${r.userName} · ${r.distKm} km</div></div>
+    ${r.uid===window.CU?.uid?`<button onclick="deleteRoute('${r.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:4px">✕</button>`:''}
+  </div>`).join('');
+}
+async function loadMyRoutes(){
+  if(!window.FB||!window.CU)return;
+  const {db,collection,query,where,orderBy,getDocs}=window.FB;
+  const snap=await getDocs(query(collection(db,'routes'),where('uid','==',window.CU.uid),orderBy('createdAt','desc')));
+  const el=document.getElementById('my-routes');if(!el)return;
+  if(snap.empty){el.innerHTML='<div class="empty-state" style="padding:16px 24px"><div class="empty-sub">Henüz rota paylaşmadın 🗺️</div></div>';return;}
+  const routes=[];snap.forEach(d=>routes.push({id:d.id,...d.data()}));
+  let totalKm=routes.reduce((s,r)=>s+(r.distKm||0),0);
+  const tkm=document.getElementById('stat-km');if(tkm)tkm.textContent=totalKm>=1000?(totalKm/1000).toFixed(1)+'K':Math.round(totalKm);
+  el.innerHTML=`<div class="routes-grid">${routes.slice(0,4).map(r=>`<div class="rcard"><div class="rthumb"><svg width="28" height="28" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><div class="rkm">${r.distKm} km</div></div><div class="rinfo"><div class="rname">${r.name||'Rota'}</div><div class="rdate">${timeAgo(r.createdAt)}</div></div></div>`).join('')}</div>`;
+}
+async function saveLive(lat,lng,speed){if(!window.FB||!window.CU)return;const {db,doc,setDoc}=window.FB;await setDoc(doc(db,'live',window.CU.uid),{uid:window.CU.uid,name:window.CU.name||'',lat,lng,speed:Math.round(speed),updatedAt:new Date().toISOString()});}
+async function clearLive(){if(!window.FB||!window.CU)return;const {db,doc,deleteDoc}=window.FB;try{await deleteDoc(doc(db,'live',window.CU.uid));}catch(e){}}
+function startLive(){if(liveInterval)return;liveInterval=setInterval(fetchLive,8000);}
+async function fetchLive(){
+  if(!window.FB||!map)return;
+  const {db,collection,getDocs}=window.FB;
+  const snap=await getDocs(collection(db,'live'));const myUid=window.CU?.uid;
+  snap.forEach(d=>{const u=d.data();if(u.uid===myUid)return;
+    if(liveMarkers[u.uid])liveMarkers[u.uid].setLatLng([u.lat,u.lng]);
+    else liveMarkers[u.uid]=L.circleMarker([u.lat,u.lng],{radius:9,color:'white',fillColor:'#16A34A',fillOpacity:1,weight:2}).bindPopup(`🏍️ ${u.name} · ${u.speed} km/h`).addTo(map);
+  });
+}
+function calcDist(a,b,c,d){const R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 
 // ── @ ETİKETLEME ──
 function checkMention(inp, postId) {
@@ -2053,6 +2083,7 @@ function hideMention(postId) {
   if (box) box.style.display = 'none';
 }
 
+
 // ── SES ──
 let audioCtx = null;
 function playDing() {
@@ -2070,11 +2101,13 @@ function playDing() {
   } catch(e) {}
 }
 
+
 // ── UTILS ──
 let toastT;
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
 function timeAgo(iso){if(!iso)return'';const d=(Date.now()-new Date(iso).getTime())/1000;if(d<60)return'Az önce';if(d<3600)return Math.floor(d/60)+' dk önce';if(d<86400)return Math.floor(d/3600)+' sa önce';return Math.floor(d/86400)+' gün önce';}
 function filterCat(el){document.querySelectorAll('.catscrl .cat').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+
 
 // ── PROFİL DÜZENLE ──
 let editCoverFile = null;
@@ -2144,6 +2177,7 @@ async function uploadCover(inp) {
   window.fbSaveProfile(data);
   toast('Arka plan güncellendi ✓');
 }
+
 
 // ── İLANLAR ──
 let listingPhotos = [];
@@ -2284,6 +2318,7 @@ async function deleteListing(id) {
   });
 }
 
+
 // ── ONAY MODALI ──
 let confirmCallback = null;
 function confirmAction(msg, cb) {
@@ -2296,6 +2331,7 @@ function confirmAction(msg, cb) {
   };
   openModal('mod-confirm');
 }
+
 
 
 
@@ -2403,6 +2439,7 @@ async function deleteStory(){
   renderStoryRow();
 }
 
+
 // ── SİLME BUTONLARI ──
 async function deletePost(postId){
   confirmAction('Bu gönderiyi silmek istiyor musun?', async () => {
@@ -2426,6 +2463,7 @@ async function deleteRoute(routeId){
   });
 }
 
+
 // ── PROFİL BİRİKİMİ ──
 async function loadProfilePosts(){
   if(!window.FB||!window.CU) return;
@@ -2444,6 +2482,7 @@ async function loadProfilePosts(){
     </div>
   `).join('')}</div>`;
 }
+
 
 
 </script>
