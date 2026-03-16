@@ -249,7 +249,6 @@ select.inp option{background:white}
 .maint-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
 .maint-card.due{border-color:rgba(220,38,38,.4);background:var(--rdim)}
 .maint-card.soon{border-color:rgba(234,179,8,.4);background:rgba(234,179,8,.05)}
-
 .ni{position:relative}
 .ni-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#FF5500;color:white;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg);line-height:1;pointer-events:none;animation:badge-pop .25s cubic-bezier(.36,.07,.19,.97)}
 @keyframes badge-pop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
@@ -331,10 +330,10 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <div style="font-size:14px;color:var(--text3)">Dil seçin / Select language</div>
     <div style="display:flex;gap:12px;width:100%">
       <button class="btn btn-or" id="btn-tr" onclick="selLang('tr')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px">
-        <span style="font-size:28px">????</span><span>Türkçe</span>
+        <span style="font-size:28px">🇹🇷</span><span>Türkçe</span>
       </button>
       <button class="btn btn-ghost" id="btn-en" onclick="selLang('en')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px">
-        <span style="font-size:28px">????</span><span>English</span>
+        <span style="font-size:28px">🇬🇧</span><span>English</span>
       </button>
     </div>
     <button class="btn btn-or" onclick="show('s-welcome');startSlides()">Devam Et →</button>
@@ -387,7 +386,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   <div class="setup-hdr"><div class="setup-back" onclick="show('s-auth')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="setup-step">1 / 3</div></div>
   <div class="setup-prog"><div class="setup-fill" style="width:33%"></div></div>
   <div class="scrl"><div class="setup-body">
-    <div class="setup-title">Seni Tanıyalım ??</div>
+    <div class="setup-title">Seni Tanıyalım 👋</div>
     <div class="setup-sub">MOTO'ya hoş geldin!</div>
     <div class="lbl">Adın Soyadın</div><input class="inp" style="margin-bottom:14px" placeholder="Adın Soyadın" id="s1-name">
     <div class="lbl">Kullanıcı Adı</div>
@@ -406,7 +405,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   <div class="setup-hdr"><div class="setup-back" onclick="show('s-s1')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="setup-step">2 / 3</div></div>
   <div class="setup-prog"><div class="setup-fill" style="width:66%"></div></div>
   <div class="scrl"><div class="setup-body">
-    <div class="setup-title">Motorun Hangisi? ??️</div>
+    <div class="setup-title">Motorun Hangisi? 🏍️</div>
     <div class="setup-sub">Doğru topluluğa seni yönlendirelim.</div>
     <div class="lbl">Marka</div>
     <select class="inp" style="margin-bottom:14px" id="s2-brand" onchange="fillModels()">
@@ -428,18 +427,18 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   <div class="setup-hdr"><div class="setup-back" onclick="show('s-s2')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="setup-step">3 / 3</div></div>
   <div class="setup-prog"><div class="setup-fill" style="width:100%"></div></div>
   <div class="scrl"><div class="setup-body">
-    <div class="setup-title">Son Adım ??</div>
+    <div class="setup-title">Son Adım 🎯</div>
     <div class="setup-sub">İstersen şimdi atla.</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
       <div class="card" style="padding:14px;cursor:pointer" onclick="toast('Kimlik doğrulama yakında!')">
         <div style="display:flex;align-items:center;gap:12px">
-          <span style="font-size:24px">????</span>
+          <span style="font-size:24px">🏍️</span>
           <div style="flex:1"><div style="font-size:14px;font-weight:600">Kimliğini Doğrula</div><div style="font-size:12px;color:var(--text3)">✓ rozeti kazan</div></div>
           <svg width="16" height="16" fill="none" stroke="var(--text3)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
     </div>
-    <button class="btn btn-or" onclick="finishSetup()">Profile Başla ??️</button>
+    <button class="btn btn-or" onclick="finishSetup()">Profile Başla →</button>
     <button class="btn btn-out" style="margin-top:10px" onclick="finishSetup()">Şimdi Değil</button>
   </div></div>
 </div>
@@ -488,30 +487,12 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <span>Kaydediliyor...</span>
       <span id="rec-stats" style="margin-left:auto;opacity:.85;font-size:11px"></span>
     </div>
+    <div id="map-el"></div>
     <div id="map-el" style="flex:1;min-height:0"></div>
-
-    <!-- Alt panel: Rotalar / Servisler tabları -->
-    <div class="routes-list" style="height:220px;display:flex;flex-direction:column">
-      <!-- Tab başlıkları -->
-      <div style="display:flex;border-bottom:1px solid var(--border);flex-shrink:0">
-        <button id="panel-tab-rotalar" onclick="switchPanelTab('rotalar')" style="flex:1;padding:9px;font-size:12px;font-weight:700;font-family:inherit;border:none;cursor:pointer;background:none;color:var(--orange);border-bottom:2px solid var(--orange)">Paylaşılan Rotalar</button>
-        <button id="panel-tab-servisler" onclick="switchPanelTab('servisler')" style="flex:1;padding:9px;font-size:12px;font-weight:600;font-family:inherit;border:none;cursor:pointer;background:none;color:var(--text3);border-bottom:2px solid transparent">Servis Ağı</button>
-      </div>
-      <!-- Rota listesi -->
-      <div id="panel-rotalar" style="flex:1;overflow-y:auto">
-        <div id="routes-feed" style="padding:0 14px 14px"></div>
-      </div>
-      <!-- Servis listesi -->
-      <div id="panel-servisler" style="display:none;flex:1;overflow-y:auto">
-        <div id="servis-list" style="padding:0 14px 14px">
-          <div style="padding:24px 0;text-align:center;color:var(--text3);font-size:13px">
-            Yakındaki servisleri yüklemek için<br>
-            <button onclick="loadServisPanel()" style="margin-top:10px;background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 20px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Yakınımdaki Servisleri Bul</button>
-          </div>
-        </div>
-      </div>
+    <div class="routes-list">
+      <div style="padding:8px 14px 4px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">Paylaşılan Rotalar</div>
+      <div id="routes-feed" style="padding:0 14px 14px"></div>
     </div>
-
     <div style="flex-shrink:0;display:flex;gap:8px;padding:10px 14px calc(10px + var(--safe));background:var(--card);border-top:1px solid var(--border)">
       <button onclick="openSOS()" style="width:44px;height:44px;border-radius:12px;background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.2);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;flex-shrink:0">SOS</button>
       <button onclick="openNav()" style="flex:1;height:44px;border-radius:12px;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Navigasyon</button>
@@ -526,7 +507,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <div style="display:flex;gap:6px">
         <button onclick="openLobbies()" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          Telsiz
+          Intercom
         </button>
         <button id="tour-live-btn" onclick="toggleTourLive()" style="display:none;background:var(--bg2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Canlı Konum</button>
         <button onclick="openCreateTour()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Tur Oluştur</button>
@@ -562,7 +543,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   <div class="tab" id="tab-profil">
     <div class="scrl">
       <div class="prof-cover" id="prof-cover" onclick="document.getElementById('cover-inp').click()" style="position:relative">
-        <div style="position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.5);color:white;border-radius:8px;padding:4px 10px;font-size:11px">?? Arka plan</div>
+        <div style="position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.5);color:white;border-radius:8px;padding:4px 10px;font-size:11px">Fotoğraf</div>
         <input type="file" id="cover-inp" accept="image/*" style="display:none" onchange="uploadCover(this)">
       </div>
       <div class="prof-body">
@@ -605,45 +586,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     </div>
   </div>
 
-  
-<!-- BAKIM EKLE OVERLAY -->
-<div class="ov" id="ov-maintenance">
-  <div class="hdr">
-    <div class="hbtn" onclick="closeOv('ov-maintenance')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--orange);margin-left:8px">BAKIM EKLE</div>
-  </div>
-  <div class="scrl" style="padding:16px">
-    <div class="lbl" style="margin-bottom:8px">Bakım Türü</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="maint-type-grid">
-      <div class="maint-type-btn on" onclick="selectMaintType(this,'oil')" data-type="oil" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
-        <div style="font-size:22px;margin-bottom:4px">🛢</div><div style="font-size:13px;font-weight:600">Motor Yağı</div><div style="font-size:10px;color:var(--text3)">Her 5.000 km</div>
-      </div>
-      <div class="maint-type-btn" onclick="selectMaintType(this,'tire')" data-type="tire" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
-        <div style="font-size:22px;margin-bottom:4px">⚫</div><div style="font-size:13px;font-weight:600">Lastik</div><div style="font-size:10px;color:var(--text3)">Her 10.000 km</div>
-      </div>
-      <div class="maint-type-btn" onclick="selectMaintType(this,'chain')" data-type="chain" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
-        <div style="font-size:22px;margin-bottom:4px">⛓</div><div style="font-size:13px;font-weight:600">Zincir</div><div style="font-size:10px;color:var(--text3)">Her 3.000 km</div>
-      </div>
-      <div class="maint-type-btn" onclick="selectMaintType(this,'brake')" data-type="brake" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
-        <div style="font-size:22px;margin-bottom:4px">🔴</div><div style="font-size:13px;font-weight:600">Fren</div><div style="font-size:10px;color:var(--text3)">Her 15.000 km</div>
-      </div>
-      <div class="maint-type-btn" onclick="selectMaintType(this,'filter')" data-type="filter" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
-        <div style="font-size:22px;margin-bottom:4px">🔧</div><div style="font-size:13px;font-weight:600">Hava Filtresi</div><div style="font-size:10px;color:var(--text3)">Her 15.000 km</div>
-      </div>
-      <div class="maint-type-btn" onclick="selectMaintType(this,'service')" data-type="service" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
-        <div style="font-size:22px;margin-bottom:4px">🏪</div><div style="font-size:13px;font-weight:600">Genel Servis</div><div style="font-size:10px;color:var(--text3)">Her 10.000 km</div>
-      </div>
-    </div>
-    <div class="lbl" style="margin-bottom:6px">Bakım yapıldığında km</div>
-    <input class="inp" id="maint-km" type="number" placeholder="Örn: 15000" style="margin-bottom:12px">
-    <div class="lbl" style="margin-bottom:6px">Sonraki bakım km <span style="color:var(--text3);font-size:10px">(opsiyonel)</span></div>
-    <input class="inp" id="maint-next-km" type="number" placeholder="Otomatik hesaplanır" style="margin-bottom:12px">
-    <div class="lbl" style="margin-bottom:6px">Not <span style="color:var(--text3);font-size:10px">(opsiyonel)</span></div>
-    <textarea class="inp" id="maint-note" rows="2" placeholder="Kullanılan yağ markası, usta adı vs." style="resize:none;margin-bottom:20px"></textarea>
-    <button onclick="saveMaintenance()" style="width:100%;background:var(--orange);color:white;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Bakımı Kaydet</button>
-  </div>
-</div>
-<!-- BOTTOM NAV -->
+  <!-- BOTTOM NAV -->
   <div class="nav">
     <div class="ni on" id="ni-feed" onclick="switchTab('feed',this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -769,7 +712,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       </div>
     </div>
     <div id="vp-locked" style="text-align:center;padding:32px 24px">
-      <div style="font-size:36px;margin-bottom:12px">??</div>
+      <div style="font-size:36px;margin-bottom:12px">🔒</div>
       <div style="font-size:15px;font-weight:600;margin-bottom:8px">Gizli Profil</div>
       <div style="font-size:13px;color:var(--text3)">Bağlantı kurarak gönderileri görebilirsin.</div>
     </div>
@@ -804,7 +747,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <div style="width:100%;height:220px;background:var(--bg2);border:2px dashed var(--border2);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;overflow:hidden;position:relative" id="post-preview">
       <svg width="32" height="32" fill="none" stroke="var(--text3)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       <div style="display:flex;gap:10px">
-        <button onclick="document.getElementById('post-camera').click()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">?? Kamera</button>
+        <button onclick="document.getElementById('post-camera').click()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer>Kamera</button>
         <button onclick="document.getElementById('post-file').click()" style="background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Galeri</button>
       </div>
       <img id="post-img" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
@@ -894,7 +837,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   <div class="scrl" style="padding:16px">
     <div style="width:100%;height:280px;background:var(--bg2);border:2px dashed var(--border2);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;overflow:hidden;position:relative;margin-bottom:16px" id="story-preview-box">
       <div style="display:flex;gap:10px">
-        <button onclick="document.getElementById('story-cam').click()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">?? Kamera</button>
+        <button onclick="document.getElementById('story-cam').click()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer>Kamera</button>
         <button onclick="document.getElementById('story-file').click()" style="background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Galeri</button>
       </div>
       <img id="story-img" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
@@ -928,15 +871,38 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 
 <!-- ROTA PAYLAŞ MODAL -->
 <div class="modal-bg" id="mod-route">
-  <div class="modal-sheet" style="text-align:center">
-    <div style="font-size:18px;font-weight:700;margin-bottom:16px">Rotayı Paylaş</div>
-    <div style="display:flex;gap:20px;justify-content:center;margin-bottom:20px">
-      <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:var(--orange)" id="sr-km">—</div><div style="font-size:11px;color:var(--text3)">Mesafe</div></div>
-      <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:var(--orange)" id="sr-min">—</div><div style="font-size:11px;color:var(--text3)">Süre</div></div>
+  <div class="modal-sheet">
+    <div style="font-size:18px;font-weight:700;margin-bottom:4px">Rotayı Paylaş</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Kaydedilen rotanı toplulukla paylaş</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="background:var(--bg2);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--orange)" id="sr-km">—</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Mesafe</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--orange)" id="sr-min">—</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Süre</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--orange)" id="sr-avg">—</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Ort. Hız</div>
+      </div>
     </div>
-    <input class="inp" id="sr-name" placeholder="Rota adı" style="margin-bottom:12px">
-    <button class="btn btn-or" style="margin-bottom:10px" onclick="saveRoute()">Paylaş</button>
-    <button class="btn btn-ghost" onclick="closeModal('mod-route')">Vazgeç</button>
+    <div class="lbl" style="margin-bottom:6px">Rota Adı</div>
+    <input class="inp" id="sr-name" placeholder="Örn: Boğaz Gün Batımı" style="margin-bottom:10px">
+    <div class="lbl" style="margin-bottom:6px">Açıklama <span style="color:var(--text3);font-size:10px">(opsiyonel)</span></div>
+    <textarea class="inp" id="sr-desc" rows="3" placeholder="Bu rotada neler gördün?" style="resize:none;margin-bottom:10px"></textarea>
+    <div class="lbl" style="margin-bottom:6px">Yol Tipi</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="sr-tags">
+      <button onclick="toggleRouteTag(this,'Şehir İçi')" class="route-tag">Şehir İçi</button>
+      <button onclick="toggleRouteTag(this,'Kıvrımlı')" class="route-tag">Kıvrımlı</button>
+      <button onclick="toggleRouteTag(this,'Sahil')" class="route-tag">Sahil</button>
+      <button onclick="toggleRouteTag(this,'Dağ')" class="route-tag">Dağ</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('mod-route')">Vazgeç</button>
+      <button class="btn btn-or" style="flex:2" id="sr-save-btn" onclick="saveRoute()">Paylaş</button>
+    </div>
   </div>
 </div>
 
@@ -965,9 +931,9 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         </div>
       </div>
     </div>
-    <div id="nav-bottom" style="flex-shrink:0;background:var(--card);border-top-left-radius:20px;border-top-right-radius:20px;box-shadow:0 -4px 24px rgba(0,0,0,.15);z-index:10">
+    <div style="flex-shrink:0;background:var(--card);border-top-left-radius:20px;border-top-right-radius:20px;box-shadow:0 -4px 24px rgba(0,0,0,.15);z-index:10">
       <div style="display:flex;align-items:center;padding:12px 16px 8px;gap:10px">
-        <div class="hbtn" onclick="closeNav()" style="flex-shrink:0"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <div class="hbtn" onclick="closeNav()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--orange)">NAVİGASYON</div>
         <div style="margin-left:auto;font-size:10px;background:var(--odim);color:var(--orange);border:1px solid rgba(255,85,0,.2);border-radius:20px;padding:3px 10px;font-weight:600">MOTOSİKLET</div>
       </div>
@@ -985,7 +951,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <button onclick="calcRoute()" id="nav-calc-btn" style="background:var(--orange);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Rota Hesapla</button>
       </div>
       <div id="nav-panel-summary" style="display:none;padding:0 16px 16px">
-        <div style="display:flex;gap:0;background:var(--bg2);border-radius:14px;overflow:hidden;margin-bottom:12px">
+        <div style="display:flex;background:var(--bg2);border-radius:14px;overflow:hidden;margin-bottom:12px">
           <div style="flex:1;padding:12px;text-align:center;border-right:1px solid var(--border)">
             <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--orange)" id="nav-dist">—</div>
             <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Mesafe</div>
@@ -1019,6 +985,44 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
   </div>
 </div>
 
+<!-- BAKIM EKLE OVERLAY -->
+<div class="ov" id="ov-maintenance">
+  <div class="hdr">
+    <div class="hbtn" onclick="closeOv('ov-maintenance')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--orange);margin-left:8px">BAKIM EKLE</div>
+  </div>
+  <div class="scrl" style="padding:16px">
+    <div class="lbl" style="margin-bottom:8px">Bakım Türü</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="maint-type-grid">
+      <div class="maint-type-btn on" onclick="selectMaintType(this,'oil')" data-type="oil" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
+        <div style="font-size:22px;margin-bottom:4px">🛢</div><div style="font-size:13px;font-weight:600">Motor Yağı</div><div style="font-size:10px;color:var(--text3)">Her 5.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'tire')" data-type="tire" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
+        <div style="font-size:22px;margin-bottom:4px">⚫</div><div style="font-size:13px;font-weight:600">Lastik</div><div style="font-size:10px;color:var(--text3)">Her 10.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'chain')" data-type="chain" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
+        <div style="font-size:22px;margin-bottom:4px">⛓</div><div style="font-size:13px;font-weight:600">Zincir</div><div style="font-size:10px;color:var(--text3)">Her 3.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'brake')" data-type="brake" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
+        <div style="font-size:22px;margin-bottom:4px">🔴</div><div style="font-size:13px;font-weight:600">Fren</div><div style="font-size:10px;color:var(--text3)">Her 15.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'filter')" data-type="filter" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
+        <div style="font-size:22px;margin-bottom:4px">🔧</div><div style="font-size:13px;font-weight:600">Hava Filtresi</div><div style="font-size:10px;color:var(--text3)">Her 15.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'service')" data-type="service" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer">
+        <div style="font-size:22px;margin-bottom:4px">🏪</div><div style="font-size:13px;font-weight:600">Genel Servis</div><div style="font-size:10px;color:var(--text3)">Her 10.000 km</div>
+      </div>
+    </div>
+    <div class="lbl" style="margin-bottom:6px">Bakım yapıldığında km</div>
+    <input class="inp" id="maint-km" type="number" placeholder="Örn: 15000" style="margin-bottom:12px">
+    <div class="lbl" style="margin-bottom:6px">Sonraki bakım km <span style="color:var(--text3);font-size:10px">(opsiyonel)</span></div>
+    <input class="inp" id="maint-next-km" type="number" placeholder="Otomatik hesaplanır" style="margin-bottom:12px">
+    <div class="lbl" style="margin-bottom:6px">Not <span style="color:var(--text3);font-size:10px">(opsiyonel)</span></div>
+    <textarea class="inp" id="maint-note" rows="2" placeholder="Kullanılan yağ markası, usta adı vs." style="resize:none;margin-bottom:20px"></textarea>
+    <button onclick="saveMaintenance()" style="width:100%;background:var(--orange);color:white;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Bakımı Kaydet</button>
+  </div>
+</div>
+
 <!-- SOS OVERLAY -->
 <div class="ov" id="ov-sos">
   <div style="flex:1;background:#0a0a0a;display:flex;flex-direction:column;overflow:hidden">
@@ -1031,15 +1035,15 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <div style="flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px">
       <!-- Konum -->
       <div id="sos-location" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px;font-size:12px;color:rgba(255,255,255,.6)">
-        ?? Konum alınıyor...
+        Konum alınıyor......
       </div>
       <!-- SOS Butonları — kompakt -->
       <button onclick="sendSOS('crash')" style="background:#DC2626;color:white;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;width:100%">
-        <span style="font-size:24px;flex-shrink:0">??</span>
+        <span style="font-size:24px;flex-shrink:0">🚨</span>
         <div><div>KAZA YAPTIM</div><div style="font-size:11px;font-weight:400;opacity:.8;margin-top:1px">Bağlantılarıma konumumu gönder</div></div>
       </button>
       <button onclick="sendSOS('breakdown')" style="background:#D97706;color:white;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;width:100%">
-        <span style="font-size:24px;flex-shrink:0">??</span>
+        <span style="font-size:24px;flex-shrink:0">🔧</span>
         <div><div>YOLDA KALDIM</div><div style="font-size:11px;font-weight:400;opacity:.8;margin-top:1px">Motor arızası, yardım lazım</div></div>
       </button>
       <button onclick="sendSOS('fuel')" style="background:#2563EB;color:white;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;width:100%">
@@ -1047,7 +1051,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <div><div>YAKIT BİTTİ</div><div style="font-size:11px;font-weight:400;opacity:.8;margin-top:1px">En yakın istasyona yönlendir</div></div>
       </button>
       <button onclick="sendSOS('help')" style="background:#16A34A;color:white;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;width:100%">
-        <span style="font-size:24px;flex-shrink:0">??</span>
+        <span style="font-size:24px;flex-shrink:0">🆘</span>
         <div><div>GENEL YARDIM</div><div style="font-size:11px;font-weight:400;opacity:.8;margin-top:1px">Diğer sürücülere duyur</div></div>
       </button>
       <!-- Acil Servisler -->
@@ -1055,22 +1059,22 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Acil Servisler</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <a href="tel:112" style="background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);border-radius:10px;padding:10px;text-align:center;text-decoration:none">
-            <div style="font-size:18px;margin-bottom:2px">??</div>
+            <div style="font-size:18px;margin-bottom:2px">🚑</div>
             <div style="font-size:15px;font-weight:700;color:white">112</div>
             <div style="font-size:10px;color:rgba(255,255,255,.5)">Ambulans</div>
           </a>
           <a href="tel:155" style="background:rgba(37,99,235,.2);border:1px solid rgba(37,99,235,.4);border-radius:10px;padding:10px;text-align:center;text-decoration:none">
-            <div style="font-size:18px;margin-bottom:2px">??</div>
+            <div style="font-size:18px;margin-bottom:2px">🚔</div>
             <div style="font-size:15px;font-weight:700;color:white">155</div>
             <div style="font-size:10px;color:rgba(255,255,255,.5)">Polis İmdat</div>
           </a>
           <a href="tel:156" style="background:rgba(22,163,74,.2);border:1px solid rgba(22,163,74,.4);border-radius:10px;padding:10px;text-align:center;text-decoration:none">
-            <div style="font-size:18px;margin-bottom:2px">??</div>
+            <div style="font-size:18px;margin-bottom:2px">👮</div>
             <div style="font-size:15px;font-weight:700;color:white">156</div>
             <div style="font-size:10px;color:rgba(255,255,255,.5)">Jandarma</div>
           </a>
           <a href="tel:177" style="background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);border-radius:10px;padding:10px;text-align:center;text-decoration:none">
-            <div style="font-size:18px;margin-bottom:2px">??</div>
+            <div style="font-size:18px;margin-bottom:2px">🔥</div>
             <div style="font-size:15px;font-weight:700;color:white">177</div>
             <div style="font-size:10px;color:rgba(255,255,255,.5)">İtfaiye</div>
           </a>
@@ -1084,7 +1088,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 <div class="ov" id="ov-lobbies">
   <div class="hdr">
     <div class="hbtn" onclick="closeOv('ov-lobbies')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--orange);margin-left:8px">??️ SESLİ KANALLAR</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--orange);margin-left:8px">INTERCOM</div>
     <button onclick="createLobby()" style="margin-left:auto;background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Kanal Aç</button>
   </div>
   <div class="scrl" style="padding:0 16px" id="lobbies-list">
@@ -1104,13 +1108,13 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--orange)" id="voice-lobby-name">Kanal</div>
         <div id="voice-status" style="font-size:11px;color:rgba(255,255,255,.4)">Bağlanıyor...</div>
       </div>
-      <button onclick="leaveVoice()" style="margin-left:auto;background:#DC2626;color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">?? Çık</button>
+      <button onclick="leaveVoice()" style="margin-left:auto;background:#DC2626;color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Kapat</button>
     </div>
     <!-- Üyeler grid -->
     <div style="flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start" id="voice-members"></div>
     <!-- Kontroller -->
     <div style="padding:20px 16px calc(20px + var(--safe));border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;gap:20px;flex-shrink:0">
-      <button id="ptt-btn" onclick="toggleMic()" style="width:72px;height:72px;border-radius:50%;background:var(--orange);color:white;border:none;font-size:26px;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(255,85,0,.4)">??️</button>
+      <button id="ptt-btn" onclick="toggleMic()" style="width:72px;height:72px;border-radius:50%;background:var(--orange);color:white;border:none;font-size:26px;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(255,85,0,.4)">○</button>
       <div style="text-align:center">
         <div id="ptt-label" style="font-size:12px;color:rgba(255,255,255,.5);margin-top:6px">Mikrofon kapalı</div>
       </div>
@@ -1138,15 +1142,15 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <div style="flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px">
       <!-- Konum -->
       <div id="sos-location" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px;font-size:12px;color:rgba(255,255,255,.6)">
-        ?? Konum alınıyor...
+        Konum alınıyor......
       </div>
       <!-- SOS Butonları — kompakt -->
       <button onclick="sendSOS('crash')" style="background:#DC2626;color:white;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;width:100%">
-        <span style="font-size:24px;flex-shrink:0">??</span>
+        <span style="font-size:24px;flex-shrink:0">🚨</span>
         <div><div>KAZA YAPTIM</div><div style="font-size:11px;font-weight:400;opacity:.8;margin-top:1px">Bağlantılarıma konumumu gönder</div></div>
       </button>
       <button onclick="sendSOS('breakdown')" style="background:#D97706;color:white;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;width:100%">
-        <span style="font-size:24px;flex-shrink:0">??</span>
+        <span style="font-size:24px;flex-shrink:0">🔧</span>
         <div><div>YOLDA KALDIM</div><div style="font-size:11px;font-weight:400;opacity:.8;margin-top:1px">Motor arızası, yardım lazım</div></div>
       </button>
       <button onclick="sendSOS('fuel')" style="background:#2563EB;color:white;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;width:100%">
@@ -1154,7 +1158,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <div><div>YAKIT BİTTİ</div><div style="font-size:11px;font-weight:400;opacity:.8;margin-top:1px">En yakın istasyona yönlendir</div></div>
       </button>
       <button onclick="sendSOS('help')" style="background:#16A34A;color:white;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;width:100%">
-        <span style="font-size:24px;flex-shrink:0">??</span>
+        <span style="font-size:24px;flex-shrink:0">🆘</span>
         <div><div>GENEL YARDIM</div><div style="font-size:11px;font-weight:400;opacity:.8;margin-top:1px">Diğer sürücülere duyur</div></div>
       </button>
       <!-- Acil Servisler -->
@@ -1162,22 +1166,22 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
         <div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Acil Servisler</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <a href="tel:112" style="background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);border-radius:10px;padding:10px;text-align:center;text-decoration:none">
-            <div style="font-size:18px;margin-bottom:2px">??</div>
+            <div style="font-size:18px;margin-bottom:2px">🚑</div>
             <div style="font-size:15px;font-weight:700;color:white">112</div>
             <div style="font-size:10px;color:rgba(255,255,255,.5)">Ambulans</div>
           </a>
           <a href="tel:155" style="background:rgba(37,99,235,.2);border:1px solid rgba(37,99,235,.4);border-radius:10px;padding:10px;text-align:center;text-decoration:none">
-            <div style="font-size:18px;margin-bottom:2px">??</div>
+            <div style="font-size:18px;margin-bottom:2px">🚔</div>
             <div style="font-size:15px;font-weight:700;color:white">155</div>
             <div style="font-size:10px;color:rgba(255,255,255,.5)">Polis İmdat</div>
           </a>
           <a href="tel:156" style="background:rgba(22,163,74,.2);border:1px solid rgba(22,163,74,.4);border-radius:10px;padding:10px;text-align:center;text-decoration:none">
-            <div style="font-size:18px;margin-bottom:2px">??</div>
+            <div style="font-size:18px;margin-bottom:2px">👮</div>
             <div style="font-size:15px;font-weight:700;color:white">156</div>
             <div style="font-size:10px;color:rgba(255,255,255,.5)">Jandarma</div>
           </a>
           <a href="tel:177" style="background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);border-radius:10px;padding:10px;text-align:center;text-decoration:none">
-            <div style="font-size:18px;margin-bottom:2px">??</div>
+            <div style="font-size:18px;margin-bottom:2px">🔥</div>
             <div style="font-size:15px;font-weight:700;color:white">177</div>
             <div style="font-size:10px;color:rgba(255,255,255,.5)">İtfaiye</div>
           </a>
@@ -1191,14 +1195,14 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 <div class="ov" id="ov-lobbies">
   <div class="hdr">
     <div class="hbtn" onclick="closeOv('ov-lobbies')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--orange);margin-left:8px">??️ SESLİ KANAL</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--orange);margin-left:8px">INTERCOM</div>
   </div>
   <div class="scrl" style="padding:16px">
     <div style="background:var(--bg2);border-radius:14px;padding:16px;margin-bottom:16px">
       <div class="lbl">Kanal Adı</div>
       <input class="inp" id="lobby-name-inp" placeholder="Örn: Boğaz Turu Kanalı" style="margin-bottom:0">
     </div>
-    <button onclick="startLobby()" class="btn btn-or" style="margin-bottom:12px">??️ Kanalı Başlat</button>
+    <button onclick="startLobby()" class="btn btn-or" style="margin-bottom:12px">Kanalı Başlat</button>
     <div style="font-size:12px;color:var(--text3);text-align:center">Kanal başlatınca istediğin kişileri davet edebilirsin</div>
   </div>
 </div>
@@ -1216,11 +1220,11 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       </div>
       <!-- Davet butonu — sadece kanal sahibine gösterilir -->
       <button id="voice-invite-btn" onclick="openVoiceInvite()" style="display:none;background:rgba(255,255,255,.08);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ Davet</button>
-      <button onclick="leaveVoice()" style="background:#DC2626;color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">?? Çık</button>
+      <button onclick="leaveVoice()" style="background:#DC2626;color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Kapat</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start" id="voice-members"></div>
     <div style="padding:20px 16px calc(20px + var(--safe));border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0">
-      <button id="ptt-btn" onclick="toggleMic()" style="width:72px;height:72px;border-radius:50%;background:var(--orange);color:white;border:none;font-size:26px;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(255,85,0,.4)">??️</button>
+      <button id="ptt-btn" onclick="toggleMic()" style="width:72px;height:72px;border-radius:50%;background:var(--orange);color:white;border:none;font-size:26px;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(255,85,0,.4)">○</button>
       <div id="ptt-label" style="font-size:12px;color:rgba(255,255,255,.5)">Mikrofon kapalı</div>
     </div>
   </div>
@@ -1245,8 +1249,8 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <div id="call-lobby" style="font-size:12px;color:var(--orange);margin-top:1px"></div>
     </div>
     <div style="display:flex;gap:8px;flex-shrink:0">
-      <button onclick="declineCall()" style="width:44px;height:44px;border-radius:50%;background:#DC2626;color:white;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(220,38,38,.5)">??</button>
-      <button onclick="acceptCall()" style="width:44px;height:44px;border-radius:50%;background:#16A34A;color:white;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(22,163,74,.5)">??</button>
+      <button onclick="declineCall()" style="width:44px;height:44px;border-radius:50%;background:#DC2626;color:white;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(220,38,38,.5)">Kapat</button>
+      <button onclick="acceptCall()" style="width:44px;height:44px;border-radius:50%;background:#16A34A;color:white;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(22,163,74,.5)">Kapat</button>
     </div>
   </div>
   <!-- Ses animasyonu -->
@@ -1342,6 +1346,12 @@ function switchTab(name,el){
   if(name==='profil')loadMyPosts();
   if(name==='profil')loadMyPosts();
   if(name==='profil')loadMyPosts();
+  if(name==='profil')loadMyPosts();
+  if(name==='profil')loadMyPosts();
+  if(name==='profil')loadMyPosts();
+  if(name==='profil')loadMyPosts();
+  if(name==='profil')loadMyPosts();
+  if(name==='profil')loadMyPosts();
 }
 
 // ════════════════════════════════════════════
@@ -1404,7 +1414,7 @@ let isLogin=false;
 function toggleAuth(){isLogin=!isLogin;authUI();}
 function authUI(){
   document.getElementById('auth-title').textContent=isLogin?'Giriş Yap':'Hesap Oluştur';
-  document.getElementById('auth-sub').textContent=isLogin?'Hoş geldin! ??️':'Sürüş dünyasına katıl.';
+  document.getElementById('auth-sub').textContent=isLogin?'Hoş geldin! 🏍️':'Sürüş dünyasına katıl.';
   document.getElementById('auth-btn').textContent=isLogin?'Giriş Yap':'Kayıt Ol';
   document.getElementById('inp-pw2').style.display=isLogin?'none':'block';
   document.getElementById('auth-sw').innerHTML=isLogin
@@ -1654,7 +1664,7 @@ async function sendConnRequest(toUid,toName,btn){
       fromAvatar:cu.avatarUrl||'',fromBike:cu.bike||'',
       toUid,status:'pending',createdAt:new Date().toISOString()
     });
-    await pushNotif(toUid,'request',`<strong>${cu.name||'Biri'}</strong> seninle bağlantı kurmak istiyor ??`);
+    await pushNotif(toUid,'request',`<strong>${cu.name||'Biri'}</strong> seninle bağlantı kurmak istiyor`);
     playDing();
     toast(`${toName} kişisine bağlantı isteği gönderildi!`);
   }catch(e){toast('Hata: '+e.message);}
@@ -1687,10 +1697,10 @@ async function acceptConnRequest(reqId,fromUid,fromName){
   if(reqEl){
     reqEl.style.background='var(--gdim)';
     reqEl.style.border='1px solid rgba(22,163,74,.2)';
-    reqEl.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><div style="font-size:28px">??</div><div><div style="font-size:14px;font-weight:600;color:var(--green)">${fromName} ile artık bağlantılısınız!</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Mesajlaşabilirsiniz.</div></div></div>`;
+    reqEl.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><div style="font-size:28px">🔍</div><div><div style="font-size:14px;font-weight:600;color:var(--green)">${fromName} ile artık bağlantılısınız!</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Mesajlaşabilirsiniz.</div></div></div>`;
     setTimeout(()=>{if(reqEl.parentNode)reqEl.remove();},3000);
   }
-  toast(`${fromName} ile bağlantı kuruldu! ??`);
+  toast(`${fromName} ile bağlantı kuruldu!`);
 }
 
 async function declineConnRequest(reqId){
@@ -1855,7 +1865,7 @@ async function loadVPPosts(uid){
     if(snap.empty){el.innerHTML='<div style="color:var(--text3);font-size:13px;grid-column:span 3;padding:16px 0">Gönderi yok</div>';return;}
     const posts=[];snap.forEach(d=>posts.push(d.data()));
     posts.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
-    el.innerHTML=posts.map(p=>`<div style="aspect-ratio:1;background:${p.photoUrl?'#eee':'var(--bg2)'};overflow:hidden">${p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,20)||'??'}</div>`}</div>`).join('');
+    el.innerHTML=posts.map(p=>`<div style="aspect-ratio:1;background:${p.photoUrl?'#eee':'var(--bg2)'};overflow:hidden">${p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,20)||''}</div>`}</div>`).join('');
   });
 }
 async function loadVPStats(uid){
@@ -1901,7 +1911,7 @@ async function loadConnectionsList(){
     snap.forEach(d=>{const v=d.data();if(v.uid1===myUid)uids.push(v.uid2);else if(v.uid2===myUid)uids.push(v.uid1);});
     myConns=new Set(uids);
     const s=document.getElementById('stat-conn');if(s)s.textContent=uids.length;
-    if(!uids.length){list.innerHTML='<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">??</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div><div style="font-size:13px">?? ile sürücü bul</div></div>';return;}
+    if(!uids.length){list.innerHTML='<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">🔒</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div><div style="font-size:13px">Sürücü ara</div></div>';return;}
     const connUsers=allUsers.filter(u=>uids.includes(u.uid));
     list.innerHTML=connUsers.map(u=>`
       <div class="conn-item" id="ci-${u.uid}">
@@ -2009,7 +2019,7 @@ async function submitComment(ownerUid,postId){
   pushNotif(ownerUid,'comment',`<strong>${window.CU.name||'Biri'}</strong> yorum yaptı: "${text.substring(0,30)}"`);
   loadComments(postId);
 }
-function shareUrl(){if(navigator.share)navigator.share({title:'MOTO',url:location.href});else navigator.clipboard?.writeText(location.href);toast('Link kopyalandı! ??');}
+function shareUrl(){if(navigator.share)navigator.share({title:'MOTO',url:location.href});else navigator.clipboard?.writeText(location.href);toast('Link kopyalandı!');}
 
 // Post oluştur
 let postFile=null;
@@ -2030,7 +2040,7 @@ async function publishPost(){
   const postData={uid:cu.uid||'',name:cu.name||'Sürücü',bike:cu.bike||'',avatarUrl:cu.avatarUrl||'',caption:cap,photoUrl,createdAt:new Date().toISOString(),likes:0,commentCount:0};
   const ref=await addDoc(collection(db,'posts'),postData);
   btn.disabled=false;btn.textContent='Paylaş';
-  closeOv('ov-post');toast('Paylaşıldı! ??️');
+  closeOv('ov-post');toast('Paylaşıldı!');
   // Anında profile grid'e ekle
   _prependToMyGrid({id:ref.id,...postData});
   // Feed'i yenile
@@ -2044,7 +2054,7 @@ async function deletePost(postId){
   if(el)el.remove();
   // Boş mu kaldı?
   const grid=document.getElementById('my-posts-grid');
-  if(grid&&!grid.querySelector('[id^="pg-"]'))grid.innerHTML='<div style="grid-column:span 3;padding:16px;color:var(--text3);font-size:13px;text-align:center">Henüz gönderi yok ??</div>';
+  if(grid&&!grid.querySelector('[id^="pg-"]'))grid.innerHTML='<div style="grid-column:span 3;padding:16px;color:var(--text3);font-size:13px;text-align:center">Henüz gönderi yok</div>';
   toast('Gönderi silindi');loadFeed();
 }
 
@@ -2065,14 +2075,14 @@ async function loadMyPosts(){
   const el=document.getElementById('my-posts-grid');if(!el)return;
   try{
     const snap=await getDocs(query(collection(db,'posts'),where('uid','==',window.CU.uid)));
-    if(snap.empty){el.innerHTML='<div style="grid-column:span 3;padding:16px;color:var(--text3);font-size:13px;text-align:center">Henüz gönderi yok ??</div>';return;}
+    if(snap.empty){el.innerHTML='<div style="grid-column:span 3;padding:16px;color:var(--text3);font-size:13px;text-align:center">Henüz gönderi yok</div>';return;}
     const posts=[];
     snap.forEach(d=>posts.push({id:d.id,...d.data()}));
     // Client-side sırala
     posts.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
     el.innerHTML=posts.map(p=>`
       <div id="pg-${p.id}" style="aspect-ratio:1;background:${p.photoUrl?'#eee':'var(--bg2)'};overflow:hidden;position:relative">
-        ${p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,30)||'??'}</div>`}
+        ${p.photoUrl?`<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">${p.caption?.substring(0,30)||''}</div>`}
         <button onclick="confirmAction('Gönderiyi Sil','Bu gönderiyi silmek istiyor musun?',()=>deletePost('${p.id}'))" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer">✕</button>
       </div>`).join('');
   }catch(e){
@@ -2121,7 +2131,7 @@ async function loadTours(){
         <div class="tc-name">${t.name||'Tur'}</div>
         <div class="tc-badge ${t.isLive?'live-b':'soon-b'}">${t.isLive?'● CANLI':t.date?new Date(t.date).toLocaleDateString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Tarih yok'}</div>
       </div>
-      <div class="tc-info">?? ${t.from||'—'} → ${t.to||'—'} · ??️ ${(t.participants||[]).length} katılımcı</div>
+      <div class="tc-info>${t.from||'—'} → ${t.to||'—'} · ${(t.participants||[]).length} katılımcı</div>
       ${t.desc?`<div style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5">${t.desc}</div>`:''}
       <div class="tc-foot">
         <div class="tc-by" onclick="viewProfile('${t.uid}')">${t.userName||'Sürücü'} tarafından</div>
@@ -2149,7 +2159,7 @@ async function requestJoinTour(tourId, ownerUid, tourName, btn){
       createdAt:new Date().toISOString()
     });
     // Tur sahibine bildirim gönder
-    await pushNotif(ownerUid,'tourRequest',`<strong>${cu.name||'Biri'}</strong> "${tourName}" turuna katılmak istiyor ??️`);
+    await pushNotif(ownerUid,'tourRequest',`<strong>${cu.name||'Biri'}</strong> "${tourName}" turuna katılmak istiyor`);
     playDing();
     toast(`"${tourName}" için katılım isteği gönderildi!`);
   }catch(e){
@@ -2178,7 +2188,7 @@ async function saveTour(){
     isLive:false,
     createdAt:new Date().toISOString()
   });
-  closeOv('ov-tour');toast(`"${name}" yayınlandı! ??️`);loadTours();
+  closeOv('ov-tour');toast(`"${name}" yayınlandı!`);loadTours();
 }
 async function deleteTour(id){
   confirmAction('Turu Sil','Bu turu silmek istiyor musun?',async()=>{
@@ -2204,7 +2214,7 @@ async function acceptTourRequest(reqId, tourId, fromUid, fromName){
     const el=document.getElementById('treq-'+reqId);
     if(el){
       el.style.background='var(--gdim)';el.style.border='1px solid rgba(22,163,74,.2)';
-      el.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><div style="font-size:28px">??️</div><div><div style="font-size:14px;font-weight:600;color:var(--green)">${fromName} tura katıldı!</div></div></div>`;
+      el.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><div style="font-size:28px">🔍</div><div><div style="font-size:14px;font-weight:600;color:var(--green)">${fromName} tura katıldı!</div></div></div>`;
       setTimeout(()=>{if(el.parentNode)el.remove();},3000);
     }
     toast(`${fromName} tura kabul edildi!`);
@@ -2293,7 +2303,7 @@ async function publishListing(){
     photos:photoUrls,createdAt:new Date().toISOString()
   });
   btn.disabled=false;btn.textContent='Yayınla';
-  closeOv('ov-listing');toast('İlan yayınlandı! ??️');loadListings();
+  closeOv('ov-listing');toast('İlan yayınlandı!');loadListings();
 }
 async function loadListings(cat=''){
   if(!window.FB)return;
@@ -2306,7 +2316,7 @@ async function loadListings(cat=''){
   el.innerHTML=listings.map(l=>`
     <div class="lcard">
       <div class="limg">
-        ${l.photos?.length?`<img src="${l.photos[0]}" style="width:100%;height:100%;object-fit:cover">`:'<div style="font-size:48px;color:var(--border2)">??️</div>'}
+        ${l.photos?.length?`<img src="${l.photos[0]}" style="width:100%;height:100%;object-fit:cover">`:'<div style="font-size:48px;color:var(--border2)">○</div>'}
         <div class="lfree">ÜCRETSİZ</div>
         <div class="lprice">${parseInt(l.price||0).toLocaleString('tr-TR')} ₺</div>
         ${l.uid===window.CU?.uid?`<button onclick="confirmAction('İlanı Sil','Bu ilanı silmek istiyor musun?',()=>deleteListing('${l.id}'))" style="position:absolute;top:10px;right:10px;background:rgba(220,38,38,.8);color:white;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sil</button>`:''}
@@ -2314,7 +2324,7 @@ async function loadListings(cat=''){
       <div class="lbody">
         <div class="lcat">${l.brand||'—'} · ${l.cat||'—'}</div>
         <div class="lname">${l.model||'—'} ${l.year?'· '+l.year:''}</div>
-        <div class="ldetail">${l.km?`<span>?? ${parseInt(l.km).toLocaleString('tr-TR')} km</span>`:''}<span>??️ ${l.city||'—'}</span></div>
+        <div class="ldetail">${l.km?`<span>${parseInt(l.km).toLocaleString('tr-TR')} km</span>`:''}<span>${l.city||'—'}</span></div>
       </div>
       <div class="lseller">
         ${makeAv(l.uid,l.userName,l.userAvatar,28)}
@@ -2341,19 +2351,14 @@ function filterCat(el,cat){
 let chatPartner=null,chatUnsub=null;
 function chatDocId(a,b){return[a,b].sort().join('_');}
 
-function openDM(){
-  openOv('ov-dm');loadDMList();
-  const b=document.getElementById('dm-badge');
-  if(b){b.style.display='none';b.textContent='0';}
-  updateFeedNavBadge();
-}
+function openDM(){openOv('ov-dm');loadDMList();const b=document.getElementById('dm-badge');if(b){b.style.display='none';b.textContent='0';}updateFeedNavBadge();}
 async function loadDMList(){
   if(!window.FB||!window.CU)return;
   const{db,collection,getDocs}=window.FB;
   const myUid=window.CU.uid;
   const list=document.getElementById('dm-list');if(!list)return;
   const connUsers=allUsers.filter(u=>myConns.has(u.uid));
-  if(!connUsers.length){list.innerHTML='<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">??</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div><div style="font-size:13px">?? ile sürücü bul ve bağlantı kur</div></div>';return;}
+  if(!connUsers.length){list.innerHTML='<div style="padding:48px 24px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">🔒</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Henüz bağlantın yok</div><div style="font-size:13px">Sürücü ara ve bağlantı kur</div></div>';return;}
   // Chat önizlemesi
   const previews={};
   try{
@@ -2391,7 +2396,7 @@ async function openChat(uid){
   if(!window.FB||!window.CU)return;
   // Bağlantı kontrolü
   const conn=await isConnected(uid);
-  if(!conn){toast('Mesajlaşmak için önce bağlantı kurman gerekiyor ??');return;}
+  if(!conn){toast('Mesajlaşmak için önce bağlantı kurman gerekiyor');return;}
   const u=getUser(uid);
   chatPartner=u;
   document.getElementById('chat-av').innerHTML=makeAv(u.uid,u.name,u.avatarUrl,36);
@@ -2464,7 +2469,7 @@ async function _sendMsg(content){
   const myUid=window.CU.uid;
   const cid=chatDocId(myUid,chatPartner.uid);
   const{db,collection,addDoc,doc,setDoc}=window.FB;
-  const preview=content.text?content.text.substring(0,60):'?? Fotoğraf';
+  const preview=content.text?content.text.substring(0,60):'Fotoğraf';
   await addDoc(collection(db,'chats',cid,'messages'),{
     senderUid:myUid,senderName:window.CU.name||'Sürücü',
     text:content.text,photoUrl:content.photoUrl,
@@ -2497,9 +2502,7 @@ async function pushNotif(toUid,type,text){
 
 function openNotifs(){
   openOv('ov-notif');
-  const nb=document.getElementById('notif-badge');
-  if(nb){nb.style.display='none';nb.textContent='0';}
-  updateFeedNavBadge();
+  const nb=document.getElementById('notif-badge');if(nb){nb.style.display='none';nb.textContent='0';}updateFeedNavBadge();
   loadNotifs();
 }
 async function loadNotifs(){
@@ -2527,7 +2530,7 @@ async function loadNotifs(){
     html+=`<div style="background:var(--odim);border:1px solid rgba(255,85,0,.15);border-radius:14px;padding:14px;margin-bottom:10px" id="req-${r.id}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
         <div onclick="closeOv('ov-notif');viewProfile('${r.fromUid}')" style="cursor:pointer">${makeAv(r.fromUid,r.fromName,r.fromAvatar,42)}</div>
-        <div style="flex:1"><div style="font-size:13px;font-weight:600"><strong>${r.fromName}</strong> seninle bağlantı kurmak istiyor ??</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600"><strong>${r.fromName}</strong> seninle bağlantı kurmak istiyor</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">${r.fromBike||''} · ${timeAgo(r.createdAt)}</div></div>
       </div>
       <div style="display:flex;gap:8px">
@@ -2541,7 +2544,7 @@ async function loadNotifs(){
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
         <div onclick="closeOv('ov-notif');viewProfile('${r.fromUid}')" style="cursor:pointer">${makeAv(r.fromUid,r.fromName,r.fromAvatar,42)}</div>
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:600"><strong>${r.fromName}</strong> "${r.tourName}" turuna katılmak istiyor ??️</div>
+          <div style="font-size:13px;font-weight:600"><strong>${r.fromName}</strong> "${r.tourName}" turuna katılmak istiyor</div>
           <div style="font-size:11px;color:var(--text3);margin-top:2px">${r.fromBike||''} · ${timeAgo(r.createdAt)}</div>
         </div>
       </div>
@@ -2553,15 +2556,15 @@ async function loadNotifs(){
   // Diğer bildirimler
   const notifs=[];notifSnap.forEach(d=>notifs.push({id:d.id,...d.data()}));
   notifs.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
-  const icons={like:'❤️',comment:'??',follow:'??',route:'??️',request:'??',accepted:'✅',tourRequest:'??️',tourAccepted:'??️',tourDeclined:'❌'};
+  const icons={like:'❤️',comment:'💬',follow:'+',route:'→',request:'+',accepted:'✅',tourRequest:'+',tourAccepted:'✓',tourDeclined:'❌'};
   notifs.forEach(n=>{
     html+=`<div class="notif-item${n.read?'':' notif-unread'}" onclick="${n.fromUid?`closeOv('ov-notif');viewProfile('${n.fromUid}')`:''}" style="${n.fromUid?'cursor:pointer':''}">
-      <div class="notif-icon">${icons[n.type]||'??'}</div>
+      <div class="notif-icon">${icons[n.type]||'·'}</div>
       <div style="flex:1"><div class="notif-text">${n.text}</div><div class="notif-time">${timeAgo(n.createdAt)}</div></div>
       ${!n.read?'<div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>':''}
     </div>`;
   });
-  list.innerHTML=html||'<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bildirim yok ??️</div>';
+  list.innerHTML=html||'<div style="padding:32px 0;text-align:center;color:var(--text3)">Henüz bildirim yok</div>';
   setTimeout(()=>markAllRead(),1500);
 }
 async function markAllRead(){
@@ -2577,68 +2580,29 @@ async function markAllRead(){
 // ════════════════════════════════════════════
 // WATCHERS (realtime badges)
 // ════════════════════════════════════════════
-function updateFeedNavBadge(){
-  const dm  = parseInt(document.getElementById('dm-badge')?.textContent)||0;
-  const notif = parseInt(document.getElementById('notif-badge')?.textContent)||0;
-  const total = dm + notif;
-  const nb = document.getElementById('ni-feed-badge');
-  const ni = document.getElementById('ni-feed');
-  if(!nb||!ni) return;
-  if(total > 0){
-    nb.textContent = total > 99 ? '99+' : total;
-    nb.style.display = 'flex';
-    ni.classList.add('ni-pulse');
-  } else {
-    nb.style.display = 'none';
-    ni.classList.remove('ni-pulse');
-  }
-}
-
 function startWatchers(){
   if(!window.FB||!window.CU)return;
   const{db,collection,query,where,onSnapshot}=window.FB;
   const myUid=window.CU.uid;
   let pN=-1,pM=-1;
-
-  // Bildirim badge — sayılı
   onSnapshot(query(collection(db,'notifications'),where('toUid','==',myUid),where('read','==',false)),snap=>{
     const b=document.getElementById('notif-badge');
-    const count = snap.size;
-    if(b){ b.style.display=count>0?'flex':'none'; b.textContent=count>99?'99+':count; }
-    if(pN>=0&&count>pN) playDing();
-    pN=count;
-    updateFeedNavBadge();
+    if(b){b.style.display=snap.size>0?'flex':'none';b.textContent=snap.size>99?'99+':snap.size;}
+    if(pN>=0&&snap.size>pN)playDing();
+    pN=snap.size;updateFeedNavBadge();
   });
-
-  // Bağlantı isteği badge
   onSnapshot(query(collection(db,'friendRequests'),where('toUid','==',myUid),where('status','==','pending')),snap=>{
-    if(snap.size>0){
-      const b=document.getElementById('notif-badge');
-      if(b){ const cur=parseInt(b.textContent)||0; b.style.display='flex'; b.textContent=Math.max(cur,snap.size); }
-      updateFeedNavBadge();
-    }
+    if(snap.size>0){const b=document.getElementById('notif-badge');if(b){b.style.display='flex';b.textContent=Math.max(parseInt(b.textContent)||0,snap.size);}updateFeedNavBadge();}
   });
-
-  // Tur isteği badge
   onSnapshot(query(collection(db,'tourRequests'),where('ownerUid','==',myUid),where('status','==','pending')),snap=>{
-    if(snap.size>0){
-      const b=document.getElementById('notif-badge');
-      if(b){ b.style.display='flex'; }
-      updateFeedNavBadge();
-    }
+    if(snap.size>0){const b=document.getElementById('notif-badge');if(b)b.style.display='flex';updateFeedNavBadge();}
   });
-
-  // DM badge — sayılı
   onSnapshot(query(collection(db,'chats'),where('unreadFor','==',myUid)),snap=>{
     const b=document.getElementById('dm-badge');
-    const count=snap.size;
-    if(b){ b.style.display=count>0?'flex':'none'; b.textContent=count>99?'99+':count; }
-    if(pM>=0&&count>pM) playDing();
-    pM=count;
-    updateFeedNavBadge();
+    if(b){b.style.display=snap.size>0?'flex':'none';b.textContent=snap.size>99?'99+':snap.size;}
+    if(pM>=0&&snap.size>pM)playDing();
+    pM=snap.size;updateFeedNavBadge();
   });
-
-  // Sesli kanal davetlerini izle
   watchVoiceInvites();
 }
 
@@ -2760,7 +2724,7 @@ function startRec(){
   if(!navigator.geolocation){toast('GPS desteklenmiyor');return;}
   recOn=true;recPath=[];recDist=0;recLast=null;recStart=Date.now();recStartCoord=null;
   const btn=document.getElementById('rec-btn');
-  btn.textContent='⏹ Durdur';btn.style.background='var(--red)';
+  btn.textContent='⏹ Bitir';btn.style.background='var(--red)';btn.style.color='white';btn.style.border='none';
   document.getElementById('rec-banner').classList.add('show');
   toast('GPS bağlanıyor...');
   recWatch=navigator.geolocation.watchPosition(
@@ -2811,14 +2775,18 @@ function stopRec(){
 
 async function saveRoute(){
   const name=document.getElementById('sr-name').value.trim()||'Rotam';
+  const desc=(document.getElementById('sr-desc')?.value||'').trim();
+  const tags=[...document.querySelectorAll('.route-tag.on')].map(t=>t.textContent);
   const cu=window.CU||{};
+  const btn=document.getElementById('sr-save-btn');if(btn){btn.textContent='Kaydediliyor...';btn.disabled=true;}
   if(window.FB){
     const{db,collection,addDoc}=window.FB;
     await addDoc(collection(db,'routes'),{
-      uid:cu.uid||'',userName:cu.name||'Sürücü',userBike:cu.bike||'',
-      name,path:recPath,
+      uid:cu.uid||'',userName:cu.name||'Sürücü',userBike:cu.bike||'',userAvatar:cu.avatarUrl||'',
+      name,desc,tags,path:recPath,
       distKm:parseFloat((recDist/1000).toFixed(2)),
       durationMins:Math.floor((Date.now()-recStart)/60000),
+      avgSpeed:recDist>0?Math.round((recDist/1000)/((Date.now()-recStart)/3600000)):0,
       startCoord:recStartCoord,
       createdAt:new Date().toISOString()
     });
@@ -2827,7 +2795,7 @@ async function saveRoute(){
   if(map&&recLast){
     L.marker(recLast,{icon:L.divIcon({html:'<div style="width:14px;height:14px;background:#DC2626;border:2px solid white;border-radius:50%;box-shadow:0 0 4px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]})}).bindPopup('Bitiş').addTo(map);
   }
-  closeModal('mod-route');toast('Rota paylaşıldı! ??️');
+  closeModal('mod-route');toast('Rota paylaşıldı!');
   loadRoutesFeed();loadMyRoutes();
 }
 
@@ -2863,7 +2831,7 @@ async function loadMyRoutes(){
   const{db,collection,query,where,getDocs}=window.FB;
   const snap=await getDocs(query(collection(db,'routes'),where('uid','==',window.CU.uid)));
   const el=document.getElementById('my-routes');if(!el)return;
-  if(snap.empty){el.innerHTML='<div style="padding:16px 24px;text-align:center;color:var(--text3);font-size:13px">Henüz rota paylaşmadın ??️</div>';return;}
+  if(snap.empty){el.innerHTML='<div style="padding:16px 24px;text-align:center;color:var(--text3);font-size:13px">Henüz rota paylaşmadın</div>';return;}
   const routes=[];snap.forEach(d=>routes.push({id:d.id,...d.data()}));
   routes.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
   let totalKm=routes.reduce((s,r)=>s+(r.distKm||0),0);
@@ -2902,7 +2870,7 @@ async function fetchLive(){
     const u=d.data();if(u.uid===myUid)return;
     const icon=L.divIcon({html:`<div style="width:12px;height:12px;background:#16A34A;border:2px solid white;border-radius:50%;box-shadow:0 0 4px rgba(0,0,0,.3)"></div>`,iconSize:[12,12],iconAnchor:[6,6]});
     if(liveMarkers[u.uid])liveMarkers[u.uid].setLatLng([u.lat,u.lng]);
-    else liveMarkers[u.uid]=L.marker([u.lat,u.lng],{icon}).bindPopup(`??️ ${u.name} · ${u.speed} km/h`).addTo(map);
+    else liveMarkers[u.uid]=L.marker([u.lat,u.lng],{icon}).bindPopup(`${u.name} · ${u.speed} km/h`).addTo(map);
   });
 }
 function calcDist(a,b,c,d){
@@ -2915,152 +2883,12 @@ function calcDist(a,b,c,d){
 // CONFIRM MODAL
 // ════════════════════════════════════════════
 let confirmCb=null;
-
-// ══════════════════════════════════════════════════════
-// ALT PANEL SEKME SİSTEMİ
-// ══════════════════════════════════════════════════════
-function switchPanelTab(tab){
-  const tabs = ['rotalar','servisler'];
-  tabs.forEach(t=>{
-    const btn = document.getElementById('panel-tab-'+t);
-    const panel = document.getElementById('panel-'+t);
-    const active = t===tab;
-    if(btn){ btn.style.color=active?'var(--orange)':'var(--text3)'; btn.style.borderBottom=active?'2px solid var(--orange)':'2px solid transparent'; }
-    if(panel) panel.style.display=active?'block':'none';
-  });
-  if(tab==='servisler' && !servisLoaded) loadServisPanel();
-}
-
-// ══════════════════════════════════════════════════════
-// SERVİS AĞI — Overpass API (OpenStreetMap gerçek data)
-// ══════════════════════════════════════════════════════
-let servisMarkers = [];
-let servisLoaded  = false;
-let servisUserPos = null;
-
-async function loadServisPanel(){
-  const listEl = document.getElementById('servis-list');
-  if(!listEl) return;
-  listEl.innerHTML = '<div style="padding:24px 0;text-align:center;color:var(--text3);font-size:13px">Konum alınıyor...</div>';
-
-  // Konumu al
-  const getPos = ()=> new Promise((res,rej)=>{
-    if(!navigator.geolocation){res({lat:41.015,lng:28.979});return;}
-    navigator.geolocation.getCurrentPosition(
-      p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),
-      ()=>res({lat:map?.getCenter().lat||41.015,lng:map?.getCenter().lng||28.979}),
-      {enableHighAccuracy:true,timeout:8000}
-    );
-  });
-
-  const {lat,lng} = await getPos();
-  servisUserPos = [lat,lng];
-  listEl.innerHTML = '<div style="padding:24px 0;text-align:center;color:var(--text3);font-size:13px">Servisler aranıyor (25km)...</div>';
-
-  const query = `[out:json][timeout:25];(node["shop"="motorcycle"](around:25000,${lat},${lng});node["shop"="motorcycle_repair"](around:25000,${lat},${lng});node["repair"="motorcycle"](around:25000,${lat},${lng});way["shop"="motorcycle"](around:25000,${lat},${lng});way["shop"="motorcycle_repair"](around:25000,${lat},${lng});way["repair"="motorcycle"](around:25000,${lat},${lng}););out center qt;`;
-
-  try{
-    const r = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query)});
-    const data = await r.json();
-
-    // Eski markerları temizle
-    servisMarkers.forEach(m=>map&&map.removeLayer(m));
-    servisMarkers = [];
-
-    if(!data.elements?.length){
-      listEl.innerHTML='<div style="padding:24px 0;text-align:center;color:var(--text3);font-size:13px">Bu bölgede kayıtlı servis bulunamadı</div>';
-      return;
-    }
-
-    // Mesafeye göre sırala
-    const items = data.elements.map(el=>{
-      const elLat=el.lat||el.center?.lat, elLng=el.lon||el.center?.lon;
-      if(!elLat||!elLng) return null;
-      const dist = geoDistM(lat,lng,elLat,elLng);
-      return {el,elLat,elLng,dist};
-    }).filter(Boolean).sort((a,b)=>a.dist-b.dist);
-
-    servisLoaded = true;
-
-    // Haritaya marker ekle + liste oluştur
-    listEl.innerHTML = '';
-    items.forEach(({el,elLat,elLng,dist})=>{
-      const tags = el.tags||{};
-      const name = tags.name||tags['name:tr']||'Motosiklet Servisi';
-      const phone = tags.phone||tags['contact:phone']||'';
-      const addr  = [tags['addr:street'],tags['addr:housenumber'],tags['addr:city']].filter(Boolean).join(' ');
-      const brand = tags.brand||'';
-      const opening = tags.opening_hours||'';
-      const isDealer = tags.shop==='motorcycle'&&!tags.repair;
-      const distText = dist<1000?Math.round(dist)+' m':(dist/1000).toFixed(1)+' km';
-
-      // Harita marker
-      const iconHtml=`<div style="position:relative;display:flex;flex-direction:column;align-items:center"><div style="width:30px;height:30px;background:${isDealer?'#2563EB':'#FF5500'};border:2.5px solid white;border-radius:50%;box-shadow:0 3px 10px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center"><svg width="13" height="13" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid ${isDealer?'#2563EB':'#FF5500'}"></div></div>`;
-      const icon = L.divIcon({html:iconHtml,iconSize:[30,37],iconAnchor:[15,37],className:''});
-      const marker = L.marker([elLat,elLng],{icon})
-        .bindPopup(`<b>${name}</b><br><small>${isDealer?'Bayi':'Servis'} · ${distText}</small>${phone?`<br><a href="tel:${phone}">${phone}</a>`:''}`)
-        .addTo(map);
-      servisMarkers.push(marker);
-
-      // Liste kartı
-      const card = document.createElement('div');
-      card.style.cssText='display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer';
-      card.innerHTML=`
-        <div style="width:40px;height:40px;border-radius:12px;background:${isDealer?'rgba(37,99,235,.1)':'var(--odim)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="18" height="18" fill="none" stroke="${isDealer?'#2563EB':'var(--orange)'}" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name}</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:1px">${isDealer?'Bayi':'Servis'} · ${distText}${addr?' · '+addr.split(',')[0]:''}</div>
-          ${phone?`<div style="font-size:11px;color:var(--orange);margin-top:1px">${phone}</div>`:''}
-          ${opening?`<div style="font-size:10px;color:var(--text3);margin-top:1px">${opening}</div>`:''}
-        </div>
-        <button onclick="event.stopPropagation();navToServis(${elLat},${elLng},'${name.replace(/'/g,"\\'")}');"
-          style="flex-shrink:0;background:var(--orange);color:white;border:none;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">
-          Git
-        </button>`;
-
-      // Karta tıklayınca haritada göster
-      card.addEventListener('click',()=>{
-        map.setView([elLat,elLng],16);
-        marker.openPopup();
-      });
-      listEl.appendChild(card);
-    });
-
-    // Haritayı tüm servisleri gösterecek şekilde ayarla
-    if(servisMarkers.length>0){
-      const group=L.featureGroup(servisMarkers);
-      map.fitBounds(group.getBounds().pad(0.15),{maxZoom:14});
-    }
-
-    // Tab başlığını güncelle
-    const tabBtn=document.getElementById('panel-tab-servisler');
-    if(tabBtn)tabBtn.textContent=`Servis Ağı (${items.length})`;
-
-  }catch(e){
-    console.error('Servis hatası:',e);
-    listEl.innerHTML='<div style="padding:24px 16px;text-align:center"><div style="color:var(--text3);font-size:13px;margin-bottom:12px">Servis verisi yüklenemedi</div><button onclick="loadServisPanel()" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:8px 20px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Tekrar Dene</button></div>';
-  }
-}
-
-// Servise navigasyon — openNav'ı açıp koordinatı set et
-function navToServis(lat,lng,name){
-  navToCoord = [lng,lat];
-  document.getElementById('nav-to') && (document.getElementById('nav-to').value = name);
-  openNav();
-  // Mevcut konumu başlangıç yap
-  if(!navFromCoord) useMyLocation();
-  // Kısa gecikme sonra hesapla
-  setTimeout(()=>calcRoute(), 600);
-}
-
 // ══════════════════════════════════════════════════════
 // HAVA DURUMU — Open-Meteo
 // ══════════════════════════════════════════════════════
 let wxLoaded=false;
 const WX_ICONS={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌧',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'❄️',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
-const WX_DESC={0:'Açık',1:'Az bulutlu',2:'Parçalı bulutlu',3:'Bulutlu',45:'Sisli',48:'Dondurucu sis',51:'Hafif çisenti',53:'Çisenti',55:'Yoğun çisenti',61:'Hafif yağmur',63:'Yağmur',65:'Kuvvetli yağmur',71:'Hafif kar',73:'Kar',75:'Yoğun kar',80:'Sağanak',81:'Kuvvetli sağanak',82:'Şiddetli sağanak',95:'Fırtına',96:'Fırtına + dolu',99:'Şiddetli fırtına'};
+const WX_DESC={0:'Açık',1:'Az bulutlu',2:'Parçalı bulutlu',3:'Bulutlu',45:'Sisli',51:'Hafif çisenti',53:'Çisenti',61:'Hafif yağmur',63:'Yağmur',65:'Kuvvetli yağmur',71:'Hafif kar',73:'Kar',75:'Yoğun kar',80:'Sağanak',81:'Kuvvetli sağanak',82:'Şiddetli sağanak',95:'Fırtına',96:'Fırtına + dolu',99:'Şiddetli fırtına'};
 
 async function loadWeather(){
   if(wxLoaded)return;
@@ -3071,24 +2899,35 @@ async function loadWeather(){
       const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,windspeed_10m,precipitation_probability&timezone=auto&wind_speed_unit=kmh`);
       const d=await r.json();
       const c=d.current;
-      const code=c.weathercode;
-      document.getElementById('wx-icon').textContent=WX_ICONS[code]||'🌡';
+      document.getElementById('wx-icon').textContent=WX_ICONS[c.weathercode]||'🌡';
       document.getElementById('wx-temp').textContent=Math.round(c.temperature_2m)+'°';
-      document.getElementById('wx-desc').textContent=WX_DESC[code]||'—';
+      document.getElementById('wx-desc').textContent=WX_DESC[c.weathercode]||'—';
       document.getElementById('wx-wind').textContent=Math.round(c.windspeed_10m)+' km/h';
       document.getElementById('wx-rain').textContent=(c.precipitation_probability||0)+'%';
       wxLoaded=true;
       if(c.windspeed_10m>50||(c.precipitation_probability||0)>60)
-        toast(`Dikkat: ${c.windspeed_10m>50?'Kuvvetli rüzgar':'Yağmur ihtimali yüksek'} — sürüşe dikkat!`);
+        toast(c.windspeed_10m>50?'Dikkat: Kuvvetli rüzgar!':'Dikkat: Yağmur ihtimali yüksek!');
     }catch(e){console.error('Hava durumu:',e);}
   },null,{enableHighAccuracy:false,timeout:8000});
 }
-function refreshWeather(){wxLoaded=false;document.getElementById('wx-temp').textContent='—°';document.getElementById('wx-desc').textContent='Yenileniyor...';loadWeather();}
+function refreshWeather(){
+  wxLoaded=false;
+  document.getElementById('wx-temp').textContent='—°';
+  document.getElementById('wx-desc').textContent='Yenileniyor...';
+  loadWeather();
+}
 
 // ══════════════════════════════════════════════════════
 // BAKIM TAKİBİ
 // ══════════════════════════════════════════════════════
-const MAINT_DEFAULTS={oil:{label:'Motor Yağı',icon:'🛢',interval:5000},tire:{label:'Lastik',icon:'⚫',interval:10000},chain:{label:'Zincir',icon:'⛓',interval:3000},brake:{label:'Fren',icon:'🔴',interval:15000},filter:{label:'Hava Filtresi',icon:'🔧',interval:15000},service:{label:'Genel Servis',icon:'🏪',interval:10000}};
+const MAINT_DEFAULTS={
+  oil:{label:'Motor Yağı',icon:'🛢',interval:5000},
+  tire:{label:'Lastik',icon:'⚫',interval:10000},
+  chain:{label:'Zincir',icon:'⛓',interval:3000},
+  brake:{label:'Fren',icon:'🔴',interval:15000},
+  filter:{label:'Hava Filtresi',icon:'🔧',interval:15000},
+  service:{label:'Genel Servis',icon:'🏪',interval:10000}
+};
 let selectedMaintType='oil';
 
 function openAddMaintenance(){
@@ -3105,7 +2944,7 @@ function selectMaintType(el,type){
   document.querySelectorAll('.maint-type-btn').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
   const km=parseInt(document.getElementById('maint-km').value)||0;
-  if(km>0) document.getElementById('maint-next-km').value=km+(MAINT_DEFAULTS[type]?.interval||5000);
+  if(km>0)document.getElementById('maint-next-km').value=km+(MAINT_DEFAULTS[type]?.interval||5000);
 }
 async function saveMaintenance(){
   if(!window.FB||!window.CU){toast('Giriş yapman gerekiyor');return;}
@@ -3136,38 +2975,30 @@ async function loadMaintenance(){
   el.innerHTML=Object.values(latest).map(v=>{
     const remaining=v.nextKm-currentKm;
     const pct=Math.max(0,Math.min(100,((currentKm-v.doneKm)/(v.nextKm-v.doneKm))*100));
-    const isDue=remaining<=0, isSoon=remaining>0&&remaining<=500;
-    if(isDue)alerts.push(`${v.label} bakımı gecikti!`);
-    else if(isSoon)alerts.push(`${v.label} bakımına ${remaining} km kaldı`);
+    const isDue=remaining<=0,isSoon=remaining>0&&remaining<=500;
+    if(isDue)alerts.push(v.label+' bakımı gecikti!');
+    else if(isSoon)alerts.push(v.label+' bakımına '+remaining+' km kaldı');
     const barColor=isDue?'var(--red)':isSoon?'#EAB308':'var(--orange)';
-    const statusText=isDue?'⚠ Gecikti!':isSoon?`${remaining} km kaldı`:`${remaining} km kaldı`;
+    const statusText=isDue?'Gecikti!':remaining+' km kaldı';
     const statusColor=isDue?'var(--red)':isSoon?'#EAB308':'var(--text3)';
-    return `<div class="maint-card${isDue?' due':isSoon?' soon':''}">
-      <div style="font-size:28px;flex-shrink:0">${v.icon}</div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <div style="font-size:13px;font-weight:600">${v.label}</div>
-          <div style="font-size:11px;font-weight:600;color:${statusColor}">${statusText}</div>
-        </div>
-        <div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:4px">
-          <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px"></div>
-        </div>
-        <div style="font-size:10px;color:var(--text3)">${v.doneKm.toLocaleString('tr-TR')} km'de yapıldı · Sonraki: ${v.nextKm.toLocaleString('tr-TR')} km${v.note?' · '+v.note:''}</div>
-      </div>
-    </div>`;
+    return '<div class="maint-card'+(isDue?' due':isSoon?' soon':'')+'">'+
+      '<div style="font-size:28px;flex-shrink:0">'+v.icon+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
+          '<div style="font-size:13px;font-weight:600">'+v.label+'</div>'+
+          '<div style="font-size:11px;font-weight:600;color:'+statusColor+'">'+statusText+'</div>'+
+        '</div>'+
+        '<div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:4px">'+
+          '<div style="height:100%;width:'+pct+'%;background:'+barColor+';border-radius:3px"></div>'+
+        '</div>'+
+        '<div style="font-size:10px;color:var(--text3)">'+v.doneKm.toLocaleString('tr-TR')+' km\'de yapıldı · Sonraki: '+v.nextKm.toLocaleString('tr-TR')+' km'+(v.note?' · '+v.note:'')+'</div>'+
+      '</div></div>';
   }).join('');
-  if(alerts.length){
-    const banner=document.getElementById('maint-alert-banner');
-    if(banner){
-      document.getElementById('maint-alert-text').textContent=alerts[0];
-      document.getElementById('maint-alert-sub').textContent=alerts.length>1?`+${alerts.length-1} daha`:'Profil → Bakım Takibi';
-      banner.style.display='block';
-    }
-  }
 }
+function toggleRouteTag(el,tag){el.classList.toggle('on');}
 
 // ══════════════════════════════════════════════════════
-// CANLI KONUM — sadece aktif tur katılımcıları
+// CANLI KONUM — sadece tur katılımcıları
 // ══════════════════════════════════════════════════════
 let liveShareOn=false,liveShareWatch=null,myActiveTourId=null;
 
@@ -3176,23 +3007,19 @@ async function checkActiveTour(){
   const{db,collection,query,where,getDocs}=window.FB;
   const myUid=window.CU.uid;
   let snap=await getDocs(query(collection(db,'tours'),where('ownerUid','==',myUid),where('active','==',true))).catch(()=>null);
-  if(snap&&!snap.empty){myActiveTourId=snap.docs[0].id;showTourLiveBtn();return;}
+  if(snap&&!snap.empty){myActiveTourId=snap.docs[0].id;const b=document.getElementById('tour-live-btn');if(b)b.style.display='flex';return;}
   snap=await getDocs(query(collection(db,'tours'),where('participants','array-contains',myUid),where('active','==',true))).catch(()=>null);
-  if(snap&&!snap.empty){myActiveTourId=snap.docs[0].id;showTourLiveBtn();return;}
-  myActiveTourId=null;hideTourLiveBtn();
+  if(snap&&!snap.empty){myActiveTourId=snap.docs[0].id;const b=document.getElementById('tour-live-btn');if(b)b.style.display='flex';return;}
+  myActiveTourId=null;const b=document.getElementById('tour-live-btn');if(b)b.style.display='none';
 }
-function showTourLiveBtn(){const b=document.getElementById('tour-live-btn');if(b)b.style.display='flex';}
-function hideTourLiveBtn(){const b=document.getElementById('tour-live-btn');if(b)b.style.display='none';}
 async function toggleTourLive(){if(liveShareOn){stopLiveShare();return;}if(!myActiveTourId){toast('Aktif bir turda değilsin');return;}startLiveShare();}
 function startLiveShare(){
   if(!navigator.geolocation){toast('GPS izni gerekli');return;}
   liveShareOn=true;
   const btn=document.getElementById('tour-live-btn');
   if(btn){btn.style.background='#16A34A';btn.style.color='white';btn.style.border='none';}
-  const banner=document.getElementById('live-share-banner');
-  if(banner){banner.style.display='flex';}
-  const cnt=document.getElementById('live-share-count');
-  if(cnt)cnt.textContent='(tur katılımcılarına görünüyor)';
+  const banner=document.getElementById('live-share-banner');if(banner)banner.style.display='flex';
+  const cnt=document.getElementById('live-share-count');if(cnt)cnt.textContent='(tur katılımcılarına görünüyor)';
   liveShareWatch=navigator.geolocation.watchPosition(pos=>{
     saveLive(pos.coords.latitude,pos.coords.longitude,Math.round((pos.coords.speed||0)*3.6),myActiveTourId);
   },()=>{},{enableHighAccuracy:true,maximumAge:2000});
@@ -3204,15 +3031,124 @@ function stopLiveShare(){
   clearLive();
   const btn=document.getElementById('tour-live-btn');
   if(btn){btn.style.background='var(--bg2)';btn.style.color='var(--text2)';btn.style.border='1.5px solid var(--border)';}
-  const banner=document.getElementById('live-share-banner');
-  if(banner)banner.style.display='none';
+  const banner=document.getElementById('live-share-banner');if(banner)banner.style.display='none';
   toast('Canlı konum durduruldu');
 }
+// ══════════════════════════════════════════════════════
+// BADGE SİSTEMİ
+// ══════════════════════════════════════════════════════
+function updateFeedNavBadge(){
+  const dm=parseInt(document.getElementById('dm-badge')?.textContent)||0;
+  const notif=parseInt(document.getElementById('notif-badge')?.textContent)||0;
+  const total=dm+notif;
+  const nb=document.getElementById('ni-feed-badge');
+  const ni=document.getElementById('ni-feed');
+  if(!nb||!ni)return;
+  if(total>0){nb.textContent=total>99?'99+':total;nb.style.display='flex';ni.classList.add('ni-pulse');}
+  else{nb.style.display='none';ni.classList.remove('ni-pulse');}
+}
 
-  if(!navFromCoord){
-    await new Promise(res=>navigator.geolocation.getCurrentPosition(p=>{navFromCoord=[p.coords.longitude,p.coords.lat
+// ══════════════════════════════════════════════════════
+// STOPREK / SAVEROUT GÜNCELLEMELERİ
+// ══════════════════════════════════════════════════════
+function confirmAction(title,msg,cb){
+  confirmCb=cb;
+  document.getElementById('confirm-title').textContent=title;
+  document.getElementById('confirm-msg').textContent=msg;
+  document.getElementById('confirm-yes-btn').onclick=async()=>{
+    closeModal('mod-confirm');
+    if(confirmCb)await confirmCb();
+    confirmCb=null;
+  };
+  openModal('mod-confirm');
+}
+
+// ════════════════════════════════════════════
+// SOS / ACİL YARDIM
+// ════════════════════════════════════════════
+let sosLocation = null;
+
+function openSOS(){
+  openOv('ov-sos');
+  // Konumu al
+  const locEl = document.getElementById('sos-location');
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const {latitude:lat, longitude:lng} = pos.coords;
+      sosLocation = {lat, lng};
+      const mapsLink = `https://maps.google.com/?q=${lat},${lng}`;
+      locEl.innerHTML = `📍 <strong style="color:white">Konum alındı</strong><br><span style="font-size:11px">${lat.toFixed(5)}, ${lng.toFixed(5)}</span><br><a href="${mapsLink}" target="_blank" style="color:#60A5FA;font-size:11px">Google Maps'te aç →</a>`;
+    }, err=>{
+      locEl.innerHTML = '📍 <span style="color:#F87171">Konum alınamadı — GPS izni ver</span>';
+    },{enableHighAccuracy:true,timeout:8000});
+  } else {
+    locEl.innerHTML = '📍 <span style="color:#F87171">GPS desteklenmiyor</span>';
+  }
+}
+
 async function sendSOS(type){
-  if(!window.FB || !window.CU){ toast('Giriş yapman gerekiyor
+  if(!window.FB || !window.CU){ toast('Giriş yapman gerekiyor'); return; }
+  const cu = window.CU;
+  const {db, collection, addDoc, getDocs} = window.FB;
+
+  const typeLabels = {
+    crash:     '🚨 KAZA — ' + (cu.name||'Biri') + ' kaza yaptı!',
+    breakdown: '🔧 YOLDA KALDI — ' + (cu.name||'Biri') + ' yardım istiyor!',
+    fuel:      '⛽ YAKIT BİTTİ — ' + (cu.name||'Biri') + ' yardım istiyor!',
+    help:      '🆘 ACİL YARDIM — ' + (cu.name||'Biri') + ' yardım istiyor!'
+  };
+  const msg = typeLabels[type] || '🆘 Yardım isteniyor!';
+  const locText = sosLocation
+    ? `Konum: https://maps.google.com/?q=${sosLocation.lat},${sosLocation.lng}`
+    : '';
+
+  // Firestore'a SOS kaydı yaz
+  try{
+    await addDoc(collection(db,'sos'),{
+      uid: cu.uid, name: cu.name||'Sürücü', bike: cu.bike||'',
+      type, msg: msg+locText,
+      lat: sosLocation?.lat||null, lng: sosLocation?.lng||null,
+      createdAt: new Date().toISOString()
+    });
+  }catch(e){}
+
+  // Tüm bağlantılara bildirim gönder
+  const connSnap = await getDocs(collection(db,'connections')).catch(()=>({forEach:()=>{}}));
+  const connUids = [];
+  connSnap.forEach(d=>{
+    const v=d.data();
+    if(v.uid1===cu.uid) connUids.push(v.uid2);
+    else if(v.uid2===cu.uid) connUids.push(v.uid1);
+  });
+
+  for(const uid of connUids){
+    await pushNotif(uid, 'sos', `${msg}${locText}`);
+  }
+
+  playDing();
+  toast('SOS gönderildi! Bağlantıların bilgilendirildi.');
+  closeOv('ov-sos');
+
+  // Haritada pin
+  if(map && sosLocation){
+    L.marker([sosLocation.lat, sosLocation.lng],{
+      icon: L.divIcon({
+        html:`<div style="background:#DC2626;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid white;box-shadow:0 0 8px rgba(220,38,38,.6);animation:blink 1s infinite">🆘</div>`,
+        iconSize:[32,32], iconAnchor:[16,16]
+      })
+    }).bindPopup(`<strong>${msg}</strong>`).addTo(map).openPopup();
+  }
+}
+
+
+// ════════════════════════════════════════════
+let liveShareOn = false, liveShareWatch = null, liveShareConnCount = 0;
+
+async function toggleLiveShare(){
+  if(liveShareOn){ stopLiveShare(); return; }
+  startLiveShare();
+}
+
 // ════════════════════════════════════════════
 // SESLİ İLETİŞİM (TELSIZ) — WebRTC
 // ════════════════════════════════════════════
@@ -3290,11 +3226,11 @@ async function joinVoiceRoom(){
   const {db, collection, doc, setDoc, onSnapshot, addDoc, getDocs, deleteDoc, where, query} = window.FB;
 
   // Mikrofon izni al
-  statusEl.textContent = '??️ Mikrofon izni...';
+  statusEl.textContent = 'Mikrofon izni...';
   try{
     voiceStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
   }catch(e){
-    statusEl.textContent = '?? Mikrofon izni reddedildi';
+    statusEl.textContent = 'Mikrofon izni reddedildi';
     statusEl.style.color = '#F87171';
     document.getElementById('ptt-label').textContent = 'Ayarlar → Gizlilik → Mikrofon izni ver';
     toast('Mikrofon izni gerekli');
@@ -3310,7 +3246,7 @@ async function joinVoiceRoom(){
   });
   voiceRoom = memberRef;
 
-  statusEl.textContent = '?? Bağlandı';
+  statusEl.textContent = 'Bağlandı';
   statusEl.style.color = '#4ADE80';
 
   // Odadaki üyeleri dinle → bağlan
@@ -3378,10 +3314,10 @@ async function joinVoiceRoom(){
 
   // Mikrofonu direkt aç
   setMic(true);
-  toast('Sesli kanala bağlandın ??️');
+  toast('Sesli kanala bağlandın');
 
   // Bağlantılara bildirim
-  connUsers.forEach(u => pushNotif(u.uid,'voice',`??️ <strong>${cu.name||'Biri'}</strong> sesli kanalda — Turlar → Telsiz`));
+  connUsers.forEach(u => pushNotif(u.uid,'voice',`<strong>${cu.name||'Biri'}</strong> sesli kanalda — Turlar → Telsiz`));
 }
 
 // ── Üye listesini render et ──
@@ -3397,9 +3333,9 @@ function renderVoiceMembers(snap, connUsers){
       ${makeAv(m.uid, m.name||u.name, m.avatarUrl||u.avatarUrl, 44)}
       <div style="flex:1">
         <div style="font-size:14px;font-weight:600;color:white">${m.name||u.name||'Sürücü'}${isMe?' (Sen)':''}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.4)">${m.micOn?'?? Konuşuyor':'⚫ Dinliyor'}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4)">${m.micOn?'● Konuşuyor':'⚫ Dinliyor'}</div>
       </div>
-      <div style="font-size:20px">${m.micOn?'??':'??'}</div>
+      <div style="font-size:20px">${m.micOn?'●':'○'}</div>
     </div>`;
   }).join('');
 }
@@ -3446,8 +3382,8 @@ async function createPeerConnection(remoteUid, isInitiator){
     const st = pc.connectionState;
     const el = document.querySelector(`#vmember-${remoteUid} div:nth-child(2) div:last-child`);
     if(el){
-      if(st==='connected') el.textContent='?? Bağlı';
-      else if(st==='disconnected'||st==='failed') el.textContent='?? Bağlantı kesildi';
+      if(st==='connected') el.textContent='● Bağlı';
+      else if(st==='disconnected'||st==='failed') el.textContent='○ Bağlantı kesildi';
     }
   };
 
@@ -3516,10 +3452,10 @@ function setMic(on){
     btn.style.background = on ? '#DC2626' : 'var(--orange)';
     btn.style.boxShadow  = on ? '0 0 0 16px rgba(220,38,38,.2)' : '0 0 0 0 rgba(255,85,0,.5)';
     btn.style.transform  = on ? 'scale(1.05)' : 'scale(1)';
-    btn.textContent      = on ? '??' : '??️';
+    btn.textContent      = on ? '●' : '○';
   }
   if(lbl){
-    lbl.textContent  = on ? '?? Konuşuluyor — kesmek için dokun' : '??️ Mikrofon kapalı — açmak için dokun';
+    lbl.textContent  = on ? '● Konuşuluyor — kesmek için dokun' : 'Mikrofon kapalı — açmak için dokun';
     lbl.style.color  = on ? '#F87171' : 'rgba(255,255,255,.5)';
   }
   // Firestore'da mic durumunu güncelle
@@ -3553,68 +3489,6 @@ async function leaveVoice(){
 // Eski fonksiyonlar — artık kullanılmıyor ama referans için bırakıldı
 function startTalk(){ setMic(true); }
 function stopTalk(){  setMic(false); }
-function navFromRoute(path,name){
-  if(!path||path.length<2){toast('Rota verisi yok');return;}
-  openNav();
-  setTimeout(()=>{
-    navFromCoord=[path[0][1],path[0][0]];
-    navToCoord=[path[path.length-1][1],path[path.length-1][0]];
-    document.getElementById('nav-from').value=name+' (Başlangıç)';
-    document.getElementById('nav-to').value=name+' (Bitiş)';
-    calcRoute();
-  },500);
-}
-
-// joinLobby alias — voiceLobbies sistemine bağlanır
-async function joinLobby(id,name,ownerUid){
-  if(!window.FB||!window.CU)return;
-  const{db,collection,doc,setDoc,onSnapshot,addDoc,deleteDoc,increment,updateDoc}=window.FB;
-  const cu=window.CU;
-  lobbyId=id; lobbyOwnerId=ownerUid||cu.uid;
-  const nameEl=document.getElementById('voice-lobby-name');
-  if(nameEl)nameEl.textContent=name||'Kanal';
-  openOv('ov-voice');
-  const statusEl=document.getElementById('voice-status');
-  const invBtn=document.getElementById('voice-invite-btn');
-  if(invBtn)invBtn.style.display=(lobbyOwnerId===cu.uid)?'block':'none';
-  if(statusEl)statusEl.textContent='Mikrofon izni...';
-  try{
-    lobbyStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-  }catch(e){
-    if(statusEl){statusEl.textContent='Mikrofon izni reddedildi';statusEl.style.color='#F87171';}
-    toast('Mikrofon izni gerekli');return;
-  }
-  lobbyMemberRef=doc(db,'voiceLobbies',id,'members',cu.uid);
-  await setDoc(lobbyMemberRef,{uid:cu.uid,name:cu.name||'Sürücü',avatarUrl:cu.avatarUrl||'',micOn:false,joinedAt:new Date().toISOString()});
-  updateDoc(doc(db,'voiceLobbies',id),{memberCount:increment(1)}).catch(()=>{});
-  if(statusEl){statusEl.textContent='Bağlandı';statusEl.style.color='#4ADE80';}
-  if(invBtn&&lobbyOwnerId===cu.uid)invBtn.style.display='block';
-  // Üye ve sinyal dinleyicileri
-  const membersColl=collection(db,'voiceLobbies',id,'members');
-  let firstSnap=true;
-  const u1=onSnapshot(membersColl,snap=>{
-    renderLobbyMembers(snap);
-    if(firstSnap){firstSnap=false;snap.forEach(d=>{const uid=d.id;if(uid!==cu.uid&&cu.uid<uid&&!lobbyPeers[uid])connectPeer(uid,true);});return;}
-    snap.docChanges().forEach(change=>{const uid=change.doc.id;if(uid===cu.uid)return;if(change.type==='added'&&cu.uid<uid&&!lobbyPeers[uid])connectPeer(uid,true);if(change.type==='removed')closeLobbyPeer(uid);});
-  });
-  lobbyUnsubs.push(u1);
-  const sigColl=collection(db,'voiceLobbies',id,'signals');
-  const u2=onSnapshot(sigColl,snap=>{
-    snap.docChanges().forEach(async change=>{
-      if(change.type!=='added')return;
-      const sigId=change.doc.id;if(processedSigs.has(sigId))return;
-      const sig=change.doc.data();if(sig.to!==cu.uid)return;
-      processedSigs.add(sigId);deleteDoc(change.doc.ref).catch(()=>{});
-      if(sig.type==='offer')await onOffer(sig.from,sig.sdp);
-      else if(sig.type==='answer')await onAnswer(sig.from,sig.sdp);
-      else if(sig.type==='candidate')await onCandidate(sig.from,sig.candidate);
-    });
-  });
-  lobbyUnsubs.push(u2);
-  setLobbyMic(true);
-  toast('Intercom kanalına bağlandın');
-}
-
 </script>
 </body>
 </html>
