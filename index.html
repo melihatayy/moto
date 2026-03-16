@@ -333,6 +333,13 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 </script>
 </head>
 <body>
+<script>
+function show(id){
+  document.querySelectorAll('#app > .screen').forEach(s=>s.classList.remove('show'));
+  var el=document.getElementById(id);
+  if(el)el.classList.add('show');
+}
+</script>
 <div id="app">
 
 <!-- ════ LANG ════ -->
