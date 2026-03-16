@@ -277,7 +277,7 @@ const gp = new GoogleAuthProvider();
 window.FB = {auth,db,gp,doc,setDoc,getDoc,collection,getDocs,addDoc,query,orderBy,limit,where,onSnapshot,updateDoc,increment,deleteDoc,writeBatch,arrayUnion};
 
 let appReady = false;
-let pendingUser = null;
+let pendingUser = undefined;
 
 window._onAppReady = async function() {
   appReady = true;
@@ -291,7 +291,7 @@ window._onAppReady = async function() {
   } catch(e) {
     if(e.code !== 'auth/no-current-user') console.warn('Redirect result:', e.message);
   }
-  // Pending user varsa işle
+  // Pending user varsa işle (undefined = henüz onAuthStateChanged gelmedi, null = giriş yok)
   if (pendingUser !== undefined) handleAuthUser(pendingUser);
 };
 
@@ -383,20 +383,36 @@ function show(id){
 </div>
 
 <!-- ════ WELCOME ════ -->
-<div class="screen" id="s-welcome">
-  <div style="flex:1;background:linear-gradient(180deg,#1a0800 0%,#0a0a0a 100%)"></div>
-  <div style="padding:32px 24px calc(32px + var(--safe));background:linear-gradient(transparent,rgba(0,0,0,.9))">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:8px;color:var(--orange);line-height:1;margin-bottom:16px">MOTO</div>
-    <div style="display:flex;gap:8px;margin-bottom:20px">
+<div class="screen" id="s-welcome" style="background:#0a0a0a;overflow:hidden;position:relative">
+  <div style="position:absolute;inset:0;z-index:0;pointer-events:none">
+    <div style="position:absolute;top:-100px;left:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(255,85,0,.2) 0%,transparent 70%);animation:pulseOrb 4s ease-in-out infinite"></div>
+    <div style="position:absolute;bottom:100px;right:-80px;width:280px;height:280px;background:radial-gradient(circle,rgba(255,40,0,.12) 0%,transparent 70%);animation:pulseOrb 4s ease-in-out infinite 2s"></div>
+    <svg style="position:absolute;bottom:0;left:0;width:100%;height:55%;opacity:.06" viewBox="0 0 400 500" preserveAspectRatio="none">
+      <line x1="200" y1="0" x2="0" y2="500" stroke="white" stroke-width="1"/>
+      <line x1="200" y1="0" x2="400" y2="500" stroke="white" stroke-width="1"/>
+      <line x1="200" y1="0" x2="200" y2="500" stroke="white" stroke-width="2" stroke-dasharray="20,15"/>
+    </svg>
+  </div>
+  <div style="position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 28px 16px;gap:8px">
+    <div style="font-size:96px;line-height:1;filter:drop-shadow(0 0 32px rgba(255,100,0,.5));animation:floatBike 3s ease-in-out infinite">🏍️</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:92px;letter-spacing:14px;line-height:1;background:linear-gradient(135deg,#ff6600,#ff2200);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 24px rgba(255,80,0,.4))">MOTO</div>
+    <div style="font-size:12px;letter-spacing:5px;color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:20px">Türkiye'nin Moto Topluluğu</div>
+    <div style="display:flex;gap:8px">
       <div style="width:8px;height:8px;border-radius:50%;transition:all .3s" id="wd0"></div>
       <div style="width:8px;height:8px;border-radius:50%;transition:all .3s" id="wd1"></div>
       <div style="width:8px;height:8px;border-radius:50%;transition:all .3s" id="wd2"></div>
     </div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1.5px;color:white;line-height:1.1;margin-bottom:10px" id="wt">Motorun varsa<br>MOTO'yu hak ediyorsun.</div>
-    <div style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:28px" id="ws">Türkiye'nin motorsiklet topluluğuna hoş geldin!</div>
-    <button class="btn btn-or" onclick="show('s-auth')">Başlayalım →</button>
-    <div style="text-align:center;margin-top:14px;font-size:12px;color:rgba(255,255,255,.4)">Hesabın var mı? <span style="color:var(--orange);cursor:pointer" onclick="show('s-auth');isLogin=true;authUI()">Giriş yap</span></div>
   </div>
+  <div style="position:relative;z-index:1;padding:24px 24px calc(36px + var(--safe));background:linear-gradient(to bottom,transparent,rgba(0,0,0,.97) 18%,#0a0a0a);border-top:1px solid rgba(255,100,0,.12)">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1.5px;color:white;line-height:1.2;margin-bottom:8px" id="wt">Motorun varsa<br>MOTO'yu hak ediyorsun.</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:22px" id="ws">Türkiye'nin motorsiklet topluluğuna hoş geldin!</div>
+    <button class="btn btn-or" onclick="show('s-auth')" style="font-size:15px;padding:15px">Başlayalım →</button>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:rgba(255,255,255,.3)">Hesabın var mı? <span style="color:var(--orange);cursor:pointer;font-weight:600" onclick="show('s-auth');isLogin=true;authUI()">Giriş yap</span></div>
+  </div>
+  <style>
+    @keyframes pulseOrb{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+    @keyframes floatBike{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-14px) rotate(4deg)}}
+  </style>
 </div>
 
 <!-- ════ AUTH ════ -->
@@ -3518,9 +3534,47 @@ async function leaveVoice(){
   toast('Sesli kanaldan çıkıldı');
 }
 
-// Eski fonksiyonlar — artık kullanılmıyor ama referans için bırakıldı
+// Alias ve eksik fonksiyonlar
+function toggleMic(){ toggleTalk(); }
 function startTalk(){ setMic(true); }
 function stopTalk(){  setMic(false); }
+function createLobby(){ openOv('ov-lobbies'); }
+function openLobbies(){ openOv('ov-lobbies'); }
+function watchVoiceInvites(){}
+function openVoiceInvite(){
+  const list = document.getElementById('voice-invite-list');
+  if(!list) return;
+  const connUsers = allUsers.filter(u => myConns.has(u.uid));
+  if(!connUsers.length){ list.innerHTML='<div style="padding:32px;text-align:center;color:var(--text3)">Bağlantın yok</div>'; return; }
+  list.innerHTML = connUsers.map(u =>
+    '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">' +
+    makeAv(u.uid,u.name,u.avatarUrl,44) +
+    '<div style="flex:1"><div style="font-size:14px;font-weight:600">'+(u.name||'Sürücü')+'</div></div>' +
+    '<button onclick="toast('Davet gönderildi!')" style="background:var(--orange);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Davet Et</button></div>'
+  ).join('');
+  openOv('ov-voice-invite');
+}
+async function startLobby(){
+  const nameEl = document.getElementById('lobby-name-inp');
+  const name = nameEl ? nameEl.value.trim() || 'Sesli Kanal' : 'Sesli Kanal';
+  const lobbyNameEl = document.getElementById('voice-lobby-name');
+  if(lobbyNameEl) lobbyNameEl.textContent = name;
+  closeOv('ov-lobbies');
+  openVoiceChat();
+}
+function _prependToMyGrid(post){
+  const grid = document.getElementById('my-posts-grid');
+  if(!grid) return;
+  const empties = grid.querySelectorAll('div[style*="span 3"]');
+  empties.forEach(e => e.remove());
+  const div = document.createElement('div');
+  div.id = 'pg-' + post.id;
+  div.style.cssText = 'aspect-ratio:1;background:' + (post.photoUrl ? '#eee' : 'var(--bg2)') + ';overflow:hidden;position:relative';
+  const img = post.photoUrl ? '<img src="'+post.photoUrl+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">' :
+    '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">'+(post.caption||'').substring(0,30)+'</div>';
+  div.innerHTML = img + '<button onclick="confirmAction('Gönderiyi Sil','Bu gönderiyi silmek istiyor musun?',()=>deletePost(''+post.id+''))" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer">✕</button>';
+  grid.insertBefore(div, grid.firstChild);
+}
 
 // Uygulama JS hazır — Firebase auth callback'i tetikle
 if(window._onAppReady) window._onAppReady();
