@@ -277,7 +277,7 @@ const gp = new GoogleAuthProvider();
 window.FB = {auth,db,gp,doc,setDoc,getDoc,collection,getDocs,addDoc,query,orderBy,limit,where,onSnapshot,updateDoc,increment,deleteDoc,writeBatch,arrayUnion};
 
 let appReady = false;
-let pendingUser = null;
+let pendingUser = undefined;
 
 // Uygulama JS'i yüklenince pending user'ı işle
 window._onAppReady = async function() {
