@@ -276,8 +276,20 @@ const db = getFirestore(app);
 const gp = new GoogleAuthProvider();
 window.FB = {auth,db,gp,doc,setDoc,getDoc,collection,getDocs,addDoc,query,orderBy,limit,where,onSnapshot,updateDoc,increment,deleteDoc,writeBatch,arrayUnion};
 
+let authHandled = false;
 onAuthStateChanged(auth, async (user) => {
-  if (!user) { show('s-lang'); return; }
+  const waitForShow = () => new Promise(res => {
+    if(typeof show === 'function') return res();
+    const t = setInterval(() => { if(typeof show === 'function'){ clearInterval(t); res(); }}, 50);
+  });
+  await waitForShow();
+  if (!user) {
+    // Sadece ilk kontrol veya oturum kapatıldığında lang'e dön
+    if(!authHandled) { authHandled=true; show('s-lang'); }
+    else { window.CU=null; show('s-lang'); }
+    return;
+  }
+  authHandled = true;
   const snap = await getDoc(doc(db,'users',user.uid));
   if (snap.exists() && snap.data().setupDone) {
     window.CU = {uid:user.uid,...snap.data()};
