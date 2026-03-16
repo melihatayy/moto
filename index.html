@@ -260,7 +260,7 @@ select.inp option{background:white}
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, query, orderBy, limit, where, onSnapshot, updateDoc, increment, deleteDoc, writeBatch, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -280,8 +280,9 @@ let appReady = false;
 let pendingUser = null;
 
 // Uygulama JS'i yüklenince pending user'ı işle
-window._onAppReady = function() {
+window._onAppReady = async function() {
   appReady = true;
+  try { const r = await getRedirectResult(auth); if(r && r.user) return; } catch(e) {}
   if(pendingUser !== undefined) handleAuthUser(pendingUser);
 };
 
@@ -331,8 +332,8 @@ window.fbLogin = async (e,p) => {
   }
 };
 window.fbGoogle = async () => {
-  try { await signInWithPopup(auth,gp); return {ok:true}; }
-  catch(e) { return {ok:false,msg:e.code==='auth/popup-closed-by-user'?'':e.message}; }
+  try { await signInWithRedirect(auth, gp); return {ok:true}; }
+  catch(e) { return {ok:false, msg:e.message}; }
 };
 window.fbSaveProfile = async (data) => {
   const u = auth.currentUser; if(!u) return;
@@ -375,20 +376,50 @@ function show(id){
 </div>
 
 <!-- ════ WELCOME ════ -->
-<div class="screen" id="s-welcome">
-  <div style="flex:1;background:linear-gradient(180deg,#1a0800 0%,#0a0a0a 100%)"></div>
-  <div style="padding:32px 24px calc(32px + var(--safe));background:linear-gradient(transparent,rgba(0,0,0,.9))">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:8px;color:var(--orange);line-height:1;margin-bottom:16px">MOTO</div>
-    <div style="display:flex;gap:8px;margin-bottom:20px">
+<div class="screen" id="s-welcome" style="background:#0a0a0a;position:relative;overflow:hidden">
+
+  <!-- Animated background -->
+  <div style="position:absolute;inset:0;z-index:0">
+    <!-- Glow orbs -->
+    <div style="position:absolute;top:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(255,100,0,.18) 0%,transparent 70%);animation:pulseOrb 4s ease-in-out infinite"></div>
+    <div style="position:absolute;bottom:120px;right:-80px;width:260px;height:260px;background:radial-gradient(circle,rgba(255,60,0,.12) 0%,transparent 70%);animation:pulseOrb 4s ease-in-out infinite 2s"></div>
+    <!-- Road lines -->
+    <svg style="position:absolute;bottom:0;left:0;width:100%;height:60%;opacity:.07" viewBox="0 0 400 500" preserveAspectRatio="none">
+      <line x1="200" y1="0" x2="0" y2="500" stroke="white" stroke-width="1"/>
+      <line x1="200" y1="0" x2="400" y2="500" stroke="white" stroke-width="1"/>
+      <line x1="200" y1="0" x2="200" y2="500" stroke="white" stroke-width="2" stroke-dasharray="20,15"/>
+    </svg>
+  </div>
+
+  <!-- Hero image area -->
+  <div style="position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 28px 20px">
+    <!-- Big icon -->
+    <div style="font-size:90px;margin-bottom:16px;filter:drop-shadow(0 0 30px rgba(255,100,0,.5));animation:floatBike 3s ease-in-out infinite">🏍️</div>
+
+    <!-- Brand -->
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:88px;letter-spacing:12px;line-height:1;background:linear-gradient(135deg,#ff6600,#ff3300);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 20px rgba(255,80,0,.4))">MOTO</div>
+    <div style="font-size:13px;letter-spacing:4px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:4px;margin-bottom:32px">Türkiye'nin Moto Topluluğu</div>
+
+    <!-- Slide dots -->
+    <div style="display:flex;gap:8px;margin-bottom:16px">
       <div style="width:8px;height:8px;border-radius:50%;transition:all .3s" id="wd0"></div>
       <div style="width:8px;height:8px;border-radius:50%;transition:all .3s" id="wd1"></div>
       <div style="width:8px;height:8px;border-radius:50%;transition:all .3s" id="wd2"></div>
     </div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1.5px;color:white;line-height:1.1;margin-bottom:10px" id="wt">Motorun varsa<br>MOTO'yu hak ediyorsun.</div>
-    <div style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:28px" id="ws">Türkiye'nin motorsiklet topluluğuna hoş geldin!</div>
-    <button class="btn btn-or" onclick="show('s-auth')">Başlayalım →</button>
-    <div style="text-align:center;margin-top:14px;font-size:12px;color:rgba(255,255,255,.4)">Hesabın var mı? <span style="color:var(--orange);cursor:pointer" onclick="show('s-auth');isLogin=true;authUI()">Giriş yap</span></div>
   </div>
+
+  <!-- Bottom card -->
+  <div style="position:relative;z-index:1;padding:28px 24px calc(32px + var(--safe));background:linear-gradient(to bottom,transparent,rgba(0,0,0,.95) 20%,#0a0a0a);border-top:1px solid rgba(255,100,0,.15)">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1.5px;color:white;line-height:1.2;margin-bottom:8px" id="wt">Motorun varsa<br>MOTO'yu hak ediyorsun.</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:24px" id="ws">Türkiye'nin motorsiklet topluluğuna hoş geldin!</div>
+    <button class="btn btn-or" onclick="show('s-auth')" style="font-size:16px;letter-spacing:1px;padding:16px">Başlayalım →</button>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:rgba(255,255,255,.35)">Hesabın var mı? <span style="color:var(--orange);cursor:pointer;font-weight:600" onclick="show('s-auth');isLogin=true;authUI()">Giriş yap</span></div>
+  </div>
+
+  <style>
+    @keyframes pulseOrb { 0%,100%{opacity:.7;transform:scale(1)} 50%{opacity:1;transform:scale(1.1)} }
+    @keyframes floatBike { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-12px) rotate(3deg)} }
+  </style>
 </div>
 
 <!-- ════ AUTH ════ -->
