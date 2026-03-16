@@ -277,11 +277,10 @@ const gp = new GoogleAuthProvider();
 window.FB = {auth,db,gp,doc,setDoc,getDoc,collection,getDocs,addDoc,query,orderBy,limit,where,onSnapshot,updateDoc,increment,deleteDoc,writeBatch,arrayUnion};
 
 let appReady = false;
-let pendingUser = undefined; // undefined = henüz gelmedi, null = giriş yok, user = giriş var
+let pendingUser = undefined;
 
 window._onAppReady = function() {
   appReady = true;
-  // onAuthStateChanged zaten geldiyse işle
   if (pendingUser !== undefined) handleAuthUser(pendingUser);
 };
 
@@ -307,7 +306,7 @@ async function handleAuthUser(user) {
 
 onAuthStateChanged(auth, async (user) => {
   pendingUser = user;
-  if (!appReady) return; // JS henüz yüklenmedi, _onAppReady bekleyecek
+  if (!appReady) return;
   await handleAuthUser(user);
 });
 
@@ -330,7 +329,7 @@ window.fbGoogle = async () => {
     await signInWithPopup(auth, gp);
     return {ok:true};
   } catch(e) {
-    if(e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return {ok:false, msg:''};
+    if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request') return {ok:false,msg:''};
     return {ok:false, msg:e.message};
   }
 };
@@ -3510,9 +3509,33 @@ async function leaveVoice(){
   toast('Sesli kanaldan çıkıldı');
 }
 
-// Eski fonksiyonlar — artık kullanılmıyor ama referans için bırakıldı
 function startTalk(){ setMic(true); }
 function stopTalk(){  setMic(false); }
+function toggleMic(){ setMic(!isMicOn); }
+function openLobbies(){ openOv('ov-lobbies'); }
+function createLobby(){ openOv('ov-lobbies'); }
+async function startLobby(){
+  const n=document.getElementById('lobby-name-inp')?.value?.trim()||'Sesli Kanal';
+  const el=document.getElementById('voice-lobby-name'); if(el) el.textContent=n;
+  closeOv('ov-lobbies'); openVoiceChat();
+}
+function openVoiceInvite(){
+  const list=document.getElementById('voice-invite-list'); if(!list)return;
+  const connUsers=allUsers.filter(u=>myConns.has(u.uid));
+  if(!connUsers.length){list.innerHTML='<div style="padding:32px;text-align:center;color:var(--text3)">Bağlantın yok</div>';return;}
+  list.innerHTML=connUsers.map(u=>'<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">'+makeAv(u.uid,u.name,u.avatarUrl,44)+'<div style="flex:1"><div style="font-size:14px;font-weight:600">'+(u.name||'Sürücü')+'</div></div><button onclick="toast('Davet gönderildi!')" style="background:var(--orange);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Davet Et</button></div>').join('');
+  openOv('ov-voice-invite');
+}
+function watchVoiceInvites(){}
+function _prependToMyGrid(post){
+  const grid=document.getElementById('my-posts-grid'); if(!grid)return;
+  grid.querySelectorAll('div[style*="span 3"]').forEach(e=>e.remove());
+  const div=document.createElement('div');
+  div.id='pg-'+post.id;
+  div.style.cssText='aspect-ratio:1;background:'+(post.photoUrl?'#eee':'var(--bg2)')+';overflow:hidden;position:relative';
+  div.innerHTML=(post.photoUrl?'<img src="'+post.photoUrl+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);padding:6px;text-align:center">'+(post.caption||'').substring(0,30)+'</div>')+'<button onclick="confirmAction('Gönderiyi Sil','Bu gönderiyi silmek istiyor musun?',()=>deletePost(''+post.id+''))" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer">✕</button>';
+  grid.insertBefore(div,grid.firstChild);
+}
 
 // Uygulama JS hazır — Firebase auth callback'i tetikle
 if(window._onAppReady) window._onAppReady();
