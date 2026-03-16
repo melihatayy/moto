@@ -277,22 +277,29 @@ const gp = new GoogleAuthProvider();
 window.FB = {auth,db,gp,doc,setDoc,getDoc,collection,getDocs,addDoc,query,orderBy,limit,where,onSnapshot,updateDoc,increment,deleteDoc,writeBatch,arrayUnion};
 
 let appReady = false;
-let pendingUser = undefined;
+let redirectHandled = false;
 
-window._onAppReady = async function() {
-  appReady = true;
-  // Redirect sonrası sonucu kontrol et
+// Google redirect sonucunu HEMEN kontrol et — sayfa yüklenince
+(async () => {
   try {
     const result = await getRedirectResult(auth);
     if (result && result.user) {
-      // Google redirect başarılı — onAuthStateChanged zaten tetiklenecek
-      return;
+      redirectHandled = true;
+      // Uygulama hazır olana kadar bekle
+      await new Promise(resolve => {
+        const check = setInterval(() => {
+          if (appReady) { clearInterval(check); resolve(); }
+        }, 50);
+      });
+      await handleAuthUser(result.user);
     }
   } catch(e) {
-    if(e.code !== 'auth/no-current-user') console.warn('Redirect result:', e.message);
+    console.warn('Redirect result:', e.message);
   }
-  // Pending user varsa işle
-  if (pendingUser !== undefined) handleAuthUser(pendingUser);
+})();
+
+window._onAppReady = function() {
+  appReady = true;
 };
 
 async function handleAuthUser(user) {
@@ -316,7 +323,8 @@ async function handleAuthUser(user) {
 }
 
 onAuthStateChanged(auth, async (user) => {
-  if (!appReady) { pendingUser = user; return; }
+  if (!appReady) return; // JS henüz yüklenmedi, bekle
+  if (redirectHandled) return; // Redirect zaten halletti
   await handleAuthUser(user);
 });
 
