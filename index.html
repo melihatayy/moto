@@ -243,6 +243,12 @@ select.inp option{background:white}
 .empty-sub{font-size:13px}
 
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.maint-type-btn{background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer;transition:all .15s}
+.maint-type-btn.on{background:var(--odim);border-color:var(--orange)}
+.maint-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.maint-card.due{border-color:rgba(220,38,38,.4);background:var(--rdim)}
+.maint-card.soon{border-color:rgba(234,179,8,.4);background:rgba(234,179,8,.05)}
 </style>
 
 <!-- Firebase -->
@@ -396,10 +402,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <div class="setup-title">Motorun Hangisi?</div>
     <div class="setup-sub">Doğru topluluğa seni yönlendirelim.</div>
     <div class="lbl">Marka</div>
-    <select class="inp" style="margin-bottom:14px" id="s2-brand" onchange="fillModels()">
-      <option value="">— Marka seç —</option>
-      <option value="aprilia">Aprilia</option><option value="bajaj">Bajaj</option><option value="bmw">BMW Motorrad</option><option value="cfmoto">CFmoto</option><option value="daelim">Daelim</option><option value="honda">Honda</option><option value="hyosung">Hyosung</option><option value="jawa">Jawa</option><option value="kawasaki">Kawasaki</option><option value="kove">Kove</option><option value="kuba">Kuba</option><option value="mv_agusta">MV Agusta</option><option value="piaggio">Piaggio</option><option value="qj">QJ Motor</option><option value="rieju">Rieju</option><option value="suzuki">Suzuki</option><option value="um">UM</option><option value="vespa">Vespa</option><option value="voge">Voge</option><option value="yamaha">Yamaha</option><option value="zontes">Zontes</option><option value="diger">Diğer</option>
-    </select>
+    <select class="inp" style="margin-bottom:14px" id="s2-brand" onchange="fillModels()"><option value="">— Marka seç —</option><option value="abush">Abush</option><option value="altai">Altai</option><option value="aprilia">Aprilia</option><option value="bmw">BMW</option><option value="bajaj">Bajaj</option><option value="barossa">Barossa</option><option value="benda_motor">Benda Motor</option><option value="benelli">Benelli</option><option value="beta">Beta</option><option value="bisan">Bisan</option><option value="brixton">Brixton</option><option value="cfmoto">CFmoto</option><option value="csn_motor">CSN Motor</option><option value="can_am">Can-Am</option><option value="daelim">Daelim</option><option value="dofern">Dofern</option><option value="ducati">Ducati</option><option value="falcon">Falcon</option><option value="gasgas">GasGas</option><option value="harley_davidson">Harley-Davidson</option><option value="hero">Hero</option><option value="honda">Honda</option><option value="husaberg">Husaberg</option><option value="husqvarna">Husqvarna</option><option value="hyosung">Hyosung</option><option value="indian">Indian</option><option value="italjet">Italjet</option><option value="jawa">Jawa</option><option value="ktm">KTM</option><option value="kanuni">Kanuni</option><option value="kawasaki">Kawasaki</option><option value="kove">Kove</option><option value="kuba">Kuba</option><option value="kymco">Kymco</option><option value="lambretta">Lambretta</option><option value="lifan">Lifan</option><option value="mv_agusta">MV Agusta</option><option value="mondial">Mondial</option><option value="moto_guzzi">Moto Guzzi</option><option value="moto_morini">Moto Morini</option><option value="motolux">Motolux</option><option value="peugeot">Peugeot</option><option value="piaggio">Piaggio</option><option value="qj">QJ</option><option value="rks">RKS</option><option value="rmg_moto_gusto">RMG Moto Gusto</option><option value="regal_raptor">Regal Raptor</option><option value="rieju">Rieju</option><option value="royal_alloy">Royal Alloy</option><option value="royal_enfield">Royal Enfield</option><option value="sfm">SFM</option><option value="swm">SWM</option><option value="sym">SYM</option><option value="sherco">Sherco</option><option value="skyjet">Skyjet</option><option value="suzuki">Suzuki</option><option value="tvs">TVS</option><option value="togo">Togo</option><option value="triumph">Triumph</option><option value="um">UM</option><option value="vespa">Vespa</option><option value="voge">Voge</option><option value="yamaha">Yamaha</option><option value="yuki">Yuki</option><option value="zontes">Zontes</option></select>
     <div class="lbl">Model</div>
     <select class="inp" style="margin-bottom:14px" id="s2-model" disabled onchange="fillCat()"><option>— Önce marka seç —</option></select>
     <div class="lbl">Kategori</div>
@@ -462,6 +465,24 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <!-- Sadece logo header -->
     <div class="hdr" style="border-bottom:none">
       <div class="logo">ROTALAR</div>
+      <!-- Hava durumu widget -->
+      <div id="weather-widget" onclick="refreshWeather()" style="display:flex;align-items:center;gap:6px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:5px 10px;cursor:pointer;flex-shrink:0">
+        <div id="wx-icon" style="font-size:18px">⛅</div>
+        <div>
+          <div id="wx-temp" style="font-size:14px;font-weight:700;color:var(--text);line-height:1">—°</div>
+          <div id="wx-desc" style="font-size:9px;color:var(--text3);line-height:1.2">Yükleniyor</div>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);margin:0 2px"></div>
+        <div>
+          <div id="wx-wind" style="font-size:11px;font-weight:600;color:var(--text2)">— km/h</div>
+          <div style="font-size:9px;color:var(--text3)">Rüzgar</div>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);margin:0 2px"></div>
+        <div>
+          <div id="wx-rain" style="font-size:11px;font-weight:600;color:var(--text2)">—%</div>
+          <div style="font-size:9px;color:var(--text3)">Yağış</div>
+        </div>
+      </div>
     </div>
     <!-- Kayıt banner -->
     <div class="rec-banner" id="rec-banner">
@@ -568,11 +589,89 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <div id="my-posts-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;margin-bottom:14px"></div>
       <div class="sec-title">Son Rotalarım</div>
       <div id="my-routes"></div>
+
+      <!-- BAKIM TAKİBİ -->
+      <div class="sec-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Bakım Takibi</span>
+        <button onclick="openAddMaintenance()" style="background:var(--orange);color:white;border:none;border-radius:8px;padding:4px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer">+ Ekle</button>
+      </div>
+      <div id="maintenance-list" style="padding:0 14px 8px"></div>
+
       <div class="sp"></div>
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
+<!-- BAKIM EKLE OVERLAY -->
+<div class="ov" id="ov-maintenance">
+  <div class="hdr">
+    <div class="hbtn" onclick="closeOv('ov-maintenance')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--orange);margin-left:8px">BAKIM EKLE</div>
+  </div>
+  <div class="scrl" style="padding:16px">
+    <!-- Bakım türü -->
+    <div class="lbl" style="margin-bottom:8px">Bakım Türü</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="maint-type-grid">
+      <div class="maint-type-btn on" onclick="selectMaintType(this,'oil')" data-type="oil">
+        <div style="font-size:22px;margin-bottom:4px">🛢</div>
+        <div style="font-size:13px;font-weight:600">Motor Yağı</div>
+        <div style="font-size:10px;color:var(--text3)">Her 5.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'tire')" data-type="tire">
+        <div style="font-size:22px;margin-bottom:4px">⚫</div>
+        <div style="font-size:13px;font-weight:600">Lastik</div>
+        <div style="font-size:10px;color:var(--text3)">Her 10.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'chain')" data-type="chain">
+        <div style="font-size:22px;margin-bottom:4px">⛓</div>
+        <div style="font-size:13px;font-weight:600">Zincir</div>
+        <div style="font-size:10px;color:var(--text3)">Her 3.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'brake')" data-type="brake">
+        <div style="font-size:22px;margin-bottom:4px">🔴</div>
+        <div style="font-size:13px;font-weight:600">Fren</div>
+        <div style="font-size:10px;color:var(--text3)">Her 15.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'filter')" data-type="filter">
+        <div style="font-size:22px;margin-bottom:4px">🔧</div>
+        <div style="font-size:13px;font-weight:600">Hava Filtresi</div>
+        <div style="font-size:10px;color:var(--text3)">Her 15.000 km</div>
+      </div>
+      <div class="maint-type-btn" onclick="selectMaintType(this,'service')" data-type="service">
+        <div style="font-size:22px;margin-bottom:4px">🏪</div>
+        <div style="font-size:13px;font-weight:600">Genel Servis</div>
+        <div style="font-size:10px;color:var(--text3)">Her 10.000 km</div>
+      </div>
+    </div>
+
+    <!-- Yapıldığı km -->
+    <div class="lbl" style="margin-bottom:6px">Bakım yapıldığında km</div>
+    <input class="inp" id="maint-km" type="number" placeholder="Örn: 15000" style="margin-bottom:12px">
+
+    <!-- Sonraki bakım km -->
+    <div class="lbl" style="margin-bottom:6px">Sonraki bakım km <span style="color:var(--text3);font-size:10px">(opsiyonel, otomatik hesaplanır)</span></div>
+    <input class="inp" id="maint-next-km" type="number" placeholder="Örn: 20000" style="margin-bottom:12px">
+
+    <!-- Not -->
+    <div class="lbl" style="margin-bottom:6px">Not <span style="color:var(--text3);font-size:10px">(opsiyonel)</span></div>
+    <textarea class="inp" id="maint-note" rows="2" placeholder="Kullanılan yağ markası, usta adı vs." style="resize:none;margin-bottom:20px"></textarea>
+
+    <button onclick="saveMaintenance()" style="width:100%;background:var(--orange);color:white;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Bakımı Kaydet</button>
+  </div>
+</div>
+
+<!-- BAKIM UYARI BANNER -->
+<div id="maint-alert-banner" style="display:none;position:absolute;bottom:60px;left:8px;right:8px;z-index:50;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border-radius:14px;padding:12px 16px;box-shadow:0 4px 20px rgba(124,58,237,.4)">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:24px;flex-shrink:0">⚠️</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700" id="maint-alert-text">Bakım zamanı!</div>
+      <div style="font-size:11px;opacity:.85;margin-top:2px" id="maint-alert-sub"></div>
+    </div>
+    <button onclick="this.parentElement.parentElement.style.display='none'" style="background:rgba(255,255,255,.2);color:white;border:none;border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">Tamam</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
   <div class="nav">
     <div class="ni on" id="ni-feed" onclick="switchTab('feed',this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -779,7 +878,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
       <input type="file" id="listing-cam" accept="image/*" capture="environment" multiple style="display:none" onchange="addListingPhotos(this)">
       <input type="file" id="listing-file" accept="image/*" multiple style="display:none" onchange="addListingPhotos(this)">
     </div>
-    <div><div class="lbl">Marka</div><select class="inp" id="l-brand" onchange="fillListingModels()"><option value="">— Marka seç —</option><option value="aprilia">Aprilia</option><option value="bmw">BMW Motorrad</option><option value="cfmoto">CFmoto</option><option value="honda">Honda</option><option value="kawasaki">Kawasaki</option><option value="suzuki">Suzuki</option><option value="vespa">Vespa</option><option value="voge">Voge</option><option value="yamaha">Yamaha</option><option value="diger">Diğer</option></select></div>
+    <div><div class="lbl">Marka</div><select class="inp" id="l-brand" onchange="fillListingModels()"><option value="">— Marka seç —</option><option value="abush">Abush</option><option value="altai">Altai</option><option value="aprilia">Aprilia</option><option value="bmw">BMW</option><option value="bajaj">Bajaj</option><option value="barossa">Barossa</option><option value="benda_motor">Benda Motor</option><option value="benelli">Benelli</option><option value="beta">Beta</option><option value="bisan">Bisan</option><option value="brixton">Brixton</option><option value="cfmoto">CFmoto</option><option value="csn_motor">CSN Motor</option><option value="can_am">Can-Am</option><option value="daelim">Daelim</option><option value="dofern">Dofern</option><option value="ducati">Ducati</option><option value="falcon">Falcon</option><option value="gasgas">GasGas</option><option value="harley_davidson">Harley-Davidson</option><option value="hero">Hero</option><option value="honda">Honda</option><option value="husaberg">Husaberg</option><option value="husqvarna">Husqvarna</option><option value="hyosung">Hyosung</option><option value="indian">Indian</option><option value="italjet">Italjet</option><option value="jawa">Jawa</option><option value="ktm">KTM</option><option value="kanuni">Kanuni</option><option value="kawasaki">Kawasaki</option><option value="kove">Kove</option><option value="kuba">Kuba</option><option value="kymco">Kymco</option><option value="lambretta">Lambretta</option><option value="lifan">Lifan</option><option value="mv_agusta">MV Agusta</option><option value="mondial">Mondial</option><option value="moto_guzzi">Moto Guzzi</option><option value="moto_morini">Moto Morini</option><option value="motolux">Motolux</option><option value="peugeot">Peugeot</option><option value="piaggio">Piaggio</option><option value="qj">QJ</option><option value="rks">RKS</option><option value="rmg_moto_gusto">RMG Moto Gusto</option><option value="regal_raptor">Regal Raptor</option><option value="rieju">Rieju</option><option value="royal_alloy">Royal Alloy</option><option value="royal_enfield">Royal Enfield</option><option value="sfm">SFM</option><option value="swm">SWM</option><option value="sym">SYM</option><option value="sherco">Sherco</option><option value="skyjet">Skyjet</option><option value="suzuki">Suzuki</option><option value="tvs">TVS</option><option value="togo">Togo</option><option value="triumph">Triumph</option><option value="um">UM</option><option value="vespa">Vespa</option><option value="voge">Voge</option><option value="yamaha">Yamaha</option><option value="yuki">Yuki</option><option value="zontes">Zontes</option></select></div>
     <div><div class="lbl">Model</div><select class="inp" id="l-model" disabled onchange="fillListingCat()"><option>— Önce marka seç —</option></select></div>
     <div><div class="lbl">Kategori</div><select class="inp" id="l-cat"><option>Supersport</option><option>Adventure / Touring</option><option>Naked / Streetfighter</option><option>Cafe Racer / Retro</option><option>Enduro / Off-Road</option><option>Scooter / Maxi Scooter</option><option>Cruiser</option></select></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -803,7 +902,7 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
     <div><div class="lbl">Adın Soyadın</div><input class="inp" id="edit-name" placeholder="Adın Soyadın"></div>
     <div><div class="lbl">Biyografi</div><textarea class="inp" id="edit-bio" rows="3" placeholder="Kendin hakkında..." style="resize:none"></textarea></div>
     <div><div class="lbl">Şehir</div><select class="inp" id="edit-city"><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option><option>Adana</option><option>Konya</option><option>Diğer</option></select></div>
-    <div><div class="lbl">Marka</div><select class="inp" id="edit-brand" onchange="fillEditModels()"><option value="">— Marka seç —</option><option value="aprilia">Aprilia</option><option value="bmw">BMW Motorrad</option><option value="cfmoto">CFmoto</option><option value="honda">Honda</option><option value="kawasaki">Kawasaki</option><option value="suzuki">Suzuki</option><option value="vespa">Vespa</option><option value="yamaha">Yamaha</option><option value="diger">Diğer</option></select></div>
+    <div><div class="lbl">Marka</div><select class="inp" id="edit-brand" onchange="fillEditModels()"><option value="">— Marka seç —</option><option value="abush">Abush</option><option value="altai">Altai</option><option value="aprilia">Aprilia</option><option value="bmw">BMW</option><option value="bajaj">Bajaj</option><option value="barossa">Barossa</option><option value="benda_motor">Benda Motor</option><option value="benelli">Benelli</option><option value="beta">Beta</option><option value="bisan">Bisan</option><option value="brixton">Brixton</option><option value="cfmoto">CFmoto</option><option value="csn_motor">CSN Motor</option><option value="can_am">Can-Am</option><option value="daelim">Daelim</option><option value="dofern">Dofern</option><option value="ducati">Ducati</option><option value="falcon">Falcon</option><option value="gasgas">GasGas</option><option value="harley_davidson">Harley-Davidson</option><option value="hero">Hero</option><option value="honda">Honda</option><option value="husaberg">Husaberg</option><option value="husqvarna">Husqvarna</option><option value="hyosung">Hyosung</option><option value="indian">Indian</option><option value="italjet">Italjet</option><option value="jawa">Jawa</option><option value="ktm">KTM</option><option value="kanuni">Kanuni</option><option value="kawasaki">Kawasaki</option><option value="kove">Kove</option><option value="kuba">Kuba</option><option value="kymco">Kymco</option><option value="lambretta">Lambretta</option><option value="lifan">Lifan</option><option value="mv_agusta">MV Agusta</option><option value="mondial">Mondial</option><option value="moto_guzzi">Moto Guzzi</option><option value="moto_morini">Moto Morini</option><option value="motolux">Motolux</option><option value="peugeot">Peugeot</option><option value="piaggio">Piaggio</option><option value="qj">QJ</option><option value="rks">RKS</option><option value="rmg_moto_gusto">RMG Moto Gusto</option><option value="regal_raptor">Regal Raptor</option><option value="rieju">Rieju</option><option value="royal_alloy">Royal Alloy</option><option value="royal_enfield">Royal Enfield</option><option value="sfm">SFM</option><option value="swm">SWM</option><option value="sym">SYM</option><option value="sherco">Sherco</option><option value="skyjet">Skyjet</option><option value="suzuki">Suzuki</option><option value="tvs">TVS</option><option value="togo">Togo</option><option value="triumph">Triumph</option><option value="um">UM</option><option value="vespa">Vespa</option><option value="voge">Voge</option><option value="yamaha">Yamaha</option><option value="yuki">Yuki</option><option value="zontes">Zontes</option></select></div>
     <div><div class="lbl">Model</div><select class="inp" id="edit-model" disabled><option>— Önce marka seç —</option></select></div>
     <div><div class="lbl">Yıl</div><select class="inp" id="edit-year"><option value="">— Yıl —</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option></select></div>
     <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
@@ -1167,17 +1266,71 @@ window.fbSignOut = async () => { await signOut(auth); window.CU=null; show('s-la
 // BIKES DATA
 // ════════════════════════════════════════════
 const BIKES = {
-  yamaha:{models:['MT-03','MT-07','MT-09','MT-09 SP','MT-10','R1','R3','R7','Tracer 7','Tracer 9','XSR700','XSR900','TMAX 560','NMAX 125','X-MAX 300','Ténéré 700'],cats:{'R1':'Supersport','R3':'Supersport','R7':'Supersport','MT-03':'Naked','MT-07':'Naked','MT-09':'Naked','MT-09 SP':'Naked','MT-10':'Naked','Tracer 7':'Adventure / Touring','Tracer 9':'Adventure / Touring','XSR700':'Cafe Racer / Retro','XSR900':'Cafe Racer / Retro','TMAX 560':'Scooter / Maxi Scooter','NMAX 125':'Scooter / Maxi Scooter','X-MAX 300':'Scooter / Maxi Scooter','Ténéré 700':'Adventure / Touring'}},
-  bmw:{models:['S 1000 RR','M 1000 RR','S 1000 R','R 1300 GS','R 1300 GS Adventure','R 1250 GS','F 900 R','F 850 GS','G 310 R','R nineT','R nineT Pure','C 400 X','CE 04'],cats:{'S 1000 RR':'Supersport','M 1000 RR':'Supersport','S 1000 R':'Naked','R 1300 GS':'Adventure / Touring','R 1300 GS Adventure':'Adventure / Touring','R 1250 GS':'Adventure / Touring','F 900 R':'Naked','F 850 GS':'Adventure / Touring','G 310 R':'Naked','R nineT':'Cafe Racer / Retro','R nineT Pure':'Cafe Racer / Retro','C 400 X':'Scooter / Maxi Scooter','CE 04':'Scooter / Maxi Scooter'}},
-  honda:{models:['CBR 1000 RR-R','CBR 600 RR','CBR 500 R','CB 1000 R','CB 650 R','CB 500 F','CB 500 X','Africa Twin','X-ADV 750','NC 750 X','Forza 750','PCX 125','Monkey'],cats:{'CBR 1000 RR-R':'Supersport','CBR 600 RR':'Supersport','CBR 500 R':'Supersport','CB 1000 R':'Naked','CB 650 R':'Naked','CB 500 F':'Naked','CB 500 X':'Adventure / Touring','Africa Twin':'Adventure / Touring','X-ADV 750':'Adventure / Touring','NC 750 X':'Adventure / Touring','Forza 750':'Scooter / Maxi Scooter','PCX 125':'Scooter / Maxi Scooter','Monkey':'Cafe Racer / Retro'}},
-  kawasaki:{models:['Ninja ZX-10R','Ninja ZX-6R','Ninja H2','Ninja 400','Z900','Z650','Z900 RS','Z900 RS Cafe','Versys 650','Versys 1000','W800'],cats:{'Ninja ZX-10R':'Supersport','Ninja ZX-6R':'Supersport','Ninja H2':'Supersport','Ninja 400':'Naked','Z900':'Naked','Z650':'Naked','Z900 RS':'Cafe Racer / Retro','Z900 RS Cafe':'Cafe Racer / Retro','Versys 650':'Adventure / Touring','Versys 1000':'Adventure / Touring','W800':'Cafe Racer / Retro'}},
-  suzuki:{models:['GSX-R 1000','GSX-R 750','Hayabusa','GSX-S 1000','GSX-S 750','SV 650','Katana','V-Strom 650','V-Strom 1050'],cats:{'GSX-R 1000':'Supersport','GSX-R 750':'Supersport','Hayabusa':'Supersport','GSX-S 1000':'Naked','GSX-S 750':'Naked','SV 650':'Naked','Katana':'Naked','V-Strom 650':'Adventure / Touring','V-Strom 1050':'Adventure / Touring'}},
-  aprilia:{models:['RSV4 Factory','RS 660','RS 660 Extrema','Tuono V4','Tuono 660'],cats:{'RSV4 Factory':'Supersport','RS 660':'Supersport','RS 660 Extrema':'Supersport','Tuono V4':'Naked','Tuono 660':'Naked'}},
-  cfmoto:{models:['450NK','450SR','450MT','650NK','650MT'],cats:{'450SR':'Supersport','450NK':'Naked','650NK':'Naked','450MT':'Adventure / Touring','650MT':'Adventure / Touring'}},
-  vespa:{models:['GTS 300','GTS 125','Primavera 125','Sprint 125'],cats:{'GTS 300':'Scooter / Maxi Scooter','GTS 125':'Scooter / Maxi Scooter','Primavera 125':'Scooter / Maxi Scooter','Sprint 125':'Scooter / Maxi Scooter'}},
-  voge:{models:['500 DS','500 R','525 DSX','650 DS'],cats:{'500 R':'Naked','500 DS':'Adventure / Touring','525 DSX':'Adventure / Touring','650 DS':'Adventure / Touring'}},
-  mv_agusta:{models:['F3 800','Brutale 800 RR','Brutale 1000 RR','Dragster 800'],cats:{'F3 800':'Supersport','Brutale 800 RR':'Naked','Brutale 1000 RR':'Naked','Dragster 800':'Naked'}},
-  diger:{models:['Diğer'],cats:{'Diğer':'Naked'}}
+  abush:{label:"Abush",models:["Asutay 125", "Aybar A-180", "Benice A-150", "CG 50 Plus", "CGA 100i", "CGA 125i", "Speedy 100i", "Speedy 110i", "Speedy 125i", "Yelken XA-1", "Yelken XA-2"],cats:{"Asutay 125": "Naked", "Aybar A-180": "Naked", "Benice A-150": "Moped / City", "CG 50 Plus": "Moped / City", "CGA 100i": "Naked", "CGA 125i": "Naked", "Speedy 100i": "Naked", "Speedy 110i": "Naked", "Speedy 125i": "Naked", "Yelken XA-1": "Naked", "Yelken XA-2": "Naked"}},
+  altai:{label:"Altai",models:["Carrier 110 Pro", "Carrier 125", "Carrier 125 Pro", "F1Max 50", "F1Max Pro 50", "F3Max", "Napoli", "F1Max Pro 125", "F2Max 50 Plus", "F4 Fusion", "G Line Pro 125", "Misk 50", "Ristretto 125"],cats:{"Carrier 110 Pro": "Naked", "Carrier 125": "Naked", "Carrier 125 Pro": "Naked", "F1Max 50": "Moped / City", "F1Max Pro 50": "Moped / City", "F3Max": "Naked", "Napoli": "Naked", "F1Max Pro 125": "Naked", "F2Max 50 Plus": "Moped / City", "F4 Fusion": "Naked", "G Line Pro 125": "Naked", "Misk 50": "Moped / City", "Ristretto 125": "Naked"}},
+  aprilia:{label:"Aprilia",models:["Atlantic 250", "Atlantic 500 Sprint", "Caponord 1000 ETV", "Caponord 1000 ETV ABS", "Caponord 1200 ABS Travel Pack", "Caponord 1200 Rally", "Dorsoduro", "Pegaso 650", "RS 125", "RS4 125 4T", "RS 457", "RS 660", "RS 660 Extrema", "Tuono V4", "Tuono 660", "RSV4 Factory"],cats:{"Atlantic 250": "Moped / City", "Atlantic 500 Sprint": "Scooter / Maxi Scooter", "Caponord 1000 ETV": "Adventure / Touring", "Caponord 1000 ETV ABS": "Adventure / Touring", "Caponord 1200 ABS Travel Pack": "Adventure / Touring", "Caponord 1200 Rally": "Adventure / Touring", "Dorsoduro": "Naked", "Pegaso 650": "Moped / City", "RS 125": "Supersport", "RS4 125 4T": "Naked", "RS 457": "Supersport", "RS 660": "Supersport", "RS 660 Extrema": "Supersport", "Tuono V4": "Naked", "Tuono 660": "Naked", "RSV4 Factory": "Naked"}},
+  bajaj:{label:"Bajaj",models:["Avenger Street 150", "Boxer", "Chetak", "Discover 125 ST", "Discover 150 F", "Discover 150 S", "Dominar 250 D", "Dominar 400", "Dominar 400 UG", "Dominar D 400", "Pulsar AS 150", "Pulsar AS 200", "Pulsar F 250", "Pulsar N 250", "Pulsar NS 125", "Pulsar NS 200", "Pulsar RS 200"],cats:{"Avenger Street 150": "Moped / City", "Boxer": "Naked", "Chetak": "Naked", "Discover 125 ST": "Naked", "Discover 150 F": "Moped / City", "Discover 150 S": "Moped / City", "Dominar 250 D": "Moped / City", "Dominar 400": "Naked", "Dominar 400 UG": "Naked", "Dominar D 400": "Naked", "Pulsar AS 150": "Moped / City", "Pulsar AS 200": "Naked", "Pulsar F 250": "Moped / City", "Pulsar N 250": "Moped / City", "Pulsar NS 125": "Naked", "Pulsar NS 200": "Naked", "Pulsar RS 200": "Supersport"}},
+  barossa:{label:"Barossa",models:["ADV 125", "GV 650", "Jedi"],cats:{"ADV 125": "Adventure / Touring", "GV 650": "Moped / City", "Jedi": "Naked"}},
+  benda_motor:{label:"Benda Motor",models:["Chinchilla 500", "Darkflag 500", "LFC 700", "Napoloen 500", "Rock 250"],cats:{"Chinchilla 500": "Moped / City", "Darkflag 500": "Moped / City", "LFC 700": "Enduro / Off-Road", "Napoloen 500": "Moped / City", "Rock 250": "Moped / City"}},
+  benelli:{label:"Benelli",models:["125-S", "502-C", "752 S", "BN 125", "BN 251", "Leoncino", "Leoncino 250", "TNT 25", "TNT 125", "TNT 249-S", "TNT 250", "TNT 300", "TNT 600"],cats:{"125-S": "Naked", "502-C": "Moped / City", "752 S": "Naked", "BN 125": "Naked", "BN 251": "Naked", "Leoncino": "Naked", "Leoncino 250": "Moped / City", "TNT 25": "Naked", "TNT 125": "Naked", "TNT 249-S": "Naked", "TNT 250": "Naked", "TNT 300": "Naked", "TNT 600": "Naked"}},
+  beta:{label:"Beta",models:["Alp 4.0", "RR 250 2T", "RR 300 2T", "RR 4T 350", "Xtrainer"],cats:{"Alp 4.0": "Naked", "RR 250 2T": "Supersport", "RR 300 2T": "Supersport", "RR 4T 350": "Supersport", "Xtrainer": "Naked"}},
+  bisan:{label:"Bisan",models:["Atlas 125", "Ceylan", "Motocup 100", "Roadstar 250", "Roadstar Cub", "Spx", "Star", "Toprak WRC 100", "Toprak WRC 125"],cats:{"Atlas 125": "Naked", "Ceylan": "Naked", "Motocup 100": "Naked", "Roadstar 250": "Moped / City", "Roadstar Cub": "Moped / City", "Spx": "Naked", "Star": "Naked", "Toprak WRC 100": "Supersport", "Toprak WRC 125": "Supersport"}},
+  bmw:{label:"BMW",models:["C 400 GT", "C 400 X", "C 650 GT", "C 650 Sport", "F 650 GS", "F 700 GS", "F 750 GS", "F 800 GS", "F 800 GS Adventure", "F 900 R", "F 900 XR", "G 310 R", "G 310 GS", "GTR 1400", "M 1000 RR", "R 1250 GS", "R 1250 GS Adventure", "R 1300 GS", "R 1300 GS Adventure", "R nineT", "R nineT Pure", "S 1000 R", "S 1000 RR", "CE 04", "C 400 X"],cats:{"C 400 GT": "Naked", "C 400 X": "Naked", "C 650 GT": "Moped / City", "C 650 Sport": "Moped / City", "F 650 GS": "Moped / City", "F 700 GS": "Naked", "F 750 GS": "Moped / City", "F 800 GS": "Naked", "F 800 GS Adventure": "Adventure / Touring", "F 900 R": "Naked", "F 900 XR": "Naked", "G 310 R": "Naked", "G 310 GS": "Naked", "GTR 1400": "Adventure / Touring", "M 1000 RR": "Naked", "R 1250 GS": "Moped / City", "R 1250 GS Adventure": "Adventure / Touring", "R 1300 GS": "Naked", "R 1300 GS Adventure": "Adventure / Touring", "R nineT": "Cruiser / Retro", "R nineT Pure": "Cruiser / Retro", "S 1000 R": "Naked", "S 1000 RR": "Naked", "CE 04": "Naked"}},
+  brixton:{label:"Brixton",models:["BX 125 X", "Cromwell 125", "Cromwell 250", "Cromwell 1200", "Crossfire 125", "Crossfire 125 XS", "Crossfire 500", "Crossfire 500 XC", "Felsberg 125 X", "Felsberg 250", "Rayburn 125", "Sunray 125"],cats:{"BX 125 X": "Naked", "Cromwell 125": "Naked", "Cromwell 250": "Moped / City", "Cromwell 1200": "Naked", "Crossfire 125": "Enduro / Off-Road", "Crossfire 125 XS": "Enduro / Off-Road", "Crossfire 500": "Enduro / Off-Road", "Crossfire 500 XC": "Enduro / Off-Road", "Felsberg 125 X": "Naked", "Felsberg 250": "Moped / City", "Rayburn 125": "Naked", "Sunray 125": "Naked"}},
+  can_am:{label:"Can-Am",models:["Canyon", "Ryker", "Ryker Rally", "Ryker Sport", "Spyder"],cats:{"Canyon": "Naked", "Ryker": "Naked", "Ryker Rally": "Enduro / Off-Road", "Ryker Sport": "Naked", "Spyder": "Naked"}},
+  cfmoto:{label:"CFmoto",models:["150NK", "250CL-X", "250NK", "250SR", "400NK", "450CL-C", "450MT", "450NK", "450SR", "650MT", "650NK", "700CL-X ADV"],cats:{"150NK": "Moped / City", "250CL-X": "Moped / City", "250NK": "Moped / City", "250SR": "Moped / City", "400NK": "Naked", "450CL-C": "Moped / City", "450MT": "Moped / City", "450NK": "Moped / City", "450SR": "Moped / City", "650MT": "Moped / City", "650NK": "Moped / City", "700CL-X ADV": "Naked"}},
+  csn_motor:{label:"CSN Motor",models:["Arrebol 125", "Beauty 50", "Beauty 125", "Blaze", "Dakar 150", "Elegance 125", "Felicity 125", "Kano 50", "Pluton", "Snake 125X", "Sniper"],cats:{"Arrebol 125": "Naked", "Beauty 50": "Moped / City", "Beauty 125": "Naked", "Blaze": "Naked", "Dakar 150": "Moped / City", "Elegance 125": "Naked", "Felicity 125": "Naked", "Kano 50": "Moped / City", "Pluton": "Naked", "Snake 125X": "Naked", "Sniper": "Naked"}},
+  daelim:{label:"Daelim",models:["B-bone", "Dart 125", "Daystar 250", "S2 125", "S3 Advance 250"],cats:{"B-bone": "Naked", "Dart 125": "Naked", "Daystar 250": "Moped / City", "S2 125": "Naked", "S3 Advance 250": "Moped / City"}},
+  dofern:{label:"Dofern",models:["JDF 125ZD", "JDF 250T"],cats:{"JDF 125ZD": "Naked", "JDF 250T": "Moped / City"}},
+  ducati:{label:"Ducati",models:["848", "1098", "DesertX", "Diavel", "Diavel 1260", "Diavel 1260 S", "Diavel Carbon", "Diavel Dark", "Diavel V4", "Hypermotard", "Monster 937", "Multistrada V4", "Panigale V2", "Panigale V4", "Scrambler 800", "Scrambler 1100", "Streetfighter V4"],cats:{"848": "Naked", "1098": "Naked", "DesertX": "Naked", "Diavel": "Naked", "Diavel 1260": "Naked", "Diavel 1260 S": "Naked", "Diavel Carbon": "Naked", "Diavel Dark": "Naked", "Diavel V4": "Naked", "Hypermotard": "Naked", "Monster 937": "Naked", "Multistrada V4": "Naked", "Panigale V2": "Supersport", "Panigale V4": "Supersport", "Scrambler 800": "Enduro / Off-Road", "Scrambler 1100": "Enduro / Off-Road", "Streetfighter V4": "Naked"}},
+  falcon:{label:"Falcon",models:["Attack 50", "Attack 100", "Cmax 155", "Comfort 150", "Comfort 180", "Cooper 125 EFI", "Cooper 50", "Crown 150", "Desert 277", "Dolphin 100", "Explore 250", "Falcon 100", "Falcon 125", "Falcon 150", "Falcon 250"],cats:{"Attack 50": "Moped / City", "Attack 100": "Naked", "Cmax 155": "Naked", "Comfort 150": "Moped / City", "Comfort 180": "Naked", "Cooper 125 EFI": "Naked", "Cooper 50": "Moped / City", "Crown 150": "Moped / City", "Desert 277": "Naked", "Dolphin 100": "Naked", "Explore 250": "Moped / City", "Falcon 100": "Naked", "Falcon 125": "Naked", "Falcon 150": "Moped / City", "Falcon 250": "Moped / City"}},
+  gasgas:{label:"GasGas",models:["EC 250", "EC 250 F", "EC 350 F", "MC 250 F", "MC 65", "MC 85", "SM 700", "TXT Pro 250"],cats:{"EC 250": "Enduro / Off-Road", "EC 250 F": "Enduro / Off-Road", "EC 350 F": "Enduro / Off-Road", "MC 250 F": "Moped / City", "MC 65": "Naked", "MC 85": "Naked", "SM 700": "Naked", "TXT Pro 250": "Moped / City"}},
+  harley_davidson:{label:"Harley-Davidson",models:["Breakout 117", "CVO Road Glide", "CVO Road Glide ST", "Dyna Fat Bob", "Dyna Low Rider", "Dyna Street Bob", "Electra Glide", "Fat Boy", "Iron 883", "Low Rider S", "Nightster", "Pan America 1250", "Road Glide", "Road King", "Softail Standard", "Sportster S", "Street Bob"],cats:{"Breakout 117": "Cruiser / Retro", "CVO Road Glide": "Cruiser / Retro", "CVO Road Glide ST": "Cruiser / Retro", "Dyna Fat Bob": "Cruiser / Retro", "Dyna Low Rider": "Cruiser / Retro", "Dyna Street Bob": "Cruiser / Retro", "Electra Glide": "Cruiser / Retro", "Fat Boy": "Cruiser / Retro", "Iron 883": "Cruiser / Retro", "Low Rider S": "Cruiser / Retro", "Nightster": "Cruiser / Retro", "Pan America 1250": "Cruiser / Retro", "Road Glide": "Cruiser / Retro", "Road King": "Cruiser / Retro", "Softail Standard": "Cruiser / Retro", "Sportster S": "Cruiser / Retro", "Street Bob": "Naked"}},
+  hero:{label:"Hero",models:["Dash 110i", "Dash 125", "Duet 110i", "Duet 125", "Glamour", "Hunk", "Hunk 200R", "Karizma", "Pleasure", "Pleasure 110", "Splendor", "Xtreme 160R", "Xtreme 200R"],cats:{"Dash 110i": "Scooter / Maxi Scooter", "Dash 125": "Scooter / Maxi Scooter", "Duet 110i": "Naked", "Duet 125": "Naked", "Glamour": "Naked", "Hunk": "Naked", "Hunk 200R": "Naked", "Karizma": "Naked", "Pleasure": "Moped / City", "Pleasure 110": "Moped / City", "Splendor": "Naked", "Xtreme 160R": "Naked", "Xtreme 200R": "Naked"}},
+  honda:{label:"Honda",models:["Activa 100", "Activa 110", "Activa 125", "Activa S", "ADV 350", "ADV 350 SE", "Beat", "C125 Super Cub", "CB 125E", "CB 300 R", "CB 300 F", "CB 500 F", "CB 500 X", "CB 650 R", "CB 750 Hornet", "CB 1000 R", "CBR 500 R", "CBR 600 RR", "CBR 1000 RR-R", "Dio", "Forza 125", "Forza 350", "Forza 750", "Gold Wing", "Monkey", "NC 750 X", "NX 500", "PCX 125", "PCX 160", "SH 125i", "SH 150i", "X-ADV 750", "Africa Twin", "Transalp 750"],cats:{"Activa 100": "Scooter / Maxi Scooter", "Activa 110": "Scooter / Maxi Scooter", "Activa 125": "Scooter / Maxi Scooter", "Activa S": "Scooter / Maxi Scooter", "ADV 350": "Adventure / Touring", "ADV 350 SE": "Adventure / Touring", "Beat": "Scooter / Maxi Scooter", "C125 Super Cub": "Moped / City", "CB 125E": "Naked", "CB 300 R": "Naked", "CB 300 F": "Naked", "CB 500 F": "Naked", "CB 500 X": "Naked", "CB 650 R": "Naked", "CB 750 Hornet": "Naked", "CB 1000 R": "Naked", "CBR 500 R": "Supersport", "CBR 600 RR": "Supersport", "CBR 1000 RR-R": "Supersport", "Dio": "Scooter / Maxi Scooter", "Forza 125": "Scooter / Maxi Scooter", "Forza 350": "Scooter / Maxi Scooter", "Forza 750": "Scooter / Maxi Scooter", "Gold Wing": "Naked", "Monkey": "Naked", "NC 750 X": "Moped / City", "NX 500": "Moped / City", "PCX 125": "Scooter / Maxi Scooter", "PCX 160": "Scooter / Maxi Scooter", "SH 125i": "Scooter / Maxi Scooter", "SH 150i": "Scooter / Maxi Scooter", "X-ADV 750": "Adventure / Touring", "Africa Twin": "Adventure / Touring", "Transalp 750": "Adventure / Touring"}},
+  husaberg:{label:"Husaberg",models:["TE 250"],cats:{"TE 250": "Enduro / Off-Road"}},
+  husqvarna:{label:"Husqvarna",models:["Enduro 701", "FC 250", "FC 350", "FE 250", "FE 350", "FE 450", "FE 501", "Norden 901", "SM 125 S", "Supermoto 701", "Svartpilen 125", "Svartpilen 250", "Svartpilen 401", "Vitpilen 401"],cats:{"Enduro 701": "Enduro / Off-Road", "FC 250": "Enduro / Off-Road", "FC 350": "Enduro / Off-Road", "FE 250": "Enduro / Off-Road", "FE 350": "Enduro / Off-Road", "FE 450": "Enduro / Off-Road", "FE 501": "Enduro / Off-Road", "Norden 901": "Adventure / Touring", "SM 125 S": "Naked", "Supermoto 701": "Naked", "Svartpilen 125": "Naked", "Svartpilen 250": "Moped / City", "Svartpilen 401": "Naked", "Vitpilen 401": "Naked"}},
+  hyosung:{label:"Hyosung",models:["GD 250 N", "GD 250 R", "GT 250 P", "GT 250 R", "GT 650 R", "GV 250", "GV 650", "QH 250"],cats:{"GD 250 N": "Moped / City", "GD 250 R": "Moped / City", "GT 250 P": "Moped / City", "GT 250 R": "Moped / City", "GT 650 R": "Moped / City", "GV 250": "Moped / City", "GV 650": "Moped / City", "QH 250": "Moped / City"}},
+  indian:{label:"Indian",models:["Challenger", "Chief Classic", "Chief Dark Horse", "Chieftain", "FTR", "Pursuit", "Roadmaster", "Scout", "Scout Bobber"],cats:{"Challenger": "Naked", "Chief Classic": "Cruiser / Retro", "Chief Dark Horse": "Naked", "Chieftain": "Naked", "FTR": "Naked", "Pursuit": "Naked", "Roadmaster": "Naked", "Scout": "Cruiser / Retro", "Scout Bobber": "Cruiser / Retro"}},
+  italjet:{label:"Italjet",models:["Dragster 125", "Dragster 200", "Dragster 300", "Formula"],cats:{"Dragster 125": "Naked", "Dragster 200": "Naked", "Dragster 300": "Naked", "Formula": "Naked"}},
+  jawa:{label:"Jawa",models:["250 Classic", "250 Ceylan", "250 Laser", "300 CL", "350 Twin Sport", "42 Bobber", "Perak", "RVM 500 Adventure", "RVM 500 Scrambler"],cats:{"250 Classic": "Cruiser / Retro", "250 Ceylan": "Moped / City", "250 Laser": "Moped / City", "300 CL": "Naked", "350 Twin Sport": "Moped / City", "42 Bobber": "Cruiser / Retro", "Perak": "Naked", "RVM 500 Adventure": "Adventure / Touring", "RVM 500 Scrambler": "Enduro / Off-Road"}},
+  kanuni:{label:"Kanuni",models:["BD100", "Bobcat 150", "Breton 125", "Breton S", "Breton SL 125", "BS 100", "BS 125", "Caracal 200", "Cross 150", "Cross 250", "Cup 100", "Elite 100", "Korvet 250", "Speed 125", "Sprint 150"],cats:{"BD100": "Naked", "Bobcat 150": "Cruiser / Retro", "Breton 125": "Naked", "Breton S": "Naked", "Breton SL 125": "Naked", "BS 100": "Naked", "BS 125": "Naked", "Caracal 200": "Naked", "Cross 150": "Enduro / Off-Road", "Cross 250": "Enduro / Off-Road", "Cup 100": "Naked", "Elite 100": "Enduro / Off-Road", "Korvet 250": "Moped / City", "Speed 125": "Naked", "Sprint 150": "Scooter / Maxi Scooter"}},
+  kawasaki:{label:"Kawasaki",models:["Eliminator 500", "ER-5", "ER-6 F", "ER-6 N", "GTR 1400", "J 300", "KLE 500", "KLR 650", "Ninja 400", "Ninja 650", "Ninja H2", "Ninja ZX-6R", "Ninja ZX-10R", "Versys 650", "Versys 1000", "Vulcan S", "W800", "Z400", "Z650", "Z900", "Z900 RS", "Z900 RS Cafe", "Z H2"],cats:{"Eliminator 500": "Moped / City", "ER-5": "Naked", "ER-6 F": "Naked", "ER-6 N": "Naked", "GTR 1400": "Adventure / Touring", "J 300": "Naked", "KLE 500": "Moped / City", "KLR 650": "Moped / City", "Ninja 400": "Naked", "Ninja 650": "Moped / City", "Ninja H2": "Naked", "Ninja ZX-6R": "Supersport", "Ninja ZX-10R": "Supersport", "Versys 650": "Adventure / Touring", "Versys 1000": "Adventure / Touring", "Vulcan S": "Naked", "W800": "Cruiser / Retro", "Z400": "Naked", "Z650": "Naked", "Z900": "Naked", "Z900 RS": "Naked", "Z900 RS Cafe": "Supersport", "Z H2": "Naked"}},
+  kove:{label:"Kove",models:["125 R", "250 R", "250 RR", "510 F", "510 X", "800 X"],cats:{"125 R": "Naked", "250 R": "Moped / City", "250 RR": "Moped / City", "510 F": "Naked", "510 X": "Naked", "800 X": "Naked"}},
+  ktm:{label:"KTM",models:["50 SX", "65 SX", "85 SX", "125 Duke", "125 RC", "125 SX", "200 Duke", "200 Duke ABS", "200 RC", "250 Adventure", "250 Duke ABS", "250 Duke", "300 EXC", "390 Adventure", "390 Duke", "450 SX-F", "690 Duke", "690 Enduro R", "790 Adventure", "890 Adventure", "890 Duke", "990 Adventure", "1090 Adventure", "1290 Super Duke R", "1290 Super Adventure"],cats:{"50 SX": "Enduro / Off-Road", "65 SX": "Enduro / Off-Road", "85 SX": "Enduro / Off-Road", "125 Duke": "Naked", "125 RC": "Naked", "125 SX": "Enduro / Off-Road", "200 Duke": "Naked", "200 Duke ABS": "Naked", "200 RC": "Naked", "250 Adventure": "Adventure / Touring", "250 Duke ABS": "Naked", "250 Duke": "Naked", "300 EXC": "Enduro / Off-Road", "390 Adventure": "Adventure / Touring", "390 Duke": "Naked", "450 SX-F": "Enduro / Off-Road", "690 Duke": "Naked", "690 Enduro R": "Enduro / Off-Road", "790 Adventure": "Adventure / Touring", "890 Adventure": "Adventure / Touring", "890 Duke": "Naked", "990 Adventure": "Adventure / Touring", "1090 Adventure": "Adventure / Touring", "1290 Super Duke R": "Naked", "1290 Super Adventure": "Adventure / Touring"}},
+  kuba:{label:"Kuba",models:["Arome 125 Pro", "AZ 50", "Azure 50 Pro", "Bannry 125", "Bevely 125", "Bevely 50 Pro", "Black Cat", "Blueberry", "Bluebird", "Borelli 50", "Brilliant 125", "CB 125", "CG 125", "Milano 250", "Panthera 125", "Rio 50", "Strada 125", "Tornado 250"],cats:{"Arome 125 Pro": "Naked", "AZ 50": "Moped / City", "Azure 50 Pro": "Moped / City", "Bannry 125": "Naked", "Bevely 125": "Naked", "Bevely 50 Pro": "Moped / City", "Black Cat": "Naked", "Blueberry": "Naked", "Bluebird": "Naked", "Borelli 50": "Moped / City", "Brilliant 125": "Naked", "CB 125": "Naked", "CG 125": "Naked", "Milano 250": "Moped / City", "Panthera 125": "Naked", "Rio 50": "Moped / City", "Strada 125": "Naked", "Tornado 250": "Moped / City"}},
+  kymco:{label:"Kymco",models:["Agility 125", "Agility 150", "Agility 16+ 125i", "Agility City 125", "Agility City 200i", "Ak 550", "CK 125", "CV3", "Downtown 125", "Downtown 350i", "Like 125", "Like 200i", "XCITING 400i", "XCITING S 400i"],cats:{"Agility 125": "Scooter / Maxi Scooter", "Agility 150": "Scooter / Maxi Scooter", "Agility 16+ 125i": "Scooter / Maxi Scooter", "Agility City 125": "Scooter / Maxi Scooter", "Agility City 200i": "Scooter / Maxi Scooter", "Ak 550": "Moped / City", "CK 125": "Naked", "CV3": "Naked", "Downtown 125": "Naked", "Downtown 350i": "Moped / City", "Like 125": "Naked", "Like 200i": "Naked", "XCITING 400i": "Naked", "XCITING S 400i": "Naked"}},
+  lambretta:{label:"Lambretta",models:["X125", "X250", "X300", "G350", "V125 Special", "V200 Special", "V50 Special"],cats:{"X125": "Naked", "X250": "Moped / City", "X300": "Naked", "G350": "Moped / City", "V125 Special": "Naked", "V200 Special": "Naked", "V50 Special": "Moped / City"}},
+  lifan:{label:"Lifan",models:["Discovery 150", "Dragon 125", "Eagle 125", "EM150L", "Glint 100", "KPR 200"],cats:{"Discovery 150": "Moped / City", "Dragon 125": "Naked", "Eagle 125": "Naked", "EM150L": "Moped / City", "Glint 100": "Naked", "KPR 200": "Naked"}},
+  mondial:{label:"Mondial",models:["50 Exon", "50 Loyal", "50 Revival", "50 SFC", "50 Turismo", "50 UAG", "Air Time", "100 Flag", "125 Flag", "Piatto 125", "Retro 125", "Retro 250"],cats:{"50 Exon": "Moped / City", "50 Loyal": "Moped / City", "50 Revival": "Moped / City", "50 SFC": "Moped / City", "50 Turismo": "Moped / City", "50 UAG": "Moped / City", "Air Time": "Naked", "100 Flag": "Naked", "125 Flag": "Naked", "Piatto 125": "Naked", "Retro 125": "Cruiser / Retro", "Retro 250": "Cruiser / Retro"}},
+  moto_guzzi:{label:"Moto Guzzi",models:["California Evolution", "Stelvio", "V100 Mandello", "V100 Mandello S", "V7 III", "V7 Special", "V7 Sport", "V7 Stone", "V85 TT", "V9 Bobber"],cats:{"California Evolution": "Naked", "Stelvio": "Adventure / Touring", "V100 Mandello": "Naked", "V100 Mandello S": "Naked", "V7 III": "Cruiser / Retro", "V7 Special": "Cruiser / Retro", "V7 Sport": "Cruiser / Retro", "V7 Stone": "Cruiser / Retro", "V85 TT": "Adventure / Touring", "V9 Bobber": "Cruiser / Retro"}},
+  moto_morini:{label:"Moto Morini",models:["Seiemmezzo", "X-Cape"],cats:{"Seiemmezzo": "Naked", "X-Cape": "Naked"}},
+  motolux:{label:"Motolux",models:["Africa King", "Africa Wolf", "Americano 125", "Cappadocia 125", "CEO 110", "CEO 125", "Cortado 200", "Drift 200", "Efsane 50", "IST 34", "Macchiato 125"],cats:{"Africa King": "Naked", "Africa Wolf": "Naked", "Americano 125": "Naked", "Cappadocia 125": "Naked", "CEO 110": "Naked", "CEO 125": "Naked", "Cortado 200": "Naked", "Drift 200": "Naked", "Efsane 50": "Moped / City", "IST 34": "Naked", "Macchiato 125": "Naked"}},
+  mv_agusta:{label:"MV Agusta",models:["Brutale 800 R", "Brutale 800 Rosso", "Brutale 800 RR", "Brutale 1000 RR", "Brutale 1000 RS", "Dragster 800", "Dragster 800 RR", "Enduro Veloce", "F3 800", "F3 800 RC", "F3 800 RR"],cats:{"Brutale 800 R": "Naked", "Brutale 800 Rosso": "Naked", "Brutale 800 RR": "Naked", "Brutale 1000 RR": "Naked", "Brutale 1000 RS": "Naked", "Dragster 800": "Naked", "Dragster 800 RR": "Naked", "Enduro Veloce": "Enduro / Off-Road", "F3 800": "Supersport", "F3 800 RC": "Supersport", "F3 800 RR": "Supersport"}},
+  peugeot:{label:"Peugeot",models:["Django 125", "Django 150", "Django 50", "Django Evo 125", "Kisbee 50", "Kisbee 100", "Metropolis 400", "Speedfight 125", "Tweet 125"],cats:{"Django 125": "Scooter / Maxi Scooter", "Django 150": "Scooter / Maxi Scooter", "Django 50": "Scooter / Maxi Scooter", "Django Evo 125": "Scooter / Maxi Scooter", "Kisbee 50": "Scooter / Maxi Scooter", "Kisbee 100": "Scooter / Maxi Scooter", "Metropolis 400": "Naked", "Speedfight 125": "Naked", "Tweet 125": "Scooter / Maxi Scooter"}},
+  piaggio:{label:"Piaggio",models:["Beverly 300 RST", "Beverly 400", "Beverly 500", "Beverly S 400", "Fly 100", "Fly 150", "Liberty 150", "Liberty 200", "Medley 150", "MP3 300", "MP3 500", "Vespa GTS 300", "X10 350", "X10 500"],cats:{"Beverly 300 RST": "Naked", "Beverly 400": "Naked", "Beverly 500": "Moped / City", "Beverly S 400": "Naked", "Fly 100": "Scooter / Maxi Scooter", "Fly 150": "Scooter / Maxi Scooter", "Liberty 150": "Scooter / Maxi Scooter", "Liberty 200": "Scooter / Maxi Scooter", "Medley 150": "Scooter / Maxi Scooter", "MP3 300": "Naked", "MP3 500": "Moped / City", "Vespa GTS 300": "Scooter / Maxi Scooter", "X10 350": "Moped / City", "X10 500": "Moped / City"}},
+  qj:{label:"QJ",models:["ATR125", "Fort 350", "LTM 125", "SRK125 R", "SRK125 S", "SRK400 RR", "SRK700", "SRT550", "SRT550 X", "SRT800", "SRT800 X", "SRV550 ST"],cats:{"ATR125": "Supersport", "Fort 350": "Moped / City", "LTM 125": "Naked", "SRK125 R": "Naked", "SRK125 S": "Naked", "SRK400 RR": "Naked", "SRK700": "Naked", "SRT550": "Moped / City", "SRT550 X": "Moped / City", "SRT800": "Naked", "SRT800 X": "Naked", "SRV550 ST": "Moped / City"}},
+  regal_raptor:{label:"Regal Raptor",models:["Cafe Racer 125", "Classic 125", "Daytona 125", "Daytona 250S", "Daytona 250V", "Daytona 350", "Daytona 400", "DD 125E", "DD 150E-2F", "DD 250E-9", "RR 125"],cats:{"Cafe Racer 125": "Enduro / Off-Road", "Classic 125": "Cruiser / Retro", "Daytona 125": "Supersport", "Daytona 250S": "Supersport", "Daytona 250V": "Supersport", "Daytona 350": "Supersport", "Daytona 400": "Supersport", "DD 125E": "Naked", "DD 150E-2F": "Moped / City", "DD 250E-9": "Moped / City", "RR 125": "Supersport"}},
+  rieju:{label:"Rieju",models:["Aventura 500", "Aventura Rally 307", "Century 125", "MR Pro 300", "MR Pro 300i", "Xplora 557", "Xplora 707"],cats:{"Aventura 500": "Moped / City", "Aventura Rally 307": "Enduro / Off-Road", "Century 125": "Naked", "MR Pro 300": "Naked", "MR Pro 300i": "Naked", "Xplora 557": "Naked", "Xplora 707": "Naked"}},
+  rks:{label:"RKS",models:["125N", "125R", "125S", "A 250", "Arome 125", "Azure 50", "Azure 50 Pro", "Bitter 125", "Bitter 50", "BlackWolf 250", "Blade 250", "Bobber 250", "Cafe 125", "Classic 125", "Dakar 250", "Flash 125", "Gladiator 250", "Knight 250", "Legend 250", "Pantera 125", "Ranger 250", "Rebel 250", "Retro 125", "Roadster 250", "Scout 125", "Shadow 250", "Sport 125", "Storm 250", "Thunder 250", "Urban 125", "Victor 250"],cats:{"125N": "Moped / City", "125R": "Naked", "125S": "Naked", "A 250": "Moped / City", "Arome 125": "Naked", "Azure 50": "Moped / City", "Azure 50 Pro": "Moped / City", "Bitter 125": "Naked", "Bitter 50": "Moped / City", "BlackWolf 250": "Moped / City", "Blade 250": "Moped / City", "Bobber 250": "Cruiser / Retro", "Cafe 125": "Enduro / Off-Road", "Classic 125": "Cruiser / Retro", "Dakar 250": "Moped / City", "Flash 125": "Scooter / Maxi Scooter", "Gladiator 250": "Moped / City", "Knight 250": "Moped / City", "Legend 250": "Moped / City", "Pantera 125": "Naked", "Ranger 250": "Moped / City", "Rebel 250": "Moped / City", "Retro 125": "Cruiser / Retro", "Roadster 250": "Moped / City", "Scout 125": "Cruiser / Retro", "Shadow 250": "Moped / City", "Sport 125": "Naked", "Storm 250": "Moped / City", "Thunder 250": "Moped / City", "Urban 125": "Naked", "Victor 250": "Moped / City"}},
+  rmg_moto_gusto:{label:"RMG Moto Gusto",models:["Aston 125", "Clasico", "Dream 150", "Fantasy Pro 125", "Miami 50", "Panzer 125", "Panzer Cross 125", "Prestige 250", "Roma 125", "Samba 50", "Scooter 50", "Toledo 250"],cats:{"Aston 125": "Naked", "Clasico": "Naked", "Dream 150": "Moped / City", "Fantasy Pro 125": "Naked", "Miami 50": "Moped / City", "Panzer 125": "Naked", "Panzer Cross 125": "Enduro / Off-Road", "Prestige 250": "Moped / City", "Roma 125": "Naked", "Samba 50": "Moped / City", "Scooter 50": "Scooter / Maxi Scooter", "Toledo 250": "Moped / City"}},
+  royal_alloy:{label:"Royal Alloy",models:["GP 300", "GT 125", "Tigara Grande 125", "Tigara Grande 300"],cats:{"GP 300": "Naked", "GT 125": "Naked", "Tigara Grande 125": "Naked", "Tigara Grande 300": "Naked"}},
+  royal_enfield:{label:"Royal Enfield",models:["Bullet 500 EFI", "Classic 350", "Classic 500", "Continental GT", "Guerrilla 450", "Himalayan", "Hunter 350", "Interceptor 650", "Meteor 350", "Scram 411", "Shotgun 650"],cats:{"Bullet 500 EFI": "Cruiser / Retro", "Classic 350": "Cruiser / Retro", "Classic 500": "Cruiser / Retro", "Continental GT": "Cruiser / Retro", "Guerrilla 450": "Moped / City", "Himalayan": "Adventure / Touring", "Hunter 350": "Moped / City", "Interceptor 650": "Cruiser / Retro", "Meteor 350": "Cruiser / Retro", "Scram 411": "Naked", "Shotgun 650": "Moped / City"}},
+  sfm:{label:"SFM",models:["Bundera 50", "Konung 110", "Lahos", "Mayro", "Pyxeria 150", "Razzi 50", "Redof 125", "Ventin 50"],cats:{"Bundera 50": "Moped / City", "Konung 110": "Naked", "Lahos": "Naked", "Mayro": "Naked", "Pyxeria 150": "Moped / City", "Razzi 50": "Moped / City", "Redof 125": "Naked", "Ventin 50": "Moped / City"}},
+  sherco:{label:"Sherco",models:["125 SM-RS Factory", "250 SE Factory 2T", "SEF300R Factory", "Trial 250 ST"],cats:{"125 SM-RS Factory": "Supersport", "250 SE Factory 2T": "Moped / City", "SEF300R Factory": "Naked", "Trial 250 ST": "Moped / City"}},
+  skyjet:{label:"Skyjet",models:["Bayberry 125", "Bellina 125", "Rivero 125"],cats:{"Bayberry 125": "Naked", "Bellina 125": "Naked", "Rivero 125": "Naked"}},
+  suzuki:{label:"Suzuki",models:["Address", "Address 110", "AN 125 HK", "Avenis 125", "Burgman 200", "Burgman Street 125EX", "Burgman AN 400", "Burgman AN 650 ABS", "DR650 SE", "DRZ400 S", "GSX-R 600", "GSX-R 750", "GSX-R 1000", "GSX-S 750", "GSX-S 1000", "GSX-S 1000 GT", "Hayabusa", "Katana", "SV 650", "V-Strom 650", "V-Strom 1050", "Inazuma 250"],cats:{"Address": "Scooter / Maxi Scooter", "Address 110": "Scooter / Maxi Scooter", "AN 125 HK": "Naked", "Avenis 125": "Naked", "Burgman 200": "Scooter / Maxi Scooter", "Burgman Street 125EX": "Scooter / Maxi Scooter", "Burgman AN 400": "Scooter / Maxi Scooter", "Burgman AN 650 ABS": "Scooter / Maxi Scooter", "DR650 SE": "Supersport", "DRZ400 S": "Naked", "GSX-R 600": "Supersport", "GSX-R 750": "Supersport", "GSX-R 1000": "Supersport", "GSX-S 750": "Enduro / Off-Road", "GSX-S 1000": "Enduro / Off-Road", "GSX-S 1000 GT": "Enduro / Off-Road", "Hayabusa": "Naked", "Katana": "Naked", "SV 650": "Naked", "V-Strom 650": "Adventure / Touring", "V-Strom 1050": "Adventure / Touring", "Inazuma 250": "Moped / City"}},
+  swm:{label:"SWM",models:["Gran Milano", "Hoku 400", "RS 300 R", "Six Days 500", "Superdual T"],cats:{"Gran Milano": "Naked", "Hoku 400": "Naked", "RS 300 R": "Supersport", "Six Days 500": "Moped / City", "Superdual T": "Enduro / Off-Road"}},
+  sym:{label:"SYM",models:["ADX 125", "ADX 300", "Cruisym 250i", "DRG 160", "Fiddle III 125", "Fiddle IV 125", "GTS 250i EVO", "Joymax Z 125", "Joymax Z 300", "MaxSym TL 500", "Orbit III 125", "Symphony 125"],cats:{"ADX 125": "Naked", "ADX 300": "Naked", "Cruisym 250i": "Moped / City", "DRG 160": "Naked", "Fiddle III 125": "Scooter / Maxi Scooter", "Fiddle IV 125": "Scooter / Maxi Scooter", "GTS 250i EVO": "Scooter / Maxi Scooter", "Joymax Z 125": "Scooter / Maxi Scooter", "Joymax Z 300": "Scooter / Maxi Scooter", "MaxSym TL 500": "Moped / City", "Orbit III 125": "Naked", "Symphony 125": "Naked"}},
+  togo:{label:"Togo",models:["800G", "800S", "RR800", "T800", "TG250", "VS550"],cats:{"800G": "Naked", "800S": "Naked", "RR800": "Naked", "T800": "Naked", "TG250": "Moped / City", "VS550": "Moped / City"}},
+  triumph:{label:"Triumph",models:["America", "Bonneville Bobber", "Bonneville T100", "Bonneville T120", "Daytona 660", "Daytona 675", "Rocket 3 GT", "Rocket 3 R", "Scrambler 400 X", "Scrambler 900", "Scrambler 1200", "Speed Triple 1200", "Speed Twin 900", "Speed Twin 1200", "Street Triple 765", "Thruxton RS", "Tiger 660", "Tiger 850", "Tiger 900", "Tiger 1200"],cats:{"America": "Naked", "Bonneville Bobber": "Cruiser / Retro", "Bonneville T100": "Cruiser / Retro", "Bonneville T120": "Cruiser / Retro", "Daytona 660": "Supersport", "Daytona 675": "Supersport", "Rocket 3 GT": "Naked", "Rocket 3 R": "Naked", "Scrambler 400 X": "Enduro / Off-Road", "Scrambler 900": "Enduro / Off-Road", "Scrambler 1200": "Enduro / Off-Road", "Speed Triple 1200": "Naked", "Speed Twin 900": "Naked", "Speed Twin 1200": "Naked", "Street Triple 765": "Naked", "Thruxton RS": "Cruiser / Retro", "Tiger 660": "Adventure / Touring", "Tiger 850": "Adventure / Touring", "Tiger 900": "Adventure / Touring", "Tiger 1200": "Adventure / Touring"}},
+  tvs:{label:"TVS",models:["Apache RTR 150", "Apache RTR 180", "Apache RTR 200", "Jupiter", "Jupiter 125", "Ntorq 125", "Raider 125"],cats:{"Apache RTR 150": "Moped / City", "Apache RTR 180": "Naked", "Apache RTR 200": "Naked", "Jupiter": "Naked", "Jupiter 125": "Naked", "Ntorq 125": "Naked", "Raider 125": "Naked"}},
+  um:{label:"UM",models:["Renegade Commando 125", "Renegade Commando 250", "Renegade Freedom 125", "Renegade Freedom ABS 250", "Renegade Sport S 125", "Renegade Vegas 125", "Renegade Vegas ABS 250"],cats:{"Renegade Commando 125": "Naked", "Renegade Commando 250": "Moped / City", "Renegade Freedom 125": "Naked", "Renegade Freedom ABS 250": "Moped / City", "Renegade Sport S 125": "Naked", "Renegade Vegas 125": "Naked", "Renegade Vegas ABS 250": "Moped / City"}},
+  vespa:{label:"Vespa",models:["946 125 i.e.", "946 150 i.e.", "GTS 125", "GTS 125 ABS", "GTS 125 Super", "GTS 125 Supersport", "GTS 125 Supertech", "GTS 150 ABS", "GTS 250", "GTS 300", "GTS 300 Super", "GTV 300", "LX 125", "LX 150", "Primavera 125", "Primavera 150", "Sprint 125", "Sprint 150"],cats:{"946 125 i.e.": "Naked", "946 150 i.e.": "Moped / City", "GTS 125": "Scooter / Maxi Scooter", "GTS 125 ABS": "Scooter / Maxi Scooter", "GTS 125 Super": "Scooter / Maxi Scooter", "GTS 125 Supersport": "Supersport", "GTS 125 Supertech": "Scooter / Maxi Scooter", "GTS 150 ABS": "Scooter / Maxi Scooter", "GTS 250": "Scooter / Maxi Scooter", "GTS 300": "Scooter / Maxi Scooter", "GTS 300 Super": "Scooter / Maxi Scooter", "GTV 300": "Naked", "LX 125": "Naked", "LX 150": "Moped / City", "Primavera 125": "Scooter / Maxi Scooter", "Primavera 150": "Scooter / Maxi Scooter", "Sprint 125": "Scooter / Maxi Scooter", "Sprint 150": "Scooter / Maxi Scooter"}},
+  voge:{label:"Voge",models:["125 R", "250 GY", "250 Rally", "250 RR", "300 DS", "300 GY", "300 Rally", "500 DS", "500 DSX", "525 ACX", "525 DSX", "650 DS", "650 DSX", "900 DS"],cats:{"125 R": "Naked", "250 GY": "Moped / City", "250 Rally": "Enduro / Off-Road", "250 RR": "Moped / City", "300 DS": "Naked", "300 GY": "Naked", "300 Rally": "Enduro / Off-Road", "500 DS": "Moped / City", "500 DSX": "Enduro / Off-Road", "525 ACX": "Naked", "525 DSX": "Enduro / Off-Road", "650 DS": "Moped / City", "650 DSX": "Enduro / Off-Road", "900 DS": "Naked"}},
+  yamaha:{label:"Yamaha",models:["Aerox 100", "BW's 100", "BW's 125", "Crypton", "Crypton S", "Cygnus L", "Cygnus RS", "D'elight", "DT 125 R", "Fazer 8", "Fazer 8 ABS", "FJR 1300", "MT-03", "MT-07", "MT-09", "MT-09 SP", "MT-10", "NMAX 125", "NMAX 155", "R1", "R3", "R7", "Ténéré 700", "TMAX 560", "Tracer 7", "Tracer 9", "Tracer 9 GT", "X-MAX 125", "X-MAX 300", "XSR 700", "XSR 900", "YBR 125", "YZF 600 R"],cats:{"Aerox 100": "Scooter / Maxi Scooter", "BW's 100": "Naked", "BW's 125": "Naked", "Crypton": "Naked", "Crypton S": "Naked", "Cygnus L": "Scooter / Maxi Scooter", "Cygnus RS": "Scooter / Maxi Scooter", "D'elight": "Scooter / Maxi Scooter", "DT 125 R": "Naked", "Fazer 8": "Naked", "Fazer 8 ABS": "Naked", "FJR 1300": "Adventure / Touring", "MT-03": "Naked", "MT-07": "Naked", "MT-09": "Naked", "MT-09 SP": "Naked", "MT-10": "Naked", "NMAX 125": "Scooter / Maxi Scooter", "NMAX 155": "Scooter / Maxi Scooter", "R1": "Supersport", "R3": "Supersport", "R7": "Supersport", "Ténéré 700": "Adventure / Touring", "TMAX 560": "Scooter / Maxi Scooter", "Tracer 7": "Adventure / Touring", "Tracer 9": "Adventure / Touring", "Tracer 9 GT": "Adventure / Touring", "X-MAX 125": "Scooter / Maxi Scooter", "X-MAX 300": "Scooter / Maxi Scooter", "XSR 700": "Cruiser / Retro", "XSR 900": "Cruiser / Retro", "YBR 125": "Naked", "YZF 600 R": "Supersport"}},
+  yuki:{label:"Yuki",models:["Active 125", "Active 50", "Adventure 150", "Afşin 250", "Bellini 125", "Bellini 50", "Casper S 50", "Defender Maxi ADV", "Gladiator 250", "Motolux 125", "YK 250", "YK 300 ADV"],cats:{"Active 125": "Naked", "Active 50": "Moped / City", "Adventure 150": "Adventure / Touring", "Afşin 250": "Moped / City", "Bellini 125": "Naked", "Bellini 50": "Moped / City", "Casper S 50": "Moped / City", "Defender Maxi ADV": "Naked", "Gladiator 250": "Moped / City", "Motolux 125": "Naked", "YK 250": "Moped / City", "YK 300 ADV": "Naked"}},
+  zontes:{label:"Zontes",models:["125 M", "155 G1", "155 U1", "200 C", "250 T-E", "310 X", "350 E", "350 GK", "350 R", "350 T1", "350 T2", "350 V", "368 G"],cats:{"125 M": "Naked", "155 G1": "Naked", "155 U1": "Naked", "200 C": "Naked", "250 T-E": "Moped / City", "310 X": "Naked", "350 E": "Moped / City", "350 GK": "Moped / City", "350 R": "Moped / City", "350 T1": "Moped / City", "350 T2": "Moped / City", "350 V": "Moped / City", "368 G": "Naked"}}
 };
 
 // ════════════════════════════════════════════
@@ -1227,9 +1380,9 @@ function switchTab(name,el){
   document.getElementById('tab-'+name).classList.add('show');
   document.querySelectorAll('.nav .ni').forEach(n=>n.classList.remove('on'));
   el.classList.add('on');
-  if(name==='rota')setTimeout(initMap,80);
+  if(name==='rota'){setTimeout(initMap,80);loadWeather();}
   if(name==='tur')checkActiveTour();
-  if(name==='profil')loadMyPosts();
+  if(name==='profil'){loadMyPosts();loadMaintenance();}
 }
 
 // ════════════════════════════════════════════
@@ -1249,6 +1402,8 @@ async function enterApp(){
   loadListings();
   loadMyPosts();
   loadMyRoutes();
+  loadWeather();
+  loadMaintenance();
   // Bildirimleri izle
   startWatchers();
   switchTab('feed',document.getElementById('ni-feed'));
@@ -3145,6 +3300,184 @@ function calcDist(a,b,c,d){
 // CONFIRM MODAL
 // ════════════════════════════════════════════
 let confirmCb=null;
+// ══════════════════════════════════════════════════════
+// HAVA DURUMU — Open-Meteo (ücretsiz, CORS yok, key yok)
+// ══════════════════════════════════════════════════════
+let wxLoaded = false;
+
+const WX_ICONS = {
+  0:'☀️', 1:'🌤', 2:'⛅', 3:'☁️',
+  45:'🌫', 48:'🌫',
+  51:'🌦', 53:'🌧', 55:'🌧',
+  61:'🌧', 63:'🌧', 65:'🌧',
+  71:'❄️', 73:'❄️', 75:'❄️',
+  80:'🌦', 81:'🌧', 82:'⛈',
+  95:'⛈', 96:'⛈', 99:'⛈'
+};
+const WX_DESC = {
+  0:'Açık', 1:'Çoğunlukla açık', 2:'Parçalı bulutlu', 3:'Bulutlu',
+  45:'Sisli', 48:'Dondurucu sis',
+  51:'Hafif çisenti', 53:'Çisenti', 55:'Yoğun çisenti',
+  61:'Hafif yağmur', 63:'Yağmur', 65:'Kuvvetli yağmur',
+  71:'Hafif kar', 73:'Kar', 75:'Yoğun kar',
+  80:'Sağanak', 81:'Kuvvetli sağanak', 82:'Şiddetli sağanak',
+  95:'Fırtına', 96:'Fırtına + dolu', 99:'Şiddetli fırtına'
+};
+
+async function loadWeather(){
+  if(wxLoaded) return;
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const{latitude:lat,longitude:lng}=pos.coords;
+    try{
+      const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,windspeed_10m,precipitation_probability&timezone=auto&wind_speed_unit=kmh`;
+      const r=await fetch(url);
+      const d=await r.json();
+      const c=d.current;
+      const code=c.weathercode;
+      document.getElementById('wx-icon').textContent  = WX_ICONS[code]||'🌡';
+      document.getElementById('wx-temp').textContent  = Math.round(c.temperature_2m)+'°';
+      document.getElementById('wx-desc').textContent  = WX_DESC[code]||'Bilinmiyor';
+      document.getElementById('wx-wind').textContent  = Math.round(c.windspeed_10m)+' km/h';
+      document.getElementById('wx-rain').textContent  = (c.precipitation_probability||0)+'%';
+      wxLoaded=true;
+      // Uyarı: rüzgar > 50 km/h veya yağmur > %60
+      if(c.windspeed_10m>50||c.precipitation_probability>60){
+        toast(`Dikkat: ${c.windspeed_10m>50?'Kuvvetli rüzgar':'Yağmur olasılığı yüksek'} — sürüşe dikkat!`);
+      }
+    }catch(e){ console.error('Hava durumu yüklenemedi',e); }
+  },null,{enableHighAccuracy:false,timeout:8000});
+}
+
+function refreshWeather(){
+  wxLoaded=false;
+  document.getElementById('wx-temp').textContent='—°';
+  document.getElementById('wx-desc').textContent='Yenileniyor...';
+  loadWeather();
+}
+
+// ══════════════════════════════════════════════════════
+// BAKIM TAKİBİ — Firestore: users/{uid}/maintenance
+// ══════════════════════════════════════════════════════
+const MAINT_DEFAULTS = {
+  oil:    {label:'Motor Yağı',  icon:'🛢',  interval:5000},
+  tire:   {label:'Lastik',      icon:'⚫',  interval:10000},
+  chain:  {label:'Zincir',      icon:'⛓',  interval:3000},
+  brake:  {label:'Fren',        icon:'🔴',  interval:15000},
+  filter: {label:'Hava Filtresi',icon:'🔧', interval:15000},
+  service:{label:'Genel Servis',icon:'🏪',  interval:10000}
+};
+
+let selectedMaintType='oil';
+
+function openAddMaintenance(){
+  selectedMaintType='oil';
+  document.querySelectorAll('.maint-type-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('[data-type="oil"]')?.classList.add('on');
+  document.getElementById('maint-km').value='';
+  document.getElementById('maint-next-km').value='';
+  document.getElementById('maint-note').value='';
+  openOv('ov-maintenance');
+}
+
+function selectMaintType(el, type){
+  selectedMaintType=type;
+  document.querySelectorAll('.maint-type-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  // Sonraki km'yi otomatik doldur
+  const kmVal=parseInt(document.getElementById('maint-km').value)||0;
+  if(kmVal>0){
+    const interval=MAINT_DEFAULTS[type]?.interval||5000;
+    document.getElementById('maint-next-km').value=kmVal+interval;
+  }
+}
+
+// Maint-km değişince next-km güncelle
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('maint-km')?.addEventListener('input',()=>{
+    const km=parseInt(document.getElementById('maint-km').value)||0;
+    const interval=MAINT_DEFAULTS[selectedMaintType]?.interval||5000;
+    if(km>0) document.getElementById('maint-next-km').value=km+interval;
+  });
+});
+
+async function saveMaintenance(){
+  if(!window.FB||!window.CU){ toast('Giriş yapman gerekiyor'); return; }
+  const km=parseInt(document.getElementById('maint-km').value);
+  if(!km||km<0){ toast('Geçerli bir km değeri gir'); return; }
+  const interval=MAINT_DEFAULTS[selectedMaintType]?.interval||5000;
+  const nextKm=parseInt(document.getElementById('maint-next-km').value)||km+interval;
+  const note=document.getElementById('maint-note').value.trim();
+  const{db,collection,addDoc}=window.FB;
+  const def=MAINT_DEFAULTS[selectedMaintType];
+  await addDoc(collection(db,'users',window.CU.uid,'maintenance'),{
+    type:selectedMaintType,
+    label:def.label,
+    icon:def.icon,
+    doneKm:km,
+    nextKm,
+    note,
+    createdAt:new Date().toISOString()
+  });
+  closeOv('ov-maintenance');
+  toast('Bakım kaydedildi!');
+  loadMaintenance();
+}
+
+async function loadMaintenance(){
+  if(!window.FB||!window.CU) return;
+  const{db,collection,getDocs,orderBy,query}=window.FB;
+  const snap=await getDocs(query(collection(db,'users',window.CU.uid,'maintenance'),orderBy('createdAt','desc'))).catch(()=>null);
+  const el=document.getElementById('maintenance-list');
+  if(!el) return;
+  if(!snap||snap.empty){
+    el.innerHTML=`<div style="padding:20px 0;text-align:center;color:var(--text3);font-size:13px">
+      Henüz bakım kaydı yok — motorunun bakımını takip etmeye başla!
+    </div>`;
+    return;
+  }
+
+  // Her tür için son kaydı al
+  const latest={};
+  snap.forEach(d=>{ const v=d.data(); if(!latest[v.type]) latest[v.type]=v; });
+
+  // Mevcut km bilgisi için profilden al
+  const currentKm=window.CU?.km||0;
+
+  let alerts=[];
+  el.innerHTML=Object.values(latest).map(v=>{
+    const remaining=v.nextKm-currentKm;
+    const pct=Math.max(0,Math.min(100,((currentKm-v.doneKm)/(v.nextKm-v.doneKm))*100));
+    const isDue=remaining<=0;
+    const isSoon=remaining>0&&remaining<=500;
+    if(isDue) alerts.push(`${v.label} bakımı gecikti!`);
+    else if(isSoon) alerts.push(`${v.label} bakımına ${remaining} km kaldı`);
+    const barColor=isDue?'var(--red)':isSoon?'#EAB308':'var(--orange)';
+    const statusText=isDue?'⚠ Gecikti!':isSoon?`${remaining} km kaldı`:`${remaining} km kaldı`;
+    const statusColor=isDue?'var(--red)':isSoon?'#EAB308':'var(--text3)';
+    return `<div class="maint-card${isDue?' due':isSoon?' soon':''}">
+      <div style="font-size:28px;flex-shrink:0">${v.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-size:13px;font-weight:600">${v.label}</div>
+          <div style="font-size:11px;font-weight:600;color:${statusColor}">${statusText}</div>
+        </div>
+        <div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:4px">
+          <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:10px;color:var(--text3)">${v.doneKm.toLocaleString('tr-TR')} km'de yapıldı · Sonraki: ${v.nextKm.toLocaleString('tr-TR')} km${v.note?' · '+v.note:''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Uyarı banner
+  if(alerts.length){
+    document.getElementById('maint-alert-text').textContent=alerts[0];
+    document.getElementById('maint-alert-sub').textContent=alerts.length>1?`+${alerts.length-1} daha var`:'Profil → Bakım Takibi';
+    document.getElementById('maint-alert-banner').style.display='block';
+  }
+}
+
 function confirmAction(title,msg,cb){
   confirmCb=cb;
   document.getElementById('confirm-title').textContent=title;
